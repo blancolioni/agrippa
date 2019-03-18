@@ -420,7 +420,7 @@ package body Agrippa.Players.Robots is
                   return Integer
                is (if Senator.Senator = Consul_1
                    then -100
-                   else 100 - Natural (Senator.Influence));
+                   else Natural (Senator.Military));
 
                Consul_2 : constant Senator_Id :=
                             Highest_Score
