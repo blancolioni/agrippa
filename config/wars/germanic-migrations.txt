@@ -1,0 +1,7 @@
+land-strength = 15
+fleet-support = 0
+disaster = { 10 }
+standoff = { 11 }
+spoils = 15
+attacks = narbonese-gaul
+active = yes

@@ -1,0 +1,7 @@
+land-strength = 6
+fleet-support = 2
+disaster = { 16 }
+standoff = { 15 }
+spoils = 45
+revolt-attacks = syria
+active = yes

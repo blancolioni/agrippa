@@ -1,0 +1,7 @@
+land-strength = 15
+fleet-support = 5
+disaster = { 10 }
+standoff = { 11 15 }
+spoils = 25
+attacks = { nearer-spain further-spain }
+active = yes

@@ -1,0 +1,9 @@
+land-strength = 10
+fleet-support = 5
+fleet-strength = 10
+scenario = early-republic
+disaster = { 13 }
+standoff = { 11 14 }
+spoils = 30
+attacks = { sicily sardinia-corsica }
+active = no

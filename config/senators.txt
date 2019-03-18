@@ -1,0 +1,227 @@
+cornelius =
+  { mil = 4
+    ora = 3
+    loy = 9
+    infl = 5
+  }
+
+fabius =
+  { mil = 4
+    ora = 2
+    loy = 9
+    infl = 5
+  }
+
+valerius =
+  { mil = 1
+    ora = 2
+    loy = 10
+    infl = 5
+  }
+
+julius =
+  { mil = 4
+    ora = 3
+    loy = 9
+    infl = 4
+  }
+
+claudius =
+  { mil = 2
+    ora = 3
+    loy = 7
+    infl = 4
+  }
+
+manlius =
+  { mil = 3
+    ora = 2
+    loy = 7
+    infl = 4
+  }
+
+fulvius =
+  { mil = 2
+    ora = 2
+    loy = 8
+    infl = 4
+  }
+
+furius =
+  { mil = 3
+    ora = 3
+    loy = 8
+    infl = 3
+  }
+
+aurelius =
+  { mil = 2
+    ora = 3
+    loy = 7
+    infl = 3
+  }
+
+junius =
+  { mil = 1
+    ora = 2
+    loy = 8
+    infl = 3
+  }
+
+papirus =
+  { mil = 1
+    ora = 2
+    loy = 6
+    infl = 3
+  }
+
+acilius =
+  { mil = 2
+    ora = 2
+    loy = 7
+    infl = 3
+  }
+
+flaminius =
+  { mil = 4
+    ora = 2
+    loy = 6
+    infl = 3
+  }
+
+aelius =
+  { mil = 3
+    ora = 4
+    loy = 7
+    infl = 2
+  }
+
+sulpicius =
+  { mil = 3
+    ora = 2
+    loy = 8
+    infl = 2
+  }
+
+calpurnius =
+  { mil = 1
+    ora = 2
+    loy = 9
+    infl = 2
+  }
+
+plautius =
+  { mil = 2
+    ora = 1
+    loy = 6
+    infl = 2
+  }
+
+quinctius =
+  { mil = 3
+    ora = 2
+    loy = 6
+    infl = 1
+  }
+
+aemilius =
+  { mil = 4
+    ora = 2
+    loy = 8
+    infl = 1
+  }
+
+terentius =
+  { mil = 2
+    ora = 1
+    loy = 6
+    infl = 1
+  }
+
+servilius =
+  { mil = 3
+    ora = 4
+    loy = 9
+    infl = 4
+    scenario = middle-republic
+  }
+
+porcius =
+  { mil = 2
+    ora = 4
+    loy = 10
+    infl = 1
+    scenario = middle-republic
+  }
+
+popillius =
+  {
+    mil = 1
+    ora = 3
+    loy = 7
+    infl = 3
+    scenario = middle-republic
+  }
+
+cassius =
+  {
+    mil = 3
+    ora = 3
+    loy = 9
+    infl = 3
+    scenario = middle-republic
+  }
+
+sempronius =
+  {
+    mil = 1
+    ora = 3
+    loy = 6
+    infl = 3
+    scenario = middle-republic
+  }
+
+octavius =
+  {
+    mil = 2
+    ora = 3
+    loy = 9
+    infl = 4
+    scenario = late-republic
+  }
+
+marius =
+  {
+    mil = 4
+    ora = 2
+    loy = 9
+    infl = 4
+    scenario = late-republic
+  }
+
+tullius =
+  {
+    mil = 2
+    ora = 3
+    loy = 7
+    infl = 3
+    scenario = late-republic
+  }
+
+licinius =
+  {
+    mil = 3
+    ora = 2
+    loy = 9
+    infl = 3
+    scenario = late-republic
+  }
+
+pompeius =
+  {
+    mil = 2
+    ora = 2
+    loy = 7
+    infl = 2
+    scenario = late-republic
+  }

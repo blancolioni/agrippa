@@ -1,0 +1,7 @@
+land-strength = 10
+fleet-support = 5
+disaster = { 13 }
+standoff = { 14 }
+spoils = 45
+revolt-attacks = { greece }
+active = no

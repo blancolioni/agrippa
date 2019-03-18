@@ -1,0 +1,13 @@
+tribune = {
+  count = 9
+}
+
+blackmail
+
+influence-peddling
+
+seduction
+
+assassin
+
+secret-bodyguard

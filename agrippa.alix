@@ -1,0 +1,19 @@
+project_name = Agrippa
+source_dir = src
+source_dir = src/driver
+source_dir = src/cards
+source_dir = src/factions
+source_dir = src/phases
+source_dir = src/players
+source_dir = src/proposals
+source_dir = src/state
+source_dir = src/ui
+source_dir = src/ui/text
+depend = { project = Tropos version = any }
+depend = { project = Lith version = any }
+depend = { project = WLib version = any }
+main_unit = agrippa-driver
+exec_name = agrippa
+config_dir = config
+path_unit = { unit = Agrippa.Paths path = src/driver/agrippa-paths.ads }
+    

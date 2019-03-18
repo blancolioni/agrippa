@@ -1,0 +1,6 @@
+land-strength = 4
+fleet-support = 2
+disaster = { 5 }
+standoff = { 15 }
+spoils = 10
+active = yes

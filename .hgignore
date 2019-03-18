@@ -1,0 +1,10 @@
+syntax: glob
+build/bin/*
+build/obj/*
+doc
+agrippa.gpr
+config/events.txdt
+config/provinces.csv
+turn-1.txt
+turns.txt
+src/driver/agrippa-paths.ads

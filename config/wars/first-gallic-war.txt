@@ -1,0 +1,7 @@
+land-strength = 10
+fleet-support = 0
+disaster = { 13 }
+standoff = { 15 }
+spoils = 20
+attacks = cisalpine-gaul
+active = yes

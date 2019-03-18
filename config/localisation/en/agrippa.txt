@@ -1,0 +1,99 @@
+early-republic,Early Republic
+middle-republic,Middle Republic
+late-republic,Late Republic
+scenario,Scenario
+turn,Turn
+unrest-level,Unrest Level
+unrest-change,Unrest changes by {2} from {1} to {3}
+unrest-level-raised-by,Unrest level raised by
+unprosecuted-war,for unprosecuted {1}
+senate,Senate
+factions,Factions
+mortality-phase,Mortality Phase
+revenue-phase,Revenue Phase
+forum-phase,Forum Phase
+population-phase,Population Phase
+senate-phase,Senate Phase
+combat-phase,Combat Phase
+influence,Influence
+military,Military
+oratory,Oratory
+popularity,Popularity
+votes,Votes
+votes-available,Votes Available
+consuls,Consuls
+censor,Censor
+governors,Governors
+open-session,Open Session
+senator-proposes,{1} proposes
+nominate-x-and-y-for-consuls,{1} and {2}
+nominate-for-office,{1} for {2}
+consular_nomination,Consul
+censor_nomination,Censor
+fleet,fleet
+fleets,Fleets
+legion,legion
+legions,Legions
+x-is-the-presiding-magistrate,{1} is the Presiding Magistrate
+x-is-now-presiding,{1} is now the Presiding Magistrate
+x-is-the-new-office-holder,{1} is the new {2}
+x-selects-office,{1} selects {2} (gains 5 influence and a PC marker)
+x-adjourns-the-senate,{1} adjourns the Senate
+rome_consul,Rome Consul
+field_consul,Field Consul
+senator-of-faction,{1} of {2}
+hrao-is-x-of-y,HRAO is {1} of {2}
+hrao-popularity,HRAO Popularity
+x-at-y-each,{1} @ {2} ea
+current-unrest-level,Current Unrest Level
+population-roll,Population Roll
+final-balance,Final Balance
+active-wars,Active Wars
+inactive-wars,Inactive Wars
+province-income,Province Income
+starting-balance,Starting Balance
+end-phase,End Phase
+treasury,Treasury: {1}t
+treasury-heading,Treasury
+treasury-now,State treasury now {1}t
+state-pays-x-for-y,State pays {1}t for {2}
+roll-of-x,Roll of {1}
+faction-leader-of-faction-dies,{1}, Faction Leader of {2} dies
+succeeded-by-son,He is succeeded by his son {1}
+name-of-faction-dies,{1} of {2} dies
+unaligned-dies,{1}, an unaligned senator dies
+no-change,No Change
+mortality-roll-none,No Effect
+mortality-roll-twice,Roll Twice
+initiative-roll,Initiative roll {1}
+draws-a-red-card,Draws a RED card
+draws-card,Draws {1}
+cards-in-deck,Cards in Deck
+hrao,HRAO
+event-roll,Event roll {1}
+manpower-shortage,Manpower Shortage
+recruit-legions-and-fleets,Recruit {1} and {2}
+recruit-legions,Recruit {1}
+recruit-fleets,Recruit {1}
+attack-war-with,Send {1} to attack {2} with {3}
+n-legions,{1} legions
+n-fleets,{1} fleets
+legions-and-fleets,{1} legions and {2} fleets
+legions-veterans-and-fleets,{1} legions, veteran legions {2}, and {3} fleets
+senator-attacks-with,{1} attacks {2} with {3} and {4}
+senator-leave-rome-to-fight,{1} leaves Rome with {3} legions and {4} fleets to fight {2}
+senator-has-strength,{1} has strength of {2} + {3} = {4}
+combat-bonus,Combat bonus = {1} - {2} = {3}
+attack-roll,Rolls a {1} + {2} = {3}; {4}
+defeat,Defeat!! {1}
+stalemate,Stalemate {1}
+victory,Victory!! {1}
+no-losses,No losses
+legions-lost,{1} lost
+legions-destroyed,Legions {1} lost
+veteran-legion-created,Veteran Legion {1} created, loyal to {2}
+commander-killed,{1} is killed!
+senator-gains-inf-and-pop,{1} gains {2} influence and {3} popularity
+unrest-remains-at-zero,Unrest remains at zero
+unrest-drops-by-to,Unrest drops by {1} to {2}
+rome-gains-spoils,Rome gains {1}t of spoils

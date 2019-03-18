@@ -1,0 +1,7 @@
+land-strength = 5
+fleet-support = 3
+disaster = { 5 }
+standoff = { 17 }
+spoils = 10
+effect = drought
+active = no

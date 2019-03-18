@@ -1,0 +1,20 @@
+cisalpine-gaul = {
+   undeveloped = {
+     personal-income = { 1 -1 }
+     state-income = { 1 -1 }
+     state-taxes = 15
+     legions = { 1 5 }
+     fleets = { 0 0 }
+   }
+   developed = {
+     personal-income = { 1 3 }
+     state-income = { 2 -1 }
+     state-taxes = 20
+     legions = { 2 10 }
+     fleets = { 0 0 }
+   }
+   frontier = yes
+   created-by = { first-gallic-war }
+   attacked-by = { gallic-wars germanic-migrations second-punic-war }
+   
+}

@@ -1,0 +1,80 @@
+tax-farmer-1 = {
+  income = 2
+  per-turn
+  destroyed-by = { first-punic-war second-punic-war hannibal gladiator-revolt spartacus }
+  dr = 6
+}
+
+tax-farmer-2 = {
+  income = 2
+  per-turn
+  destroyed-by = { first-punic-war second-punic-war hannibal gladiator-revolt spartacus }
+  dr = 6
+}
+
+tax-farmer-3 = {
+  income = 2
+  per-turn
+  destroyed-by = { first-punic-war second-punic-war hannibal gladiator-revolt spartacus }
+  dr = 6
+}
+
+tax-farmer-4 = {
+  income = 2
+  per-turn
+  destroyed-by = { first-punic-war second-punic-war hannibal gladiator-revolt spartacus }
+  dr = 6
+}
+
+tax-farmer-5 = {
+  income = 2
+  per-turn
+  destroyed-by = { first-punic-war second-punic-war hannibal gladiator-revolt spartacus }
+  dr = 6
+}
+
+tax-farmer-6 = {
+  income = 2
+  per-turn
+  destroyed-by = { first-punic-war second-punic-war hannibal gladiator-revolt spartacus }
+  dr = 6
+}
+
+harbor-fees = {
+   income = 3 per-turn
+   destroyed-by = disaster
+   dr = 6
+}
+
+mining = {
+   income = 3 per-turn
+   destroyed-by = disaster
+   dr = 6
+}
+
+armaments = {
+   income = 2 per-legion-raised
+   destroyed-by = disaster
+   dr = 6
+}
+
+ship-building = {
+   income = 3 per-fleet-raised
+   destroyed-by = disaster
+   dr = 6
+}
+
+egyptian-grain = {
+   income = 5 per-turn
+   destroyed-by = alexandine-war
+   drought = { income = 10 pop = -2 voluntary }
+}
+
+sicilian-grain = {
+   income = 4 per-turn
+   destroyed-by = sicilian-slave-revolts
+   drought = { income = 8 pop = -2 voluntary }
+}
+
+
+
