@@ -6,7 +6,7 @@ package Agrippa.Deals is
    type Offer_Category_Type is
      (Nothing, Office, Province, Card);
 
-   type Offer_Type (Category : Offer_Category_Type) is private;
+   type Offer_Type (Category : Offer_Category_Type := Nothing) is private;
 
    function Nothing return Offer_Type;
 
@@ -20,6 +20,10 @@ package Agrippa.Deals is
    function Concession
      return Offer_Type;
 
+   function Is_Office_Offer (Offer : Offer_Type) return Boolean;
+   function Get_Office (Offer : Offer_Type) return Office_Type
+     with Pre => Is_Office_Offer (Offer);
+
    function Show (Offer : Offer_Type) return String;
 
    type Offer_List is private;
@@ -28,6 +32,17 @@ package Agrippa.Deals is
    function Is_Empty (List : Offer_List) return Boolean;
    procedure Add (List : in out Offer_List;
                   Offer : Offer_Type);
+
+   function First (List : Offer_List;
+                   Test : not null access
+                     function (Offer : Offer_Type) return Boolean)
+                   return Offer_Type;
+
+   function Second (List : Offer_List;
+                    Test : not null access
+                      function (Offer : Offer_Type) return Boolean)
+                    return Offer_Type;
+
    procedure Scan (List : Offer_List;
                    Process : not null access
                      procedure (Offer : Offer_Type));
@@ -47,7 +62,7 @@ package Agrippa.Deals is
    procedure Add
      (Deal    : in out Deal_Type;
       Faction : Faction_Id;
-      Terms   : Offer_List);
+      Offer   : Offer_Type);
 
    procedure Scan
      (Deal : Deal_Type;
@@ -63,7 +78,7 @@ package Agrippa.Deals is
 
 private
 
-   type Offer_Type (Category : Offer_Category_Type) is
+   type Offer_Type (Category : Offer_Category_Type := Nothing) is
       record
          Any : Boolean := False;
          case Category is
@@ -94,6 +109,12 @@ private
    function Concession
      return Offer_Type
    is (Card, False, True, No_Card);
+
+   function Is_Office_Offer (Offer : Offer_Type) return Boolean
+   is (Offer.Category = Office);
+
+   function Get_Office (Offer : Offer_Type) return Office_Type
+   is (Offer.Offer_Office);
 
    package Offer_Lists is
      new Ada.Containers.Indefinite_Doubly_Linked_Lists (Offer_Type);

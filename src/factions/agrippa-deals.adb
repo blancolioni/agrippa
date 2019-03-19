@@ -23,10 +23,23 @@ package body Agrippa.Deals is
    procedure Add
      (Deal    : in out Deal_Type;
       Faction : Faction_Id;
-      Terms   : Offer_List)
+      Offer   : Offer_Type)
    is
    begin
-      Deal.Terms.Append ((Faction, Terms));
+      for Term of Deal.Terms loop
+         if Term.Faction = Faction then
+            Term.Terms.List.Append (Offer);
+            return;
+         end if;
+      end loop;
+
+      declare
+         List : Offer_List;
+      begin
+         List.List.Append (Offer);
+         Deal.Terms.Append ((Faction, List));
+      end;
+
    end Add;
 
    -----------
@@ -48,6 +61,24 @@ package body Agrippa.Deals is
    begin
       Deal.Terms.Clear;
    end Clear;
+
+   -----------
+   -- First --
+   -----------
+
+   function First (List : Offer_List;
+                   Test : not null access
+                     function (Offer : Offer_Type) return Boolean)
+                   return Offer_Type
+   is
+   begin
+      for Offer of List.List loop
+         if Test (Offer) then
+            return Offer;
+         end if;
+      end loop;
+      return Nothing;
+   end First;
 
    --------------------
    -- Matching_Index --
@@ -126,6 +157,29 @@ package body Agrippa.Deals is
          Process (Term.Faction, Term.Terms);
       end loop;
    end Scan;
+
+   ------------
+   -- Second --
+   ------------
+
+   function Second (List : Offer_List;
+                    Test : not null access
+                      function (Offer : Offer_Type) return Boolean)
+                    return Offer_Type
+   is
+      Found : Boolean := False;
+   begin
+      for Offer of List.List loop
+         if Test (Offer) then
+            if Found then
+               return Offer;
+            else
+               Found := True;
+            end if;
+         end if;
+      end loop;
+      return Nothing;
+   end Second;
 
    ----------
    -- Show --
