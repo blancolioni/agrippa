@@ -1,3 +1,5 @@
+with Ada.Strings.Unbounded;
+
 with Agrippa.Cards;
 
 package body Agrippa.Deals is
@@ -124,5 +126,54 @@ package body Agrippa.Deals is
          Process (Term.Faction, Term.Terms);
       end loop;
    end Scan;
+
+   ----------
+   -- Show --
+   ----------
+
+   function Show (Offer : Offer_Type) return String is
+   begin
+      case Offer.Category is
+         when Nothing =>
+            return "no offer";
+         when Office =>
+            if Offer.Any then
+               return "any office";
+            else
+               return Offer.Offer_Office'Image;
+            end if;
+         when Province =>
+            if Offer.Any then
+               return "any province";
+            else
+               return Offer.Offer_Province'Image;
+            end if;
+         when Card =>
+            if Offer.Any then
+               return "any card";
+            elsif Offer.Any_Concession then
+               return "concession";
+            else
+               return Agrippa.Cards.Card (Offer.Offer_Card).Tag;
+            end if;
+      end case;
+   end Show;
+
+   ----------
+   -- Show --
+   ----------
+
+   function Show (Offer : Offer_List) return String is
+      use Ada.Strings.Unbounded;
+      Result : Unbounded_String;
+   begin
+      for Item of Offer.List loop
+         if Result /= "" then
+            Result := Result & ", ";
+         end if;
+         Result := Result & Show (Item);
+      end loop;
+      return To_String (Result);
+   end Show;
 
 end Agrippa.Deals;

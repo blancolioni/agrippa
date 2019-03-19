@@ -20,6 +20,8 @@ package Agrippa.Deals is
    function Concession
      return Offer_Type;
 
+   function Show (Offer : Offer_Type) return String;
+
    type Offer_List is private;
 
    procedure Clear (List : in out Offer_List);
@@ -29,6 +31,8 @@ package Agrippa.Deals is
    procedure Scan (List : Offer_List;
                    Process : not null access
                      procedure (Offer : Offer_Type));
+
+   function Show (Offer : Offer_List) return String;
 
    function Matching_Index
      (List  : Offer_List;

@@ -55,6 +55,8 @@ package body Agrippa.Players.Robots is
       record
          Robot_Faction : Robot_Faction_Type;
          Faction       : Faction_Id;
+         Handler       : Player_Access;
+         Handlers      : Player_Access_Array;
       end record;
 
    overriding function Name
@@ -65,6 +67,11 @@ package body Agrippa.Players.Robots is
           when Imperial     => "Imperial Faction",
           when Plutocratic  => "Plutocratic Faction",
           when Populist     => "Populist Faction");
+
+   overriding function Get_Player_Handler
+     (Robot : Robot_Player_Type)
+      return Player_Access
+   is (Robot.Handler);
 
    overriding procedure Initialize
      (Robot   : in out Robot_Player_Type;
@@ -103,6 +110,10 @@ package body Agrippa.Players.Robots is
       State   : Agrippa.State.State_Interface'Class;
       Deal    : Agrippa.Deals.Deal_Type)
       return Boolean;
+
+   overriding procedure Set_Players
+     (Robot   : in out Robot_Player_Type;
+      Players : Player_Access_Array);
 
    function Desired_Spoils
      (Robot : Robot_Player_Type'Class)
@@ -565,14 +576,16 @@ package body Agrippa.Players.Robots is
      (State        : in out Agrippa.State.State_Interface'Class;
       Faction_Type : Robot_Faction_Type;
       Faction      : Faction_Id)
-      return Player_Access
+      return Autoplayer_Interface'Class
    is
       Robot : Robot_Player_Type;
    begin
       Robot.Robot_Faction := Faction_Type;
       Robot.Faction := Faction;
-      return Agrippa.Players.Autohandler.Create_Autohandler
-        (State, Faction, Robot);
+      Robot.Handler :=
+        Agrippa.Players.Autohandler.Create_Autohandler
+          (State, Faction);
+      return Robot;
    end Create_Robot_Player;
 
    --------------------
@@ -794,7 +807,27 @@ package body Agrippa.Players.Robots is
                Coalition : constant Faction_Vectors.Vector :=
                              Robot.Create_Coalition (State);
                Proposals : Agrippa.Proposals.Proposal_Container_Type;
+               Offers    : array (Faction_Id) of Agrippa.Deals.Offer_List;
             begin
+               if Has_Proposal_Category
+                 (Message, Agrippa.Proposals.Consular_Nomination)
+               then
+                  for Faction in Faction_Id loop
+                     if Faction /= Robot.Faction then
+                        Robot.Handlers (Faction).Senate_Phase_Desire (State);
+                        Robot.Handlers (Faction).Get_Offer_Reply
+                          (Offers (Faction));
+                     else
+                        Offers (Faction) := Robot.Senate_Phase_Desire (State);
+                     end if;
+
+                     Ada.Text_IO.Put_Line
+                       (State.Faction_Name (Faction)
+                        & " wants "
+                        & Agrippa.Deals.Show (Offers (Faction)));
+                  end loop;
+               end if;
+
                Ada.Text_IO.Put ("coalition:");
                for Rec of Coalition loop
                   Ada.Text_IO.Put
@@ -817,6 +850,21 @@ package body Agrippa.Players.Robots is
               "player cannot accept message: " & Message.Content'Image;
       end case;
    end Send_Message;
+
+   -----------------
+   -- Set_Players --
+   -----------------
+
+   overriding procedure Set_Players
+     (Robot   : in out Robot_Player_Type;
+      Players : Player_Access_Array)
+   is
+   begin
+      Robot.Handlers := Players;
+      Robot.Handler := Players (Robot.Faction);
+      Agrippa.Players.Autohandler.Set_Autoplayer
+        (Players (Robot.Faction), Robot);
+   end Set_Players;
 
    ----------------
    -- Start_Turn --

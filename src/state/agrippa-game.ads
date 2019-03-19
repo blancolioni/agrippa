@@ -275,6 +275,14 @@ package Agrippa.Game is
       Faction : Faction_Id;
       Player  : Agrippa.Players.Player_Access);
 
+   procedure Set_Autoplayer
+     (Game    : in out Game_Type'Class;
+      Faction : Faction_Id;
+      Player  : Agrippa.Players.Autoplayer_Interface'Class);
+
+   procedure Set_Player_Handlers
+     (Game    : in out Game_Type'Class);
+
    procedure Start_Turn
      (Game : in out Game_Type'Class);
 
@@ -307,8 +315,6 @@ private
        (War_Id, Agrippa.State.Wars.War_State_Type,
         Agrippa.State.Wars."=");
 
-   type Player_Array is array (Faction_Id) of Agrippa.Players.Player_Access;
-
    package Phase_Holders is
      new Ada.Containers.Indefinite_Holders
        (Agrippa.Phases.Phase_Interface'Class,
@@ -331,6 +337,20 @@ private
 
    type Status_Table is
      array (Agrippa.Events.Event_Type) of Status_Effect;
+
+   package Autoplayer_Holders is
+     new Ada.Containers.Indefinite_Holders
+       (Agrippa.Players.Autoplayer_Interface'Class,
+        Agrippa.Players."=");
+
+   type Player_Record is
+      record
+         Autoplayer : Autoplayer_Holders.Holder;
+         Handler    : Agrippa.Players.Player_Access;
+      end record;
+
+   type Player_Array is
+     array (Faction_Id) of Player_Record;
 
    type Game_Type is limited
      new Ada.Finalization.Limited_Controlled

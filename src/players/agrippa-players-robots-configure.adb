@@ -113,9 +113,11 @@ package body Agrippa.Players.Robots.Configure is
       is
          Faction : constant Faction_Id :=
                      Game.Highest_Score (Score);
+         Player  : constant Autoplayer_Interface'Class :=
+                     Create_Robot_Player (Game, Robot_Faction, Faction);
       begin
-         Game.Set_Player
-           (Faction, Create_Robot_Player (Game, Robot_Faction, Faction));
+         Game.Set_Player (Faction, Player.Get_Player_Handler);
+         Game.Set_Autoplayer (Faction, Player);
          Remaining (Faction) := False;
       end Set_Player;
 
@@ -136,13 +138,16 @@ package body Agrippa.Players.Robots.Configure is
                Index : constant Natural := WL.Random.Random_Number (0, 3);
                Robot : constant Robot_Faction_Type :=
                          Robot_Faction_Type'Val (Index);
+               Player  : constant Autoplayer_Interface'Class :=
+                           Create_Robot_Player (Game, Robot, Id);
             begin
-               Game.Set_Player
-                 (Id,
-                  Create_Robot_Player (Game, Robot, Id));
+               Game.Set_Player (Id, Player.Get_Player_Handler);
+               Game.Set_Autoplayer (Id, Player);
             end;
          end if;
       end loop;
+
+      Game.Set_Player_Handlers;
 
    end Configure_Robots;
 

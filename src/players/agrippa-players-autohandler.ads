@@ -2,9 +2,12 @@ package Agrippa.Players.Autohandler is
 
    function Create_Autohandler
      (State   : in out Agrippa.State.State_Interface'Class;
-      Faction : Faction_Id;
-      Player  : Autoplayer_Interface'Class)
+      Faction : Faction_Id)
       return Player_Access;
+
+   procedure Set_Autoplayer
+     (Handler    : Player_Access;
+      Autoplayer : Autoplayer_Interface'Class);
 
 private
 
@@ -28,6 +31,9 @@ private
 
       entry Get_Reply
         (Reply : out Agrippa.Messages.Message_Type);
+
+      entry Senate_Phase_Desire
+        (State   : Agrippa.State.State_Interface'Class);
 
       entry What_Do_You_Want_For
         (State   : Agrippa.State.State_Interface'Class;

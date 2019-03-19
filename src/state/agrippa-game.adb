@@ -1633,7 +1633,7 @@ package body Agrippa.Game is
          return Agrippa.Messages.Message_Type
       is
          Player : constant Agrippa.Players.Player_Access :=
-                    Game.Player_State (Get_Faction (M));
+                    Game.Player_State (Get_Faction (M)).Handler;
       begin
          Player.Send_Message (Game, M);
          return Response : Message_Type do
@@ -1896,6 +1896,20 @@ package body Agrippa.Game is
       Game.Notifier.Send_Notification (Text);
    end Send_Text_Notification;
 
+   --------------------
+   -- Set_Autoplayer --
+   --------------------
+
+   procedure Set_Autoplayer
+     (Game    : in out Game_Type'Class;
+      Faction : Faction_Id;
+      Player  : Agrippa.Players.Autoplayer_Interface'Class)
+   is
+   begin
+      Game.Player_State (Faction).Autoplayer :=
+        Autoplayer_Holders.To_Holder (Player);
+   end Set_Autoplayer;
+
    ------------------------
    -- Set_Faction_Leader --
    ------------------------
@@ -1954,10 +1968,31 @@ package body Agrippa.Game is
       Player  : Agrippa.Players.Player_Access)
    is
    begin
-      Game.Player_State (Faction) := Player;
+      Game.Player_State (Faction).Handler := Player;
    end Set_Player;
 
-   ------------------
+   -------------------------
+   -- Set_Player_Handlers --
+   -------------------------
+
+   procedure Set_Player_Handlers
+     (Game    : in out Game_Type'Class)
+   is
+      Handlers : Agrippa.Players.Player_Access_Array;
+   begin
+      for Faction in Faction_Id loop
+         Handlers (Faction) := Game.Player_State (Faction).Handler;
+      end loop;
+
+      for Faction in Faction_Id loop
+         if not Game.Player_State (Faction).Autoplayer.Is_Empty then
+            Game.Player_State (Faction).Autoplayer.Reference.Set_Players
+              (Handlers);
+         end if;
+      end loop;
+   end Set_Player_Handlers;
+
+      ------------------
    -- Set_Treasury --
    ------------------
 
@@ -2165,7 +2200,7 @@ package body Agrippa.Game is
    is
    begin
       for Player of Game.Player_State loop
-         Player.Start_Turn (Game);
+         Player.Handler.Start_Turn (Game);
       end loop;
    end Start_Turn;
 
@@ -2179,8 +2214,8 @@ package body Agrippa.Game is
       use type Agrippa.Players.Player_Access;
    begin
       for Player of Game.Player_State loop
-         if Player /= null then
-            Player.Stop;
+         if Player.Handler /= null then
+            Player.Handler.Stop;
          end if;
       end loop;
    end Stop;
