@@ -114,7 +114,8 @@ package body Agrippa.Players.Robots.Configure is
          Faction : constant Faction_Id :=
                      Game.Highest_Score (Score);
       begin
-         Game.Set_Player (Faction, Robot_Player (Robot_Faction));
+         Game.Set_Player
+           (Faction, Create_Robot_Player (Game, Robot_Faction, Faction));
          Remaining (Faction) := False;
       end Set_Player;
 
@@ -137,7 +138,8 @@ package body Agrippa.Players.Robots.Configure is
                          Robot_Faction_Type'Val (Index);
             begin
                Game.Set_Player
-                 (Id, Robot_Player (Robot));
+                 (Id,
+                  Create_Robot_Player (Game, Robot, Id));
             end;
          end if;
       end loop;

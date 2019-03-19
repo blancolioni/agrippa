@@ -114,10 +114,9 @@ package body Agrippa.Game is
       Name   : String)
    is
       Faction : constant Faction_Id :=
-                  Game.Player_State.Last_Index + 1;
+                  Faction_Id (Game.Faction_Count + 1);
    begin
-      Game.Player_State.Append
-        (Player_Holders.Empty_Holder);
+      Game.Faction_Count := Game.Faction_Count + 1;
       Game.Faction_State (Faction).Create_Faction (Faction, Name);
    end Add_Faction;
 
@@ -1627,12 +1626,25 @@ package body Agrippa.Game is
 
       function To_Player
         (M : Agrippa.Messages.Message_Type)
+         return Agrippa.Messages.Message_Type;
+
+      function To_Player
+        (M : Agrippa.Messages.Message_Type)
          return Agrippa.Messages.Message_Type
-      is (Game.Player_State.Element (Get_Faction (M))
-          .Element.Send_Message (Game, M));
+      is
+         Player : constant Agrippa.Players.Player_Access :=
+                    Game.Player_State (Get_Faction (M));
+      begin
+         Player.Send_Message (Game, M);
+         return Response : Message_Type do
+            Player.Get_Reply (Response);
+         end return;
+      end To_Player;
 
    begin
       case Message.Content is
+         when Empty_Message =>
+            null;
          when Mortality_Roll =>
             Game.Mortality_Roll;
 
@@ -1734,10 +1746,8 @@ package body Agrippa.Game is
 
          when Attract_Knights =>
             declare
-               Faction  : constant Faction_Id := Get_Faction (Message);
                Response : constant Agrippa.Messages.Message_Type :=
-                            Game.Player_State.Element (Faction)
-                            .Element.Send_Message (Game, Message);
+                            To_Player (Message);
                Spend    : constant Talents := Get_Money (Response);
                Senator  : constant Senator_Id := Get_Senator (Response);
                Roll     : constant Agrippa.Dice.Die_Range :=
@@ -1941,20 +1951,10 @@ package body Agrippa.Game is
    procedure Set_Player
      (Game    : in out Game_Type'Class;
       Faction : Faction_Id;
-      Player  : Agrippa.Players.Player_Interface'Class)
+      Player  : Agrippa.Players.Player_Access)
    is
-      Copy : Agrippa.Players.Player_Interface'Class := Player;
    begin
-      Copy.Initialize (Game, Faction);
-
-      Game.Player_State (Faction) :=
-        Player_Holders.To_Holder (Copy);
-
-      Ada.Text_IO.Put_Line
-        (Game.Faction_State (Faction).Name
-         & " controlled by "
-         & Player.Name);
-
+      Game.Player_State (Faction) := Player;
    end Set_Player;
 
    ------------------
@@ -2164,12 +2164,26 @@ package body Agrippa.Game is
      (Game : in out Game_Type'Class)
    is
    begin
-      for Holder of Game.Player_State loop
-         if not Holder.Is_Empty then
-            Holder.Reference.Start_Turn (Game);
-         end if;
+      for Player of Game.Player_State loop
+         Player.Start_Turn (Game);
       end loop;
    end Start_Turn;
+
+   ----------
+   -- Stop --
+   ----------
+
+   procedure Stop
+     (Game     : in out Game_Type'Class)
+   is
+      use type Agrippa.Players.Player_Access;
+   begin
+      for Player of Game.Player_State loop
+         if Player /= null then
+            Player.Stop;
+         end if;
+      end loop;
+   end Stop;
 
    -----------------------
    -- Total_Fleet_Count --

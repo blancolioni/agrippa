@@ -273,7 +273,7 @@ package Agrippa.Game is
    procedure Set_Player
      (Game    : in out Game_Type'Class;
       Faction : Faction_Id;
-      Player  : Agrippa.Players.Player_Interface'Class);
+      Player  : Agrippa.Players.Player_Access);
 
    procedure Start_Turn
      (Game : in out Game_Type'Class);
@@ -284,6 +284,9 @@ package Agrippa.Game is
       Language : WL.Localisation.Language_Type;
       Notify   : not null access constant
         Agrippa.State.Notifications.Change_Handler_Interface'Class);
+
+   procedure Stop
+     (Game     : in out Game_Type'Class);
 
 private
 
@@ -304,14 +307,7 @@ private
        (War_Id, Agrippa.State.Wars.War_State_Type,
         Agrippa.State.Wars."=");
 
-   package Player_Holders is
-     new Ada.Containers.Indefinite_Holders
-       (Agrippa.Players.Player_Interface'Class,
-        Agrippa.Players."=");
-
-   package Player_Vectors is
-     new Ada.Containers.Vectors
-       (Faction_Id, Player_Holders.Holder, Player_Holders."=");
+   type Player_Array is array (Faction_Id) of Agrippa.Players.Player_Access;
 
    package Phase_Holders is
      new Ada.Containers.Indefinite_Holders
@@ -346,6 +342,7 @@ private
          Scenario         : Agrippa.Scenarios.Scenario_Type;
          Finished         : Boolean := False;
          Has_Winner       : Boolean := False;
+         Faction_Count    : Natural := 0;
          Winning_Faction  : Faction_Id;
          Current_Turn     : Turn_Number := 1;
          Current_Phase    : Phase_Holders.Holder;
@@ -358,7 +355,7 @@ private
          Legion_State     : Legion_State_Array;
          Fleet_State      : Fleet_State_Array;
          Faction_State    : Faction_Array;
-         Player_State     : Player_Vectors.Vector;
+         Player_State     : Player_Array;
          Events           : Event_Table;
          Status           : Status_Table;
          Forum_Deck       : Agrippa.Cards.Decks.Deck_Type;

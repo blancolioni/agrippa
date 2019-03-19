@@ -56,10 +56,13 @@ package Agrippa.Messages is
       return Event_Update_Type;
 
    type Message_Content_Type is
-     (Mortality_Roll, Faction_Transfers, Initiative_Roll, Attract_Knights,
+     (Empty_Message,
+      Mortality_Roll, Faction_Transfers, Initiative_Roll, Attract_Knights,
       Population_Roll, Make_Proposal, Proposal_Vote, Attack);
 
-   type Message_Type (Content : Message_Content_Type) is private;
+   type Message_Type
+     (Content : Message_Content_Type := Empty_Message)
+   is private;
 
    function Has_Roll (Message : Message_Type) return Boolean;
    function Get_Roll (Message : Message_Type) return Positive
@@ -324,7 +327,8 @@ private
    type Allowed_Proposals is
      array (Agrippa.Proposals.Proposal_Category_Type) of Boolean;
 
-   type Message_Type (Content : Message_Content_Type) is
+   type Message_Type
+     (Content : Message_Content_Type := Empty_Message) is
       record
          Has_Faction      : Boolean := False;
          Has_Senator      : Boolean := False;
@@ -337,6 +341,8 @@ private
          Table            : Table_Row_Lists.List;
          Property_Updates : Property_Update_Lists.List;
          case Content is
+            when Empty_Message =>
+               null;
             when Mortality_Roll =>
                Roll_Twice : Boolean := False;
                No_Deaths  : Boolean := False;

@@ -417,6 +417,8 @@ package body Agrippa.UI.Text is
       use Agrippa.Messages;
    begin
       case Message.Content is
+         when Empty_Message =>
+            null;
          when Mortality_Roll =>
             Ada.Text_IO.Put
               (State.Local_Text
@@ -957,6 +959,8 @@ package body Agrippa.UI.Text is
               ("Everybody loses!");
          end if;
       end if;
+
+      Game.Stop;
 
    end Start;
 
