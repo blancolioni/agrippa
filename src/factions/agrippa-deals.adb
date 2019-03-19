@@ -176,4 +176,29 @@ package body Agrippa.Deals is
       return To_String (Result);
    end Show;
 
+   ----------
+   -- Show --
+   ----------
+
+   function Show
+     (Deal : Deal_Type;
+      Name : not null access
+        function (Faction : Faction_Id) return String)
+      return String
+   is
+      use Ada.Strings.Unbounded;
+      Result : Unbounded_String;
+   begin
+      for Term of Deal.Terms loop
+         if not Term.Terms.List.Is_Empty then
+            if Result /= "" then
+               Result := Result & "; ";
+            end if;
+            Result := Result & Name (Term.Faction) & ": "
+              & Show (Term.Terms);
+         end if;
+      end loop;
+      return To_String (Result);
+   end Show;
+
 end Agrippa.Deals;

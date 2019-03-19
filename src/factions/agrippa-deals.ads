@@ -55,6 +55,12 @@ package Agrippa.Deals is
         procedure (Faction : Faction_Id;
                    Terms   : Offer_List));
 
+   function Show
+     (Deal : Deal_Type;
+      Name : not null access
+        function (Faction : Faction_Id) return String)
+      return String;
+
 private
 
    type Offer_Type (Category : Offer_Category_Type) is
