@@ -26,6 +26,7 @@ package body Agrippa.Players.Robots is
          Votes     : Vote_Count;
          Influence : Faction_Influence_Range;
          Senators  : Senator_Vectors.Vector;
+         Desire    : Agrippa.Deals.Offer_List;
       end record;
 
    function Create
@@ -144,6 +145,11 @@ package body Agrippa.Players.Robots is
       Overwhelm : Boolean;
       Coalition : Faction_Vectors.Vector;
       Container : in out Agrippa.Proposals.Proposal_Container_Type);
+
+   function Create_Deal
+     (Robot     : Robot_Player_Type'Class;
+      Coalition : Faction_Vectors.Vector)
+      return Agrippa.Deals.Deal_Type;
 
    ----------------
    -- Attack_War --
@@ -291,7 +297,8 @@ package body Agrippa.Players.Robots is
         (Faction   => Faction,
          Votes     => State.Faction_Votes (Faction),
          Influence => State.Faction_Influence (Faction),
-         Senators  => <>)
+         Senators  => <>,
+         Desire    => <>)
       do
          for Senator of State.Faction_Senators (Faction) loop
             Rec.Senators.Append
@@ -804,10 +811,11 @@ package body Agrippa.Players.Robots is
 
          when Make_Proposal =>
             declare
-               Coalition : constant Faction_Vectors.Vector :=
+               Coalition : Faction_Vectors.Vector :=
                              Robot.Create_Coalition (State);
                Proposals : Agrippa.Proposals.Proposal_Container_Type;
                Offers    : array (Faction_Id) of Agrippa.Deals.Offer_List;
+               Deal      : Agrippa.Deals.Deal_Type;
             begin
                if Has_Proposal_Category
                  (Message, Agrippa.Proposals.Consular_Nomination)
@@ -826,6 +834,13 @@ package body Agrippa.Players.Robots is
                         & " wants "
                         & Agrippa.Deals.Show (Offers (Faction)));
                   end loop;
+
+                  for Rec of Coalition loop
+                     Rec.Desire := Offers (Rec.Faction);
+                  end loop;
+
+                  Deal := Create_Deal (Robot, Coalition);
+
                end if;
 
                Ada.Text_IO.Put ("coalition:");
