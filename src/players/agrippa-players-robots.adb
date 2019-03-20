@@ -4,6 +4,8 @@ with Ada.Text_IO;
 with Agrippa.Dice;
 with Agrippa.Proposals;
 
+with Agrippa.Cards.Wars;
+
 with Agrippa.Players.Autohandler;
 
 package body Agrippa.Players.Robots is
@@ -153,13 +155,15 @@ package body Agrippa.Players.Robots is
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
       return Boolean;
 
-   procedure Attack_War
+   function Attack_War
      (Robot     : Robot_Player_Type'Class;
       State     : Agrippa.State.State_Interface'Class;
       War       : War_Id;
+      Minimal   : Boolean;
       Overwhelm : Boolean;
       Coalition : Faction_Vectors.Vector;
-      Container : in out Agrippa.Proposals.Proposal_Container_Type);
+      Container : in out Agrippa.Proposals.Proposal_Container_Type)
+      return Boolean;
 
    function Create_Election_Deal
      (Robot     : Robot_Player_Type'Class;
@@ -170,13 +174,15 @@ package body Agrippa.Players.Robots is
    -- Attack_War --
    ----------------
 
-   procedure Attack_War
+   function Attack_War
      (Robot     : Robot_Player_Type'Class;
       State     : Agrippa.State.State_Interface'Class;
       War       : War_Id;
+      Minimal   : Boolean;
       Overwhelm : Boolean;
       Coalition : Faction_Vectors.Vector;
       Container : in out Agrippa.Proposals.Proposal_Container_Type)
+      return Boolean
    is
       pragma Unreferenced (Robot, Coalition);
       War_State          : constant Agrippa.State.War_State_Interface'Class :=
@@ -192,8 +198,10 @@ package body Agrippa.Players.Robots is
                              Legion_Count'Max
                                ((if Overwhelm
                                 then Land_Strength + 5
+                                elsif Minimal
+                                then Land_Strength
                                 else Land_Strength + 3),
-                                10);
+                                (if Minimal then Land_Strength else 10));
       Veteran_Legions    : constant Legion_Index_Array :=
                              State.Available_Veteran_Legions;
       Available_Strength : constant Legion_Count :=
@@ -243,13 +251,30 @@ package body Agrippa.Players.Robots is
                               else raise Constraint_Error with
                                 "no available commander");
    begin
+      Ada.Text_IO.Put_Line
+        ("attacking " & Agrippa.Cards.Wars.War (War).Tag
+         & ": land strength" & Land_Strength'Image
+         & "; required strength" & Required_Strength'Image
+         & "; Available_Strength" & Available_Strength'Image
+         & "; required recruitment" & Recruit_Legions'Image
+         & "; max recruitment" & Max_Recuitment'Image
+         & "; canceled recruitment" & Canceled_Recuitment'Image);
 
       if Canceled_Recuitment > 0 then
-         return;
+         Ada.Text_IO.Put_Line
+           ("Canceling attack because we could not recruit"
+            & Canceled_Recuitment'Image
+            & " legions");
+         return False;
       end if;
 
       if Final_Strength < Required_Strength then
-         return;
+         Ada.Text_IO.Put_Line
+           ("Canceling attack because final strength is"
+            & Final_Strength'Image
+            & " but we need"
+            & Required_Strength'Image);
+         return False;
       end if;
 
       if Final_Recruit_Legions > 0
@@ -272,6 +297,8 @@ package body Agrippa.Players.Robots is
                 State.Available_Regular_Legions + Final_Recruit_Legions,
               Veteran_Legions => Veteran_Legions,
               Fleets          => Required_Fleets));
+
+      return True;
 
    end Attack_War;
 
@@ -562,26 +589,41 @@ package body Agrippa.Players.Robots is
                                      State.Prosecuted_Wars;
                Inactive_Wars     : constant War_Id_Array :=
                                      State.Inactive_Wars;
+               Attacked          : Boolean := False;
             begin
 
+               Ada.Text_IO.Put_Line
+                 ("unprosecuted wars:"
+                  & Natural'Image (Unprosecuted_Wars'Length));
+
                if Unprosecuted_Wars'Length > 0 then
-                  Attack_War
-                    (Robot     => Robot,
-                     State     => State,
-                     War       => Unprosecuted_Wars (Unprosecuted_Wars'First),
-                     Overwhelm => False,
-                     Coalition => Coalition,
-                     Container => Container);
+                  Find_Unprosecuted_War :
+                  for Minimal in Boolean loop
+                     for War of Unprosecuted_Wars loop
+                        Attacked := Attack_War
+                          (Robot     => Robot,
+                           State     => State,
+                           War       => War,
+                           Minimal   => Minimal,
+                           Overwhelm => False,
+                           Coalition => Coalition,
+                           Container => Container);
+                        exit Find_Unprosecuted_War when Attacked;
+                     end loop;
+                  end loop Find_Unprosecuted_War;
                elsif Inactive_Wars'Length > 0
                  and then Prosecuted_Wars'Length = 0
                then
-                  Attack_War
-                    (Robot     => Robot,
-                     State     => State,
-                     War       => Inactive_Wars (Inactive_Wars'First),
-                     Overwhelm => False,
-                     Coalition => Coalition,
-                     Container => Container);
+                  for War of Inactive_Wars loop
+                     exit when Attack_War
+                       (Robot     => Robot,
+                        State     => State,
+                        War       => War,
+                        Minimal   => False,
+                        Overwhelm => False,
+                        Coalition => Coalition,
+                        Container => Container);
+                  end loop;
                else
                   declare
                      Current_Legions : constant Legion_Count :=
