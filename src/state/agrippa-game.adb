@@ -405,18 +405,42 @@ package body Agrippa.Game is
          else
             if Remaining_Count >= 1 then
                declare
-                  Index : constant Positive :=
-                            WL.Random.Random_Number (1, Remaining_Count);
+                  Non_Veteran_Count : Natural := 0;
+                  Non_Veteran       : Legion_Index_Array
+                    (1 .. Remaining_Count);
                begin
-                  Game.Legion_State (Legion_Ids (Index)).Make_Veteran;
-                  Game.Legion_State (Legion_Ids (Index)).Set_Loyalty
-                    (Commander);
-                  Game.Notifier.Send_Notification
-                    (Game.Local_Text
-                       ("veteran-legion-created",
-                        WL.Numerics.Roman.Roman_Image
-                          (Positive (Legion_Ids (Index))),
-                        Game.Senator_Name (Commander)));
+                  for I in 1 .. Remaining_Count loop
+                     declare
+                        Id : constant Legion_Index := Legion_Ids (I);
+                        State : Agrippa.State.Legions.Legion_State_Type
+                        renames Game.Legion_State (Id);
+                     begin
+                        if not State.Veteran then
+                           Non_Veteran_Count := Non_Veteran_Count + 1;
+                           Non_Veteran (Non_Veteran_Count) := Id;
+                        end if;
+                     end;
+                  end loop;
+
+                  if Non_Veteran_Count > 0 then
+                     declare
+                        Index : constant Positive :=
+                                  WL.Random.Random_Number
+                                    (1, Non_Veteran_Count);
+                        Id    : constant Legion_Index := Non_Veteran (Index);
+                        State : Agrippa.State.Legions.Legion_State_Type
+                        renames Game.Legion_State (Id);
+                     begin
+                        State.Make_Veteran;
+                        State.Set_Loyalty (Commander);
+                        Game.Notifier.Send_Notification
+                          (Game.Local_Text
+                             ("veteran-legion-created",
+                              WL.Numerics.Roman.Roman_Image
+                                (Positive (Legion_Ids (Index))),
+                              Game.Senator_Name (Commander)));
+                     end;
+                  end if;
                end;
             end if;
          end if;
