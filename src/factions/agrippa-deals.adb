@@ -1,6 +1,6 @@
 with Ada.Strings.Unbounded;
 
-with Agrippa.Cards;
+with Agrippa.Cards.Senators;
 
 package body Agrippa.Deals is
 
@@ -158,6 +158,24 @@ package body Agrippa.Deals is
       end loop;
    end Scan;
 
+   ----------
+   -- Scan --
+   ----------
+
+   procedure Scan
+     (Deal    : Deal_Type;
+      Process : not null access
+        procedure (Faction : Faction_Id;
+                   Offer   : Offer_Type))
+   is
+   begin
+      for Term of Deal.Terms loop
+         for Offer of Term.Terms.List loop
+            Process (Term.Faction, Offer);
+         end loop;
+      end loop;
+   end Scan;
+
    ------------
    -- Second --
    ------------
@@ -194,7 +212,8 @@ package body Agrippa.Deals is
             if Offer.Any then
                return "any office";
             else
-               return Offer.Offer_Office'Image;
+               return Agrippa.Cards.Senators.Senator (Offer.Holder).Tag
+                 & " as " & Offer.Offer_Office'Image;
             end if;
          when Province =>
             if Offer.Any then

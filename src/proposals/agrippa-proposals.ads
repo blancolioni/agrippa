@@ -4,7 +4,8 @@ private with Ada.Containers.Indefinite_Doubly_Linked_Lists;
 package Agrippa.Proposals is
 
    type Proposal_Category_Type is
-     (Consular_Nomination, Censor_Nomination, Dictator_Nomination,
+     (No_Proposal,
+      Consular_Nomination, Censor_Nomination, Dictator_Nomination,
       Pontifex_Maximus_Nomination,
       Governor_Nomination, Consul_For_Life,
       Recruitment, Attack);
@@ -18,9 +19,13 @@ package Agrippa.Proposals is
    type Proposal_Category_Array is
      array (Positive range <>) of Proposal_Category_Type;
 
-   type Proposal_Type (Category : Proposal_Category_Type) is private;
+   type Proposal_Type
+     (Category : Proposal_Category_Type := No_Proposal) is private;
 
    function Nominee (Proposal : Proposal_Type) return Senator_Id
+     with Pre => Proposal.Category in Nomination;
+
+   function Office (Proposal : Proposal_Type) return Office_Type
      with Pre => Proposal.Category in Nomination;
 
    function Commander (Proposal : Proposal_Type) return Senator_Id
@@ -96,12 +101,14 @@ private
    package Legion_Lists is
      new Ada.Containers.Doubly_Linked_Lists (Legion_Index);
 
-   type Proposal_Type (Category : Proposal_Category_Type) is
+   type Proposal_Type (Category : Proposal_Category_Type := No_Proposal) is
       record
          Senator : Senator_Id;
          Fleets  : Fleet_Count := 0;
          Legions : Legion_Count := 0;
          case Category is
+            when No_Proposal =>
+               null;
             when Office_Nomination =>
                Office  : Office_Type;
             when Governor_Nomination =>
@@ -118,6 +125,9 @@ private
 
    function Nominee (Proposal : Proposal_Type) return Senator_Id
    is (Proposal.Senator);
+
+   function Office (Proposal : Proposal_Type) return Office_Type
+   is (Proposal.Office);
 
    function Commander (Proposal : Proposal_Type) return Senator_Id
    is (Proposal.Senator);

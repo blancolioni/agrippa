@@ -8,17 +8,23 @@ package body Agrippa.Players.Autohandler is
      new Ada.Containers.Indefinite_Holders
        (Autoplayer_Interface'Class);
 
+   function Proposal_Matches_Deal
+     (Deal : Agrippa.Deals.Deal_Type;
+      Proposal : Agrippa.Proposals.Proposal_Container_Type)
+      return Boolean;
+
    ----------------------
    -- Autohandler_Task --
    ----------------------
 
    task body Autohandler_Task is
-      My_Faction   : Faction_Id;
-      pragma Unreferenced (My_Faction);
-      My_Player    : Autoplayer_Holders.Holder;
-      Agreement    : Boolean;
-      Counter      : Agrippa.Deals.Offer_List;
-      Msg          : Agrippa.Messages.Message_Type;
+      My_Faction       : Faction_Id;
+      My_Player        : Autoplayer_Holders.Holder;
+      Agreement        : Boolean;
+      Counter          : Agrippa.Deals.Offer_List;
+      Msg              : Agrippa.Messages.Message_Type;
+      Current_Deal     : Agrippa.Deals.Deal_Type;
+      Current_Votes    : Faction_Vote_Type;
    begin
       accept Initialize
         (State : in out Agrippa.State.State_Interface'Class;
@@ -55,6 +61,9 @@ package body Agrippa.Players.Autohandler is
                Deal : in Agrippa.Deals.Deal_Type)
             do
                Agreement := My_Player.Element.Will_You_Agree_To (State, Deal);
+               if Agreement then
+                  Current_Deal := Deal;
+               end if;
             end Will_You_Agree_To;
             accept Get_Agreement_Reply (Agree : out Boolean) do
                Agree := Agreement;
@@ -93,6 +102,22 @@ package body Agrippa.Players.Autohandler is
                Offer := Counter;
             end Get_Offer_Reply;
          or
+            accept Vote_Proposal
+              (State : Agrippa.State.State_Interface'Class;
+               Proposal : in Agrippa.Proposals.Proposal_Container_Type)
+            do
+               Current_Votes := (others => 0);
+
+               if Proposal_Matches_Deal (Current_Deal, Proposal) then
+                  Current_Votes (Aye) := State.Faction_Votes (My_Faction);
+               else
+                  Current_Votes (Nay) := State.Faction_Votes (My_Faction);
+               end if;
+            end Vote_Proposal;
+            accept Get_Votes (Votes : out Faction_Vote_Type) do
+               Votes := Current_Votes;
+            end Get_Votes;
+         or
             accept Stop;
             exit;
          or
@@ -115,6 +140,20 @@ package body Agrippa.Players.Autohandler is
       Result.Initialize (State, Faction);
       return Player_Access (Result);
    end Create_Autohandler;
+
+   ---------------------------
+   -- Proposal_Matches_Deal --
+   ---------------------------
+
+   function Proposal_Matches_Deal
+     (Deal     : Agrippa.Deals.Deal_Type;
+      Proposal : Agrippa.Proposals.Proposal_Container_Type)
+      return Boolean
+   is
+      pragma Unreferenced (Deal, Proposal);
+   begin
+      return True;
+   end Proposal_Matches_Deal;
 
    --------------------
    -- Set_Autoplayer --

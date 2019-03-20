@@ -60,7 +60,11 @@ package Agrippa is
 
    type Faction_Influence_Range is range 0 .. 99;
 
+   type Vote_Type is (Abstain, Nay, Aye);
+
    type Vote_Count is range 0 .. 200;
+
+   type Faction_Vote_Type is array (Vote_Type) of Vote_Count;
 
    type Talents is range 0 .. 999;
 

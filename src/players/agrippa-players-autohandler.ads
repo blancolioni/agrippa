@@ -53,6 +53,13 @@ private
       entry Get_Agreement_Reply
         (Agree  :    out Boolean);
 
+      entry Vote_Proposal
+        (State    : Agrippa.State.State_Interface'Class;
+         Proposal : Agrippa.Proposals.Proposal_Container_Type);
+
+      entry Get_Votes
+        (Votes    :    out Faction_Vote_Type);
+
    end Autohandler_Task;
 
 end Agrippa.Players.Autohandler;

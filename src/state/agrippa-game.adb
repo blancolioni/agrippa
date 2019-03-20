@@ -848,12 +848,11 @@ package body Agrippa.Game is
       begin
          Count := Count + 1;
          case Proposal.Category is
+            when No_Proposal =>
+               Ada.Text_IO.Put_Line
+                 ("warning: enacting no proposal");
             when Consular_Nomination =>
-               if Count = 1 then
-                  Game.Set_Office (Nominee (Proposal), Rome_Consul);
-               else
-                  Game.Set_Office (Nominee (Proposal), Field_Consul);
-               end if;
+               Game.Set_Office (Nominee (Proposal), Office (Proposal));
 
             when Censor_Nomination =>
                Game.Set_Office (Nominee (Proposal), Censor);

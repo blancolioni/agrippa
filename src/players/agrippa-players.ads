@@ -1,5 +1,6 @@
 with Agrippa.Deals;
 with Agrippa.Messages;
+with Agrippa.Proposals;
 with Agrippa.State;
 
 package Agrippa.Players is
@@ -63,6 +64,17 @@ package Agrippa.Players is
    procedure Get_Agreement_Reply
      (Player : in out Player_Handler;
       Agree  :    out Boolean)
+   is abstract;
+
+   procedure Vote_Proposal
+     (Player   : in out Player_Handler;
+      State    : Agrippa.State.State_Interface'Class;
+      Proposal : Agrippa.Proposals.Proposal_Container_Type)
+   is abstract;
+
+   procedure Get_Votes
+     (Player   : in out Player_Handler;
+      Votes    :    out Faction_Vote_Type)
    is abstract;
 
    type Player_Access is access all Player_Handler'Class;

@@ -11,7 +11,8 @@ package Agrippa.Deals is
    function Nothing return Offer_Type;
 
    function Office
-     (Item : Office_Type)
+     (Item   : Office_Type;
+      Holder : Senator_Id)
       return Offer_Type;
 
    function Province
@@ -22,6 +23,9 @@ package Agrippa.Deals is
 
    function Is_Office_Offer (Offer : Offer_Type) return Boolean;
    function Get_Office (Offer : Offer_Type) return Office_Type
+     with Pre => Is_Office_Offer (Offer);
+
+   function Get_Holder (Offer : Offer_Type) return Senator_Id
      with Pre => Is_Office_Offer (Offer);
 
    function Show (Offer : Offer_Type) return String;
@@ -70,6 +74,12 @@ package Agrippa.Deals is
         procedure (Faction : Faction_Id;
                    Terms   : Offer_List));
 
+   procedure Scan
+     (Deal    : Deal_Type;
+      Process : not null access
+        procedure (Faction : Faction_Id;
+                   Offer   : Offer_Type));
+
    function Show
      (Deal : Deal_Type;
       Name : not null access
@@ -86,8 +96,10 @@ private
                null;
             when Office =>
                Offer_Office   : Office_Type;
+               Holder         : Senator_Id;
             when Province =>
                Offer_Province : Province_Id;
+               Governor       : Senator_Id;
             when Card =>
                Any_Concession : Boolean := False;
                Offer_Card     : Card_Id;
@@ -98,13 +110,14 @@ private
    is (Nothing, False);
 
    function Office
-     (Item : Office_Type)
+     (Item   : Office_Type;
+      Holder : Senator_Id)
       return Offer_Type
-   is (Office, False, Item);
+   is (Office, False, Item, Holder);
 
    function Province
      return Offer_Type
-   is (Province, True, 1);
+   is (Province, True, 1, 1);
 
    function Concession
      return Offer_Type
@@ -115,6 +128,9 @@ private
 
    function Get_Office (Offer : Offer_Type) return Office_Type
    is (Offer.Offer_Office);
+
+   function Get_Holder (Offer : Offer_Type) return Senator_Id
+   is (Offer.Holder);
 
    package Offer_Lists is
      new Ada.Containers.Indefinite_Doubly_Linked_Lists (Offer_Type);
