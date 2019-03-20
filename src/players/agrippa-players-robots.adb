@@ -107,6 +107,12 @@ package body Agrippa.Players.Robots is
       Deal    : Agrippa.Deals.Deal_Type)
       return Boolean;
 
+   overriding function Vote
+     (Player    : Robot_Player_Type;
+      State     : Agrippa.State.State_Interface'Class;
+      Proposals : Agrippa.Proposals.Proposal_Container_Type)
+      return Faction_Vote_Type;
+
    overriding procedure Set_Players
      (Robot   : in out Robot_Player_Type;
       Players : Player_Access_Array);
@@ -139,6 +145,13 @@ package body Agrippa.Players.Robots is
       Category  : Agrippa.Proposals.Proposal_Category_Type;
       Coalition : Faction_Vectors.Vector;
       Container : in out Agrippa.Proposals.Proposal_Container_Type);
+
+   function Proposal_Matches_Deal
+     (Faction  : Faction_Id;
+      State    : Agrippa.State.State_Interface'Class;
+      Deal     : Agrippa.Deals.Deal_Type;
+      Proposal : Agrippa.Proposals.Proposal_Container_Type)
+      return Boolean;
 
    procedure Attack_War
      (Robot     : Robot_Player_Type'Class;
@@ -717,6 +730,73 @@ package body Agrippa.Players.Robots is
       Robot.Faction := Faction;
    end Initialize;
 
+   ---------------------------
+   -- Proposal_Matches_Deal --
+   ---------------------------
+
+   function Proposal_Matches_Deal
+     (Faction  : Faction_Id;
+      State    : Agrippa.State.State_Interface'Class;
+      Deal     : Agrippa.Deals.Deal_Type;
+      Proposal : Agrippa.Proposals.Proposal_Container_Type)
+      return Boolean
+   is
+      pragma Unreferenced (Faction);
+
+      Arr      : constant Agrippa.Proposals.Proposal_Array :=
+                   Agrippa.Proposals.Get_Proposals (Proposal);
+
+      function Check_Proposal
+        (P : Agrippa.Proposals.Proposal_Type)
+         return Boolean;
+
+      --------------------
+      -- Check_Proposal --
+      --------------------
+
+      function Check_Proposal
+        (P : Agrippa.Proposals.Proposal_Type)
+         return Boolean
+      is
+         use all type Agrippa.Proposals.Proposal_Category_Type;
+      begin
+         case P.Category is
+            when No_Proposal =>
+               return True;
+            when Office_Nomination =>
+
+               if Agrippa.Deals.Contradicts
+                 (Deal, Agrippa.Proposals.Office (P),
+                  Agrippa.Proposals.Nominee (P),
+                  State.Senator_Faction
+                    (Agrippa.Proposals.Nominee (P)))
+               then
+                  return False;
+               end if;
+               return True;
+
+            when Governor_Nomination =>
+               return True;
+            when Consul_For_Life =>
+               return False;
+            when Recruitment =>
+               return True;
+            when Attack =>
+               return True;
+         end case;
+      end Check_Proposal;
+
+   begin
+
+      for Proposal of Arr loop
+         if not Check_Proposal (Proposal) then
+            return False;
+         end if;
+      end loop;
+      return True;
+
+   end Proposal_Matches_Deal;
+
    -------------------------
    -- Senate_Phase_Desire --
    -------------------------
@@ -1069,6 +1149,28 @@ package body Agrippa.Players.Robots is
       end if;
    end Start_Turn;
 
+   ----------
+   -- Vote --
+   ----------
+
+   overriding function Vote
+     (Player    : Robot_Player_Type;
+      State     : Agrippa.State.State_Interface'Class;
+      Proposals : Agrippa.Proposals.Proposal_Container_Type)
+      return Faction_Vote_Type
+   is
+   begin
+      return Votes : Faction_Vote_Type := (others => 0) do
+         if Proposal_Matches_Deal
+           (Player.Faction, State, Player.Current_Deal, Proposals)
+         then
+            Votes (Aye) := State.Faction_Votes (Player.Faction);
+         else
+            Votes (Nay) := State.Faction_Votes (Player.Faction);
+         end if;
+      end return;
+   end Vote;
+
    --------------------------
    -- What_Do_You_Want_For --
    --------------------------
@@ -1173,9 +1275,15 @@ package body Agrippa.Players.Robots is
    begin
       Agrippa.Deals.Scan (Deal, Check_Terms'Access);
       if Score > 0 then
+         Ada.Text_IO.Put_Line
+           (State.Faction_Name (Robot.Faction)
+            & " agrees");
          Robot.Current_Deal := Deal;
          return True;
       else
+         Ada.Text_IO.Put_Line
+           (State.Faction_Name (Robot.Faction)
+            & " rejects");
          return False;
       end if;
    end Will_You_Agree_To;

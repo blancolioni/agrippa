@@ -64,6 +64,10 @@ package Agrippa.Deals is
 
    type Deal_Type is private;
 
+   function Is_Empty
+     (Deal : Deal_Type)
+      return Boolean;
+
    procedure Clear
      (Deal    : in out Deal_Type);
 
@@ -89,6 +93,13 @@ package Agrippa.Deals is
       Name : not null access
         function (Faction : Faction_Id) return String)
       return String;
+
+   function Contradicts
+     (Deal    : Deal_Type;
+      Office  : Office_Type;
+      Holder  : Senator_Id;
+      Faction : Faction_Id)
+      return Boolean;
 
 private
 
@@ -168,5 +179,10 @@ private
       record
          Terms   : Term_Lists.List;
       end record;
+
+   function Is_Empty
+     (Deal : Deal_Type)
+      return Boolean
+   is (Deal.Terms.Is_Empty);
 
 end Agrippa.Deals;

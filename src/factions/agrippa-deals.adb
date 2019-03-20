@@ -62,6 +62,39 @@ package body Agrippa.Deals is
       Deal.Terms.Clear;
    end Clear;
 
+   -----------------
+   -- Contradicts --
+   -----------------
+
+   function Contradicts
+     (Deal    : Deal_Type;
+      Office  : Office_Type;
+      Holder  : Senator_Id;
+      Faction : Faction_Id)
+      return Boolean
+   is
+   begin
+      if Is_Empty (Deal) then
+         return True;
+      end if;
+      for Terms of Deal.Terms loop
+         for Offer of Terms.Terms.List loop
+            if Offer.Category = Agrippa.Deals.Office
+              and then Offer.Offer_Office = Office
+            then
+               declare
+                  Result : constant Boolean :=
+                             Offer.Holder /= Holder
+                                 or else Terms.Faction /= Faction;
+               begin
+                  return Result;
+               end;
+            end if;
+         end loop;
+      end loop;
+      return False;
+   end Contradicts;
+
    -----------
    -- First --
    -----------

@@ -132,6 +132,13 @@ package Agrippa.Players is
       return Boolean
       is abstract;
 
+   function Vote
+     (Player    : Autoplayer_Interface;
+      State     : Agrippa.State.State_Interface'Class;
+      Proposals : Agrippa.Proposals.Proposal_Container_Type)
+      return Faction_Vote_Type
+      is abstract;
+
    function Get_Player_Handler
      (Player : Autoplayer_Interface)
       return Player_Access
