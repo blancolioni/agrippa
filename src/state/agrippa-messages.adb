@@ -269,6 +269,50 @@ package body Agrippa.Messages is
       end return;
    end Initiative_Roll;
 
+   ------------------------------
+   -- Make_Consular_Nomination --
+   ------------------------------
+
+   function Make_Consular_Nomination
+     (Senator  : Senator_Id;
+      Faction  : Faction_Id)
+      return Make_Proposal_Message
+   is
+   begin
+      return Message : Make_Proposal_Message do
+         Message.Has_Senator := True;
+         Message.Senator := Senator;
+         Message.Has_Faction := True;
+         Message.Faction := Faction;
+         Message.Allowed_Categories (Agrippa.Proposals.Office_Nomination) :=
+           True;
+         Message.Allowed_Offices (Rome_Consul) := True;
+         Message.Allowed_Offices (Field_Consul) := True;
+      end return;
+   end Make_Consular_Nomination;
+
+   ----------------------------
+   -- Make_Office_Nomination --
+   ----------------------------
+
+   function Make_Office_Nomination
+     (Senator  : Senator_Id;
+      Faction  : Faction_Id;
+      Office   : Office_Type)
+      return Make_Proposal_Message
+   is
+   begin
+      return Message : Make_Proposal_Message do
+         Message.Has_Senator := True;
+         Message.Senator := Senator;
+         Message.Has_Faction := True;
+         Message.Faction := Faction;
+         Message.Allowed_Categories (Agrippa.Proposals.Office_Nomination) :=
+           True;
+         Message.Allowed_Offices (Office) := True;
+      end return;
+   end Make_Office_Nomination;
+
    -------------------
    -- Make_Proposal --
    -------------------
@@ -391,6 +435,26 @@ package body Agrippa.Messages is
       return Message : constant Message_Type :=
         (Population_Roll, others => <>);
    end Population_Roll;
+
+   ----------------------
+   -- Proposal_Offices --
+   ----------------------
+
+   function Proposal_Offices
+     (Message  : Make_Proposal_Message)
+      return Office_Array
+   is
+      Result : Office_Array (1 .. Message.Allowed_Offices'Length);
+      Count  : Natural := 0;
+   begin
+      for Office in Office_Type loop
+         if Message.Allowed_Offices (Office) then
+            Count := Count + 1;
+            Result (Count) := Office;
+         end if;
+      end loop;
+      return Result (1 .. Count);
+   end Proposal_Offices;
 
    ---------------------------
    -- Scan_Property_Updates --

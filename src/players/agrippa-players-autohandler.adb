@@ -9,7 +9,8 @@ package body Agrippa.Players.Autohandler is
        (Autoplayer_Interface'Class);
 
    function Proposal_Matches_Deal
-     (Deal : Agrippa.Deals.Deal_Type;
+     (Faction : Faction_Id;
+      Deal    : Agrippa.Deals.Deal_Type;
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
       return Boolean;
 
@@ -50,7 +51,7 @@ package body Agrippa.Players.Autohandler is
               (State : in Agrippa.State.State_Interface'Class;
                Message : in Agrippa.Messages.Message_Type)
             do
-               Msg := My_Player.Element.Send_Message (State, Message);
+               Msg := My_Player.Reference.Send_Message (State, Message);
             end Send_Message;
             accept Get_Reply (Reply : out Agrippa.Messages.Message_Type) do
                Reply := Msg;
@@ -60,7 +61,8 @@ package body Agrippa.Players.Autohandler is
               (State : in Agrippa.State.State_Interface'Class;
                Deal : in Agrippa.Deals.Deal_Type)
             do
-               Agreement := My_Player.Element.Will_You_Agree_To (State, Deal);
+               Agreement :=
+                 My_Player.Reference.Will_You_Agree_To (State, Deal);
                if Agreement then
                   Current_Deal := Deal;
                end if;
@@ -108,7 +110,9 @@ package body Agrippa.Players.Autohandler is
             do
                Current_Votes := (others => 0);
 
-               if Proposal_Matches_Deal (Current_Deal, Proposal) then
+               if Proposal_Matches_Deal
+                 (My_Faction, Current_Deal, Proposal)
+               then
                   Current_Votes (Aye) := State.Faction_Votes (My_Faction);
                else
                   Current_Votes (Nay) := State.Faction_Votes (My_Faction);
@@ -146,13 +150,76 @@ package body Agrippa.Players.Autohandler is
    ---------------------------
 
    function Proposal_Matches_Deal
-     (Deal     : Agrippa.Deals.Deal_Type;
+     (Faction  : Faction_Id;
+      Deal     : Agrippa.Deals.Deal_Type;
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
       return Boolean
    is
-      pragma Unreferenced (Deal, Proposal);
+      Match : Boolean := True;
+      Arr   : constant Agrippa.Proposals.Proposal_Array :=
+                Agrippa.Proposals.Get_Proposals (Proposal);
+
+      procedure Check_Term
+        (Id   : Faction_Id;
+         Term : Agrippa.Deals.Offer_Type);
+
+      procedure Check_Term
+        (Id   : Faction_Id;
+         Term : Agrippa.Deals.Offer_Type)
+      is
+         Found : Boolean := False;
+
+         function Match_Proposal
+           (P : Agrippa.Proposals.Proposal_Type)
+            return Boolean;
+
+         --------------------
+         -- Match_Proposal --
+         --------------------
+
+         function Match_Proposal
+           (P : Agrippa.Proposals.Proposal_Type)
+            return Boolean
+         is
+            use all type Agrippa.Proposals.Proposal_Category_Type;
+         begin
+            case P.Category is
+               when No_Proposal =>
+                  return True;
+               when Office_Nomination =>
+                  return Agrippa.Deals.Is_Office_Offer (Term)
+                    and then Agrippa.Deals.Get_Office (Term) =
+                    Agrippa.Proposals.Office (P);
+               when Governor_Nomination =>
+                  return Agrippa.Deals.Is_Province_Offer (Term)
+                    and then Agrippa.Deals.Get_Province (Term) =
+                    Agrippa.Proposals.Province (P);
+               when Consul_For_Life =>
+                  return False;
+               when Recruitment =>
+                  return False;
+               when Attack =>
+                  return False;
+            end case;
+         end Match_Proposal;
+
+      begin
+         if Id = Faction then
+            for Item of Arr loop
+               if Match_Proposal (Item) then
+                  Found := True;
+                  exit;
+               end if;
+            end loop;
+            if not Found then
+               Match := False;
+            end if;
+         end if;
+      end Check_Term;
+
    begin
-      return True;
+      Agrippa.Deals.Scan (Deal, Check_Term'Access);
+      return Match;
    end Proposal_Matches_Deal;
 
    --------------------

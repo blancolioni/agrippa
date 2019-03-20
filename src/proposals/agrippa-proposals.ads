@@ -5,16 +5,12 @@ package Agrippa.Proposals is
 
    type Proposal_Category_Type is
      (No_Proposal,
-      Consular_Nomination, Censor_Nomination, Dictator_Nomination,
-      Pontifex_Maximus_Nomination,
+      Office_Nomination,
       Governor_Nomination, Consul_For_Life,
       Recruitment, Attack);
 
    subtype Nomination is Proposal_Category_Type range
-     Consular_Nomination .. Consul_For_Life;
-
-   subtype Office_Nomination is Proposal_Category_Type range
-     Consular_Nomination .. Pontifex_Maximus_Nomination;
+     Office_Nomination .. Consul_For_Life;
 
    type Proposal_Category_Array is
      array (Positive range <>) of Proposal_Category_Type;
@@ -96,6 +92,24 @@ package Agrippa.Proposals is
       Process   : not null access
         procedure (Proposal : Proposal_Type));
 
+--     function Find_Proposal
+--       (Container : Proposal_Container_Type;
+--        Test      : not null access
+--          function (Proposal : Proposal_Type) return Boolean)
+--        return Proposal_Type;
+
+   function Have_Proposal
+     (Container : Proposal_Container_Type;
+      Test      : not null access
+        function (Proposal : Proposal_Type) return Boolean)
+      return Boolean;
+
+   type Proposal_Array is array (Positive range <>) of Proposal_Type;
+
+   function Get_Proposals
+     (Container : Proposal_Container_Type)
+      return Proposal_Array;
+
 private
 
    package Legion_Lists is
@@ -159,5 +173,12 @@ private
      (Container : Proposal_Container_Type)
       return Boolean
    is (Container.List.Is_Empty);
+
+   function Have_Proposal
+     (Container : Proposal_Container_Type;
+      Test      : not null access
+        function (Proposal : Proposal_Type) return Boolean)
+      return Boolean
+   is (for some Proposal of Container.List => Test (Proposal));
 
 end Agrippa.Proposals;

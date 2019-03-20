@@ -855,17 +855,8 @@ package body Agrippa.Game is
             when No_Proposal =>
                Ada.Text_IO.Put_Line
                  ("warning: enacting no proposal");
-            when Consular_Nomination =>
+            when Office_Nomination =>
                Game.Set_Office (Nominee (Proposal), Office (Proposal));
-
-            when Censor_Nomination =>
-               Game.Set_Office (Nominee (Proposal), Censor);
-
-            when Dictator_Nomination =>
-               Game.Set_Office (Nominee (Proposal), Dictator);
-
-            when Pontifex_Maximus_Nomination =>
-               Game.Set_Office (Nominee (Proposal), Pontifex_Maximus);
 
             when Governor_Nomination =>
                null;

@@ -99,7 +99,7 @@ package Agrippa.Players is
    is abstract;
 
    function Send_Message
-     (Player  : Autoplayer_Interface;
+     (Player  : in out Autoplayer_Interface;
       State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Message_Type)
       return Agrippa.Messages.Message_Type
@@ -126,7 +126,7 @@ package Agrippa.Players is
       is abstract;
 
    function Will_You_Agree_To
-     (Player : Autoplayer_Interface;
+     (Player : in out Autoplayer_Interface;
       State  : Agrippa.State.State_Interface'Class;
       Deal   : Agrippa.Deals.Deal_Type)
       return Boolean

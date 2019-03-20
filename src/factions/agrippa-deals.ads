@@ -25,6 +25,10 @@ package Agrippa.Deals is
    function Get_Office (Offer : Offer_Type) return Office_Type
      with Pre => Is_Office_Offer (Offer);
 
+   function Is_Province_Offer (Offer : Offer_Type) return Boolean;
+   function Get_Province (Offer : Offer_Type) return Province_Id
+     with Pre => Is_Province_Offer (Offer);
+
    function Get_Holder (Offer : Offer_Type) return Senator_Id
      with Pre => Is_Office_Offer (Offer);
 
@@ -131,6 +135,12 @@ private
 
    function Get_Holder (Offer : Offer_Type) return Senator_Id
    is (Offer.Holder);
+
+   function Is_Province_Offer (Offer : Offer_Type) return Boolean
+   is (Offer.Category = Province);
+
+   function Get_Province (Offer : Offer_Type) return Province_Id
+   is (Offer.Offer_Province);
 
    package Offer_Lists is
      new Ada.Containers.Indefinite_Doubly_Linked_Lists (Offer_Type);

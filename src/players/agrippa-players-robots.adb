@@ -34,12 +34,6 @@ package body Agrippa.Players.Robots is
       Faction : Faction_Id)
       return Faction_Record;
 
-   function Highest_Score
-     (Faction : Faction_Record;
-      Score   : not null access
-        function (Senator : Senator_Record) return Integer)
-     return Senator_Id;
-
    package Faction_Vectors is
      new Ada.Containers.Vectors (Positive, Faction_Record);
 
@@ -58,6 +52,7 @@ package body Agrippa.Players.Robots is
          Faction       : Faction_Id;
          Handler       : Player_Access;
          Handlers      : Player_Access_Array;
+         Current_Deal  : Agrippa.Deals.Deal_Type;
       end record;
 
    overriding function Name
@@ -84,7 +79,7 @@ package body Agrippa.Players.Robots is
       State   : in out Agrippa.State.State_Interface'Class);
 
    overriding function Send_Message
-     (Robot   : Robot_Player_Type;
+     (Robot   : in out Robot_Player_Type;
       State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Message_Type)
       return Agrippa.Messages.Message_Type;
@@ -107,7 +102,7 @@ package body Agrippa.Players.Robots is
       return Agrippa.Deals.Offer_List;
 
    overriding function Will_You_Agree_To
-     (Robot   : Robot_Player_Type;
+     (Robot   : in out Robot_Player_Type;
       State   : Agrippa.State.State_Interface'Class;
       Deal    : Agrippa.Deals.Deal_Type)
       return Boolean;
@@ -532,64 +527,10 @@ package body Agrippa.Players.Robots is
 
          when No_Proposal =>
             raise Constraint_Error with "robot: cannot create no proposal";
-         when Consular_Nomination =>
-            declare
-               function Score_Consul_1
-                 (Senator : Senator_Record)
-                  return Integer
-               is (100 - Natural (Senator.Influence));
 
-               Consul_1 : constant Senator_Id :=
-                            Highest_Score
-                              (Coalition.First_Element, Score_Consul_1'Access);
-
-               function Score_Consul_2
-                 (Senator : Senator_Record)
-                  return Integer
-               is (if Senator.Senator = Consul_1
-                   then -100
-                   else Natural (Senator.Military));
-
-               Consul_2 : constant Senator_Id :=
-                            Highest_Score
-                              (Faction => (if Coalition.Last_Index = 1
-                                           then Coalition.First_Element
-                                           else Coalition.Element (2)),
-                               Score   => Score_Consul_2'Access);
-            begin
-               Add_Proposal
-                 (Container, Nominate (Consul_1, Rome_Consul));
-               Add_Proposal
-                 (Container, Nominate (Consul_2, Field_Consul));
-            end;
-
-         when Censor_Nomination =>
-
-            declare
-               function Score_Censor
-                 (Senator : Senator_Record)
-                  return Integer
-               is (if State.Has_Office (Senator.Senator)
-                   then -1000
-                   else 100 - Natural (Senator.Influence));
-
-               Faction_Index : constant Positive :=
-                                 Positive'Min (3, Coalition.Last_Index);
-
-               Candidate : constant Senator_Id :=
-                             Highest_Score
-                                   (Coalition.Element (Faction_Index),
-                                    Score_Censor'Access);
-            begin
-               Add_Proposal
-                 (Container, Nominate (Candidate, Censor));
-            end;
-
-         when Pontifex_Maximus_Nomination =>
-            null;
-
-         when Dictator_Nomination =>
-            null;
+         when Office_Nomination =>
+            raise Constraint_Error with
+              "robot: cannot create office proposal";
 
          when Governor_Nomination =>
             null;
@@ -762,29 +703,6 @@ package body Agrippa.Players.Robots is
 
    end Desired_Spoils;
 
-   -------------------
-   -- Highest_Score --
-   -------------------
-
-   function Highest_Score
-     (Faction : Faction_Record;
-      Score   : not null access
-        function (Senator : Senator_Record) return Integer)
-      return Senator_Id
-   is
-      Highest : Integer := Integer'First;
-      Id      : Nullable_Senator_Id := No_Senator;
-   begin
-      for Rec of Faction.Senators loop
-         if Score (Rec) > Highest then
-            Highest := Score (Rec);
-            Id     := To_Nullable_Id (Rec.Senator);
-         end if;
-      end loop;
-      pragma Assert (Has_Senator (Id));
-      return To_Senator_Id (Id);
-   end Highest_Score;
-
    ----------------
    -- Initialize --
    ----------------
@@ -839,7 +757,7 @@ package body Agrippa.Players.Robots is
    ------------------
 
    overriding function Send_Message
-     (Robot   : Robot_Player_Type;
+     (Robot   : in out Robot_Player_Type;
       State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Message_Type)
       return Agrippa.Messages.Message_Type
@@ -847,8 +765,8 @@ package body Agrippa.Players.Robots is
       use Agrippa.Messages;
 
       function Make_Deal_Proposals
-        (Deal     : Agrippa.Deals.Deal_Type;
-         Category : Agrippa.Proposals.Proposal_Category_Type)
+        (Deal   : Agrippa.Deals.Deal_Type;
+         Filter : Office_Array)
          return Agrippa.Proposals.Proposal_Container_Type;
 
       -------------------------
@@ -856,30 +774,29 @@ package body Agrippa.Players.Robots is
       -------------------------
 
       function Make_Deal_Proposals
-        (Deal     : Agrippa.Deals.Deal_Type;
-         Category : Agrippa.Proposals.Proposal_Category_Type)
+        (Deal   : Agrippa.Deals.Deal_Type;
+         Filter : Office_Array)
          return Agrippa.Proposals.Proposal_Container_Type
       is
-         pragma Unreferenced (Category);
          Result : Agrippa.Proposals.Proposal_Container_Type;
 
-         procedure Add_Consular_Offer
+         procedure Add_Offer
            (Faction : Faction_Id;
             Offer   : Agrippa.Deals.Offer_Type);
 
-         -------------------------
-         -- Add_Consular_Offers --
-         -------------------------
+         ---------------
+         -- Add_Offer --
+         ---------------
 
-         procedure Add_Consular_Offer
+         procedure Add_Offer
            (Faction : Faction_Id;
             Offer   : Agrippa.Deals.Offer_Type)
          is
             pragma Unreferenced (Faction);
          begin
             if Agrippa.Deals.Is_Office_Offer (Offer)
-              and then Agrippa.Deals.Get_Office (Offer) in
-              Rome_Consul | Field_Consul
+              and then (for some Office of Filter =>
+                          Agrippa.Deals.Get_Office (Offer) = Office)
             then
                Agrippa.Proposals.Add_Proposal
                  (Result,
@@ -887,10 +804,10 @@ package body Agrippa.Players.Robots is
                     (Senator => Agrippa.Deals.Get_Holder (Offer),
                      Office  => Agrippa.Deals.Get_Office (Offer)));
             end if;
-         end Add_Consular_Offer;
+         end Add_Offer;
 
       begin
-         Agrippa.Deals.Scan (Deal, Add_Consular_Offer'Access);
+         Agrippa.Deals.Scan (Deal, Add_Offer'Access);
          return Result;
       end Make_Deal_Proposals;
 
@@ -986,9 +903,7 @@ package body Agrippa.Players.Robots is
                Offers    : array (Faction_Id) of Agrippa.Deals.Offer_List;
                Deal      : Agrippa.Deals.Deal_Type;
             begin
-               if Has_Proposal_Category
-                 (Message, Agrippa.Proposals.Consular_Nomination)
-               then
+               if Has_Proposal_Office (Message, Rome_Consul) then
                   for Faction in Faction_Id loop
                      if Faction /= Robot.Faction then
                         Robot.Handlers (Faction).Senate_Phase_Desire (State);
@@ -1021,7 +936,6 @@ package body Agrippa.Players.Robots is
 
                   declare
                      Accepted : Boolean := True;
-                     pragma Unreferenced (Accepted);
                   begin
                      for Rec of Coalition loop
                         declare
@@ -1043,11 +957,25 @@ package body Agrippa.Players.Robots is
                         end;
                      end loop;
 
+                     if Accepted then
+                        Robot.Current_Deal := Deal;
+                     end if;
+
                      return Make_Proposal
                        (Message,
                         Make_Deal_Proposals
-                          (Deal, Agrippa.Proposals.Consular_Nomination));
+                          (Deal, (Rome_Consul, Field_Consul)));
                   end;
+
+               elsif Has_Proposal_Category
+                 (Message, Agrippa.Proposals.Office_Nomination)
+               then
+                  return Make_Proposal
+                    (Message,
+                     Make_Deal_Proposals
+                       (Robot.Current_Deal,
+                        Proposal_Offices (Message)));
+
                end if;
 
                Ada.Text_IO.Put ("coalition:");
@@ -1195,7 +1123,7 @@ package body Agrippa.Players.Robots is
    -----------------------
 
    overriding function Will_You_Agree_To
-     (Robot   : Robot_Player_Type;
+     (Robot   : in out Robot_Player_Type;
       State   : Agrippa.State.State_Interface'Class;
       Deal    : Agrippa.Deals.Deal_Type)
       return Boolean
@@ -1244,7 +1172,12 @@ package body Agrippa.Players.Robots is
 
    begin
       Agrippa.Deals.Scan (Deal, Check_Terms'Access);
-      return Score > 0;
+      if Score > 0 then
+         Robot.Current_Deal := Deal;
+         return True;
+      else
+         return False;
+      end if;
    end Will_You_Agree_To;
 
 end Agrippa.Players.Robots;

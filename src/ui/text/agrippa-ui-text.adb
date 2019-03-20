@@ -684,35 +684,42 @@ package body Agrippa.UI.Text is
                   Count := Count + 1;
 
                   case Proposal.Category is
-                     when Consular_Nomination =>
+                     when Office_Nomination =>
 
                         declare
-                           Nominee : constant Senator_Id :=
-                                       Agrippa.Proposals.Nominee (Proposal);
+                           Office : constant Office_Type :=
+                                      Agrippa.Proposals.Office (Proposal);
                         begin
-                           if Count = 1 then
-                              First_Consul := Nominee;
+                           if Office in Rome_Consul | Field_Consul then
+                              declare
+                                 Nominee : constant Senator_Id :=
+                                             Agrippa.Proposals.Nominee
+                                               (Proposal);
+                              begin
+                                 if Count = 1 then
+                                    First_Consul := Nominee;
+                                 else
+                                    Put (" ");
+                                    Put_Line
+                                      (State.Local_Text
+                                         ("nominate-x-and-y-for-consuls",
+                                          State.Full_Name_And_Faction
+                                            (First_Consul),
+                                          State.Full_Name_And_Faction
+                                            (Nominee)));
+                                 end if;
+                              end;
+
                            else
                               Put (" ");
                               Put_Line
                                 (State.Local_Text
-                                   ("nominate-x-and-y-for-consuls",
+                                   ("nominate-for-office",
                                     State.Full_Name_And_Faction
-                                      (First_Consul),
-                                    State.Full_Name_And_Faction
-                                      (Nominee)));
+                                      (Agrippa.Proposals.Nominee (Proposal)),
+                                    State.Local_Text (Office'Image)));
                            end if;
                         end;
-
-                     when Censor_Nomination =>
-
-                        Put (" ");
-                        Put_Line
-                          (State.Local_Text
-                             ("nominate-for-office",
-                              State.Full_Name_And_Faction
-                                (Agrippa.Proposals.Nominee (Proposal)),
-                              State.Local_Text ("censor")));
 
                      when others =>
                         if Count = 1 then
@@ -778,6 +785,10 @@ package body Agrippa.UI.Text is
                         New_Line;
                   end case;
                end Show_Proposal;
+
+               -------------------------
+               -- Show_Proposal_Force --
+               -------------------------
 
                function Show_Proposal_Force
                  (Proposal : Agrippa.Proposals.Proposal_Type)

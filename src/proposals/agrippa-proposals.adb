@@ -47,6 +47,24 @@ package body Agrippa.Proposals is
       Container.List.Clear;
    end Clear;
 
+   -------------------
+   -- Get_Proposals --
+   -------------------
+
+   function Get_Proposals
+     (Container : Proposal_Container_Type)
+      return Proposal_Array
+   is
+      Count : Natural := 0;
+   begin
+      return Arr : Proposal_Array (1 .. Natural (Container.List.Length)) do
+         for Item of Container.List loop
+            Count := Count + 1;
+            Arr (Count) := Item;
+         end loop;
+      end return;
+   end Get_Proposals;
+
    --------------
    -- Nominate --
    --------------
@@ -56,16 +74,7 @@ package body Agrippa.Proposals is
       Office  : Office_Type)
       return Proposal_Type
    is
-      Category : constant Proposal_Category_Type :=
-                   (case Office is
-                       when Rome_Consul | Field_Consul =>
-                         Consular_Nomination,
-                       when Censor                     =>
-                         Censor_Nomination,
-                       when Pontifex_Maximus           =>
-                         Pontifex_Maximus_Nomination,
-                       when Dictator | Master_Of_Horse =>
-                         Dictator_Nomination);
+      Category : constant Proposal_Category_Type := Office_Nomination;
    begin
       return Proposal : Proposal_Type (Category) do
          Proposal.Senator := Senator;

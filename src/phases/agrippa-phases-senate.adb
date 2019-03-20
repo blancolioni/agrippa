@@ -130,10 +130,9 @@ package body Agrippa.Phases.Senate is
       case Senate_State.Step is
          when Consul_Nomination =>
             State.Send_Message
-              (Agrippa.Messages.Make_Proposal
+              (Agrippa.Messages.Make_Consular_Nomination
                  (Senate_State.Magistrate,
-                  State.Senator_Faction (Senate_State.Magistrate),
-                  Agrippa.Proposals.Consular_Nomination));
+                  State.Senator_Faction (Senate_State.Magistrate)));
 
             declare
                Old_Magistrate : constant Senator_Id :=
@@ -156,10 +155,10 @@ package body Agrippa.Phases.Senate is
          when Censor_Nomination =>
 
             State.Send_Message
-              (Agrippa.Messages.Make_Proposal
+              (Agrippa.Messages.Make_Office_Nomination
                  (Senate_State.Magistrate,
                   State.Senator_Faction (Senate_State.Magistrate),
-                  Agrippa.Proposals.Censor_Nomination));
+                  Censor));
 
             Senate_State.Step := Open_Session;
 

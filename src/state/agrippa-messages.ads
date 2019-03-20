@@ -230,6 +230,17 @@ package Agrippa.Messages is
       Category : Agrippa.Proposals.Proposal_Category_Type)
       return Make_Proposal_Message;
 
+   function Make_Consular_Nomination
+     (Senator  : Senator_Id;
+      Faction  : Faction_Id)
+      return Make_Proposal_Message;
+
+   function Make_Office_Nomination
+     (Senator  : Senator_Id;
+      Faction  : Faction_Id;
+      Office   : Office_Type)
+      return Make_Proposal_Message;
+
    function Make_Proposal
      (Senator    : Senator_Id;
       Faction    : Faction_Id;
@@ -240,6 +251,15 @@ package Agrippa.Messages is
      (Message  : Make_Proposal_Message;
       Category : Agrippa.Proposals.Proposal_Category_Type)
       return Boolean;
+
+   function Has_Proposal_Office
+     (Message  : Make_Proposal_Message;
+      Office   : Office_Type)
+      return Boolean;
+
+   function Proposal_Offices
+     (Message  : Make_Proposal_Message)
+      return Office_Array;
 
    function Make_Proposal
      (Message  : Make_Proposal_Message;
@@ -327,6 +347,9 @@ private
    type Allowed_Proposals is
      array (Agrippa.Proposals.Proposal_Category_Type) of Boolean;
 
+   type Allowed_Offices_Array is
+     array (Office_Type) of Boolean;
+
    type Message_Type
      (Content : Message_Content_Type := Empty_Message) is
       record
@@ -357,6 +380,8 @@ private
                null;
             when Make_Proposal =>
                Allowed_Categories  : Allowed_Proposals := (others => False);
+               Allowed_Offices     : Allowed_Offices_Array :=
+                                       (others => False);
                Proposal            : Agrippa.Proposals.Proposal_Container_Type;
             when Proposal_Vote =>
                Aye                 : Boolean;
@@ -434,6 +459,12 @@ private
       Category : Agrippa.Proposals.Proposal_Category_Type)
       return Boolean
    is (Message.Allowed_Categories (Category));
+
+   function Has_Proposal_Office
+     (Message  : Make_Proposal_Message;
+      Office   : Office_Type)
+      return Boolean
+   is (Message.Allowed_Offices (Office));
 
    function Legions (Message : Message_Type) return Legion_Count
    is (Message.Legions);
