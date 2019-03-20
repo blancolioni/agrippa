@@ -77,6 +77,10 @@ package body Agrippa.Game is
       Roll    : Integer;
       Message : in out Agrippa.Messages.Message_Type);
 
+   procedure  Hold_Vote
+     (Game      : in out Game_Type'Class;
+      Proposals : Agrippa.Proposals.Proposal_Container_Type);
+
    procedure Enact_Proposals
      (Game      : in out Game_Type'Class;
       Proposals : Agrippa.Proposals.Proposal_Container_Type);
@@ -1420,6 +1424,49 @@ package body Agrippa.Game is
       return Result;
    end Highest_Score;
 
+   procedure  Hold_Vote
+     (Game      : in out Game_Type'Class;
+      Proposals : Agrippa.Proposals.Proposal_Container_Type)
+   is
+      Result : Faction_Vote_Type := (others => 0);
+   begin
+      for Faction of Game.Faction_State loop
+         if Faction.Active then
+            declare
+               Handler : constant Agrippa.Players.Player_Access :=
+                           Game.Player_State (Faction.Id).Handler;
+               Votes   : Faction_Vote_Type;
+            begin
+               Handler.Vote_Proposal (Game, Proposals);
+               Handler.Get_Votes (Votes);
+               Ada.Text_IO.Put
+                 (Faction.Name & ": ");
+               Ada.Text_IO.Set_Col (18);
+               Ada.Text_IO.Put_Line
+                 ((if Votes (Aye) > 0
+                  then "+" & Agrippa.Images.Image (Votes (Aye))
+                  else "")
+                  & (if Votes (Nay) > 0
+                    then "-" & Agrippa.Images.Image (Votes (Nay))
+                    else ""));
+               for V in Vote_Type loop
+                  Result (V) := Result (V) + Votes (V);
+               end loop;
+            end;
+         end if;
+      end loop;
+      Ada.Text_IO.Put_Line
+        ("for: " & Agrippa.Images.Image (Result (Aye))
+         & "; against: " & Agrippa.Images.Image (Result (Nay))
+         & ": proposal "
+         & (if Result (Aye) > Result (Nay) then "passes!" else "fails!"));
+
+      if Result (Aye) > Result (Nay) then
+         Game.Enact_Proposals (Proposals);
+      end if;
+
+   end Hold_Vote;
+
    ----------------
    -- Initialize --
    ----------------
@@ -1626,6 +1673,10 @@ package body Agrippa.Game is
       function To_Player
         (M : Agrippa.Messages.Message_Type)
          return Agrippa.Messages.Message_Type;
+
+      ---------------
+      -- To_Player --
+      ---------------
 
       function To_Player
         (M : Agrippa.Messages.Message_Type)
@@ -1857,8 +1908,10 @@ package body Agrippa.Game is
                   Game.Senate_Adjourned := True;
                else
                   Game.Notifier.Send_Message (Game, Response);
-                  Game.Enact_Proposals
+
+                  Game.Hold_Vote
                     (Agrippa.Messages.Proposals (Response));
+
                end if;
             end;
 

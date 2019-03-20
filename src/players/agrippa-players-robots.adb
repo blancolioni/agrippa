@@ -443,6 +443,10 @@ package body Agrippa.Players.Robots is
       end return;
    end Create_Coalition;
 
+   --------------------------
+   -- Create_Election_Deal --
+   --------------------------
+
    function Create_Election_Deal
      (Robot     : Robot_Player_Type'Class;
       Coalition : Faction_Vectors.Vector)
