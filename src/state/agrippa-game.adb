@@ -11,6 +11,7 @@ with Agrippa.Proposals;
 
 with Agrippa.Cards.Concessions;
 with Agrippa.Cards.Intrigue;
+with Agrippa.Cards.Statesmen;
 with Agrippa.Cards.Wars;
 
 with Agrippa.Cards.Vectors;
@@ -2155,6 +2156,11 @@ package body Agrippa.Game is
          Game.Senator_State (RC).Set_Office (Rome_Consul);
       end;
 
+      for Id of Agrippa.Cards.Statesmen.All_Statesmen (Game.Scenario) loop
+         Game.Forum_Deck.Add
+           (Agrippa.Cards.Statesmen.Statesman (Id));
+      end loop;
+
       for Id of Agrippa.Cards.Concessions.All_Concessions (Game.Scenario) loop
          Game.Forum_Deck.Add
            (Agrippa.Cards.Concessions.Concession (Id));
@@ -2210,6 +2216,10 @@ package body Agrippa.Game is
       end loop;
 
    end Start;
+
+   --------------------------
+   -- Start_Senate_Session --
+   --------------------------
 
    overriding procedure Start_Senate_Session
      (Game    : Game_Type)

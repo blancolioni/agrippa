@@ -1,0 +1,46 @@
+scipio =
+  { family = cornelius
+    mil = 5
+    ora = 5
+    loy = 7
+    infl = 6
+    opposes = cato-the-elder
+    special = { voids-ds = { first-punic-war second-punic-war } }
+  }
+
+cunctator = 
+  { family = fabius
+    mil = 5
+    ora = 2
+    loy = 7
+    infl = 3
+    special = half-combat-losses
+  }
+
+quinctius-flaminius = 
+  { family = quinctius
+    mil = 5
+    ora = 4
+    loy = 7
+    infl = 4
+    opposes = cato-the-elder
+    special = { voids-ds = { first-macedonian-war second-macedonian-war } }
+  }
+
+macedonicus =
+  { family = aemilius
+    mil = 5
+    ora = 4
+    loy = 8
+    infl = 4
+    special = { voids-ds = { first-macedonian-war second-macedonian-war } }
+  }
+
+cato-the-elder = 
+  { family = porcius
+    mil = 1
+    ora = 6
+    loy = 10
+    infl = 1
+    opposes = { scipio flaminius }
+  }

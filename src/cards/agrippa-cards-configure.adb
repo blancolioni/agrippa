@@ -3,6 +3,7 @@ with Tropos.Reader;
 with Agrippa.Cards.Concessions.Configure;
 with Agrippa.Cards.Intrigue.Configure;
 with Agrippa.Cards.Senators.Configure;
+with Agrippa.Cards.Statesmen.Configure;
 with Agrippa.Cards.Wars.Configure;
 
 with Agrippa.Paths;
@@ -24,6 +25,10 @@ package body Agrippa.Cards.Configure is
         (Tropos.Reader.Read_Config
            (Agrippa.Paths.Config_File
                 ("senators.txt")));
+      Agrippa.Cards.Statesmen.Configure.Configure_Statesmen
+        (Tropos.Reader.Read_Config
+           (Agrippa.Paths.Config_File
+                ("statesmen.txt")));
       Agrippa.Cards.Concessions.Configure.Configure_Concessions
         (Tropos.Reader.Read_Config
            (Agrippa.Paths.Config_File

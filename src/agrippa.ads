@@ -2,11 +2,12 @@ package Agrippa is
 
    pragma Pure (Agrippa);
 
-   Max_Legions : constant := 25;
-   Max_Fleets  : constant := 25;
-   Max_Turns   : constant := 30;
-   Max_Senators : constant := 30;
-   Max_Factions : constant := 6;
+   Max_Legions    : constant := 25;
+   Max_Fleets     : constant := 25;
+   Max_Turns      : constant := 30;
+   Max_Senators   : constant := 30;
+   Max_Statesmen  : constant := 30;
+   Max_Factions   : constant := 6;
 
    type Turn_Number is range 1 .. Max_Turns;
 
@@ -29,6 +30,10 @@ package Agrippa is
    function Has_Senator (Item : Nullable_Senator_Id) return Boolean;
    function To_Senator_Id (Item : Nullable_Senator_Id) return Senator_Id
      with Pre => Has_Senator (Item);
+
+   type Statesman_Id is private;
+
+   type Statesman_Id_Array is array (Positive range <>) of Statesman_Id;
 
    type Province_Id is private;
 
@@ -114,6 +119,8 @@ private
 
    function To_Senator_Id (Item : Nullable_Senator_Id) return Senator_Id
    is (Senator_Id (Item));
+
+   type Statesman_Id is range 1 .. Max_Statesmen;
 
    type Province_Id is range 1 .. 50;
 
