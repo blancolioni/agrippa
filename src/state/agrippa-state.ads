@@ -35,6 +35,11 @@ package Agrippa.State is
       return Boolean
       is abstract;
 
+   function Imminent
+     (State : War_State_Interface)
+      return Boolean
+      is abstract;
+
    function Active
      (State : War_State_Interface)
       return Boolean
@@ -396,7 +401,7 @@ package Agrippa.State is
    is abstract;
 
    procedure Start_Senate_Session
-     (State : State_Interface)
+     (State : in out State_Interface)
    is abstract;
 
    procedure Change_Unrest

@@ -417,7 +417,7 @@ private
    is (Game.Status (Event).Level);
 
    overriding procedure Start_Senate_Session
-     (Game    : Game_Type);
+     (Game    : in out Game_Type);
 
    overriding procedure Clear_Status
      (Game    : in out Game_Type);

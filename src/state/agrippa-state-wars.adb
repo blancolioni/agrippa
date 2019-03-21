@@ -1,5 +1,13 @@
 package body Agrippa.State.Wars is
 
+   procedure Activate
+     (War : in out War_State_Type)
+   is
+   begin
+      War.Imminent := False;
+      War.Active := True;
+   end Activate;
+
    -------------
    -- Discard --
    -------------
@@ -36,7 +44,7 @@ package body Agrippa.State.Wars is
    is
    begin
       War.Drawn := True;
-      War.Active := Agrippa.Cards.Wars.War (War.Id).Active;
+      War.Imminent := Agrippa.Cards.Wars.War (War.Id).Active;
    end On_Drawn;
 
    ---------------

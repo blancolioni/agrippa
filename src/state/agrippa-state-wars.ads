@@ -21,6 +21,9 @@ package Agrippa.State.Wars is
    procedure On_Drawn
      (War : in out War_State_Type);
 
+   procedure Activate
+     (War : in out War_State_Type);
+
    procedure Prosecute
      (War : in out War_State_Type)
      with Pre => War.Drawn;
@@ -36,6 +39,7 @@ private
       record
          Id             : War_Id;
          In_Play        : Boolean := False;
+         Imminent       : Boolean := False;
          Active         : Boolean := False;
          Drawn          : Boolean := False;
          Discarded      : Boolean := False;
@@ -51,6 +55,11 @@ private
      (War : War_State_Type)
       return Boolean
    is (War.In_Play);
+
+   overriding function Imminent
+     (War : War_State_Type)
+      return Boolean
+   is (War.Imminent);
 
    overriding function Active
      (War : War_State_Type)

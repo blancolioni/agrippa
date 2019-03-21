@@ -2235,12 +2235,18 @@ package body Agrippa.Game is
    --------------------------
 
    overriding procedure Start_Senate_Session
-     (Game    : Game_Type)
+     (Game    : in out Game_Type)
    is
       use Ada.Strings.Unbounded;
       Total_Votes : Vote_Count := 0;
       Message     : Unbounded_String;
    begin
+      for War of Game.War_State loop
+         if War.Imminent then
+            War.Activate;
+         end if;
+      end loop;
+
       for Faction in Faction_Id loop
          declare
             Votes : constant Vote_Count :=
