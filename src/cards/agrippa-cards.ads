@@ -5,6 +5,7 @@ package Agrippa.Cards is
    type Card_Class is
      (Concession_Card,
       Intrigue_Card,
+      Leader_Card,
       Senator_Card,
       Statesman_Card,
       War_Card);

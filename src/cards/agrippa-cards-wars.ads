@@ -8,6 +8,8 @@ package Agrippa.Cards.Wars is
 
    function War (Id : War_Id) return War_Card_Type'Class;
 
+   function Get (Tag : String) return War_Id;
+
    function All_Wars
      return War_Id_Array;
 

@@ -24,6 +24,21 @@ package body Agrippa.Cards.Wars is
       return Result (1 .. Count);
    end All_Wars;
 
+   ---------
+   -- Get --
+   ---------
+
+   function Get (Tag : String) return War_Id is
+   begin
+      for Id in 1 .. War_Id_To_Card_Id.Last_Index loop
+         if Card (War_Id_To_Card_Id.Element (Id)).Tag.all = Tag then
+            return Id;
+         end if;
+      end loop;
+      raise Constraint_Error with
+        "no such war: " & Tag;
+   end Get;
+
    -------------
    -- New_War --
    -------------

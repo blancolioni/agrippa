@@ -45,6 +45,10 @@ package Agrippa is
 
    type War_Id_Array is array (Positive range <>) of War_Id;
 
+   type Leader_Id is private;
+
+   type Leader_Id_Array is array (Positive range <>) of Leader_Id;
+
    type Concession_Id is private;
 
    type Concession_Id_Array is array (Positive range <>) of Concession_Id;
@@ -125,6 +129,8 @@ private
    type Province_Id is range 1 .. 50;
 
    type War_Id is range 1 .. 50;
+
+   type Leader_Id is range 1 .. 20;
 
    type Concession_Id is range 1 .. 30;
 

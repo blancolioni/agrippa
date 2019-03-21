@@ -1,0 +1,28 @@
+hannibal = {
+   strength = 7
+   disaster = 9
+   stand-off = 16
+   wars = { first-punic-war second-punic-war }
+   special = destroy-tax-farmer
+}
+
+hamilcar = {
+   strength = 3
+   disaster = 8
+   stand-off = 12
+   wars = { first-punic-war second-punic-war }
+}
+
+philip-v = {
+   strength = 6
+   disaster = 15
+   stand-off = 14
+   wars = { first-macedonian-war second-macedonian-war }
+}
+
+antiochus = {
+   strength = 5
+   disaster = 14
+   stand-off = 14
+   wars = { syrian-war }
+}

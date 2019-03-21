@@ -11,6 +11,7 @@ with Agrippa.Proposals;
 
 with Agrippa.Cards.Concessions;
 with Agrippa.Cards.Intrigue;
+with Agrippa.Cards.Leaders;
 with Agrippa.Cards.Statesmen;
 with Agrippa.Cards.Wars;
 
@@ -1617,6 +1618,9 @@ package body Agrippa.Game is
          when Intrigue_Card =>
             null;
 
+         when Leader_Card =>
+            null;
+
          when Senator_Card =>
             null;
 
@@ -2212,6 +2216,15 @@ package body Agrippa.Game is
             else
                Game.Forum_Deck.Add (Card);
             end if;
+         end;
+      end loop;
+
+      for Id of Agrippa.Cards.Leaders.All_Leaders (Game.Scenario) loop
+         declare
+            Card    : constant Agrippa.Cards.Leaders.Leader_Card_Type'Class :=
+                        Agrippa.Cards.Leaders.Leader (Id);
+         begin
+            Game.Forum_Deck.Add (Card);
          end;
       end loop;
 
