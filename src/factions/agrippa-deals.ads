@@ -8,6 +8,8 @@ package Agrippa.Deals is
 
    type Offer_Type (Category : Offer_Category_Type := Nothing) is private;
 
+   type Offer_Array is array (Positive range <>) of Offer_Type;
+
    function Nothing return Offer_Type;
 
    function Office
@@ -41,15 +43,7 @@ package Agrippa.Deals is
    procedure Add (List : in out Offer_List;
                   Offer : Offer_Type);
 
-   function First (List : Offer_List;
-                   Test : not null access
-                     function (Offer : Offer_Type) return Boolean)
-                   return Offer_Type;
-
-   function Second (List : Offer_List;
-                    Test : not null access
-                      function (Offer : Offer_Type) return Boolean)
-                    return Offer_Type;
+   function Get_Offers (List : Offer_List) return Offer_Array;
 
    procedure Scan (List : Offer_List;
                    Process : not null access

@@ -1,4 +1,5 @@
 with Ada.Containers.Vectors;
+with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
 with Agrippa.Dice;
@@ -22,13 +23,18 @@ package body Agrippa.Players.Robots is
    package Senator_Vectors is
      new Ada.Containers.Vectors (Positive, Senator_Record);
 
+   package Offer_Vectors is
+     new Ada.Containers.Vectors (Positive, Agrippa.Deals.Offer_Type,
+                                 Agrippa.Deals."=");
+
    type Faction_Record is
       record
          Faction   : Faction_Id;
+         Name      : Ada.Strings.Unbounded.Unbounded_String;
          Votes     : Vote_Count;
          Influence : Faction_Influence_Range;
          Senators  : Senator_Vectors.Vector;
-         Desire    : Agrippa.Deals.Offer_List;
+         Desire    : Offer_Vectors.Vector;
       end record;
 
    function Create
@@ -337,6 +343,9 @@ package body Agrippa.Players.Robots is
    begin
       return Rec : Faction_Record := Faction_Record'
         (Faction   => Faction,
+         Name      =>
+           Ada.Strings.Unbounded.To_Unbounded_String
+             (State.Faction_Name (Faction)),
          Votes     => State.Faction_Votes (Faction),
          Influence => State.Faction_Influence (Faction),
          Senators  => <>,
@@ -487,56 +496,63 @@ package body Agrippa.Players.Robots is
       Coalition : Faction_Vectors.Vector)
       return Agrippa.Deals.Deal_Type
    is
-      pragma Unreferenced (Robot);
       use Agrippa.Deals;
-      Deal         : Deal_Type;
-      Allocated    : array (Office_Type) of Boolean := (others => False);
-      Have_First   : array (Faction_Id) of Boolean  := (others => False);
-      First        : array (Faction_Id) of Offer_Type;
-      Second       : array (Faction_Id) of Offer_Type;
-      Success      : Boolean := True;
-      Second_Round : Boolean := False;
+      Deal      : Deal_Type;
+      Allocated : array (Office_Type) of Boolean := (others => False);
+      Success   : Boolean := True;
    begin
-      for Rec of Coalition loop
-         First (Rec.Faction) :=
-           Agrippa.Deals.First
-             (Rec.Desire, Is_Office_Offer'Access);
-         Second (Rec.Faction) :=
-           Agrippa.Deals.Second
-             (Rec.Desire, Is_Office_Offer'Access);
-      end loop;
 
       for Rec of Coalition loop
-         declare
-            Choice : constant Offer_Type := First (Rec.Faction);
-            Office : constant Office_Type := Agrippa.Deals.Get_Office (Choice);
-         begin
-            if not Allocated (Office) then
-               Allocated (Office) := True;
-               Have_First (Rec.Faction) := True;
-               Add (Deal, Rec.Faction, Choice);
-            else
-               Second_Round := True;
-               Success      := False;
+         if Rec.Faction /= Robot.Faction then
+            Success := False;
+            for Choice of Rec.Desire loop
+               if Is_Office_Offer (Choice) then
+                  declare
+                     Office : constant Office_Type :=
+                                Agrippa.Deals.Get_Office (Choice);
+                  begin
+                     if not Allocated (Office) then
+                        Allocated (Office) := True;
+                        Add (Deal, Rec.Faction, Choice);
+                        Ada.Text_IO.Put_Line
+                          (Ada.Strings.Unbounded.To_String (Rec.Name)
+                           & " accepts "
+                           & Office'Image);
+                        Success := True;
+                        exit;
+                     end if;
+                  end;
+               end if;
+            end loop;
+
+            if not Success then
+               Ada.Text_IO.Put_Line
+                 (Ada.Strings.Unbounded.To_String (Rec.Name)
+                  & " rejects remaining offices");
             end if;
-         end;
+         end if;
+
+         exit when not Success;
       end loop;
 
-      if Second_Round then
+      if Success then
          for Rec of Coalition loop
-            if not Have_First (Rec.Faction) then
-               declare
-                  Choice : constant Offer_Type := Second (Rec.Faction);
-                  Office : constant Office_Type :=
-                             Agrippa.Deals.Get_Office (Choice);
-               begin
-                  if not Allocated (Office) then
-                     Allocated (Office) := True;
-                     Add (Deal, Rec.Faction, Choice);
-                  else
-                     Success      := False;
+            if Rec.Faction = Robot.Faction then
+               for Choice of Rec.Desire loop
+                  if Is_Office_Offer (Choice) then
+                     declare
+                        Office : constant Office_Type :=
+                                   Agrippa.Deals.Get_Office (Choice);
+                     begin
+                        if not Allocated (Office) then
+                           Allocated (Office) := True;
+                           Add (Deal, Rec.Faction, Choice);
+                           exit;
+                        end if;
+                     end;
                   end if;
-               end;
+               end loop;
+               exit;
             end if;
          end loop;
       end if;
@@ -1025,6 +1041,15 @@ package body Agrippa.Players.Robots is
                Offers    : array (Faction_Id) of Agrippa.Deals.Offer_List;
                Deal      : Agrippa.Deals.Deal_Type;
             begin
+
+               Ada.Text_IO.Put ("coalition:");
+               for Rec of Coalition loop
+                  Ada.Text_IO.Put
+                    (" " & State.Faction_Name (Rec.Faction));
+               end loop;
+
+               Ada.Text_IO.New_Line;
+
                if Has_Proposal_Office (Message, Rome_Consul) then
                   for Faction in Faction_Id loop
                      if Faction /= Robot.Faction then
@@ -1042,7 +1067,11 @@ package body Agrippa.Players.Robots is
                   end loop;
 
                   for Rec of Coalition loop
-                     Rec.Desire := Offers (Rec.Faction);
+                     for Offer of
+                       Agrippa.Deals.Get_Offers (Offers (Rec.Faction))
+                     loop
+                        Rec.Desire.Append (Offer);
+                     end loop;
                   end loop;
 
                   Deal := Create_Election_Deal (Robot, Coalition);
@@ -1099,14 +1128,6 @@ package body Agrippa.Players.Robots is
                         Proposal_Offices (Message)));
 
                end if;
-
-               Ada.Text_IO.Put ("coalition:");
-               for Rec of Coalition loop
-                  Ada.Text_IO.Put
-                    (" " & State.Faction_Name (Rec.Faction));
-               end loop;
-
-               Ada.Text_IO.New_Line;
 
                for Category in Agrippa.Proposals.Proposal_Category_Type loop
                   if Has_Proposal_Category (Message, Category) then
@@ -1300,15 +1321,18 @@ package body Agrippa.Players.Robots is
             Index : constant Natural :=
                       Matching_Index (Spoils, Offer);
          begin
-            if Index in 1 .. 5 then
-               This_Score := This_Score + 2 ** (5 - Index);
-            end if;
+            This_Score :=
+              This_Score
+                + (case Index is
+                      when 1 | 2 => 8,
+                      when 3 | 4 => 4,
+                      when others => 2);
          end Check_My_Offer;
 
       begin
          if Faction = Robot.Faction then
             Agrippa.Deals.Scan (Terms, Check_My_Offer'Access);
-            if This_Score >= 11 then
+            if This_Score >= 8 then
                Score := Score + 1;
             end if;
          end if;

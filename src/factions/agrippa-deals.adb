@@ -95,23 +95,20 @@ package body Agrippa.Deals is
       return False;
    end Contradicts;
 
-   -----------
-   -- First --
-   -----------
+   ----------------
+   -- Get_Offers --
+   ----------------
 
-   function First (List : Offer_List;
-                   Test : not null access
-                     function (Offer : Offer_Type) return Boolean)
-                   return Offer_Type
-   is
+   function Get_Offers (List : Offer_List) return Offer_Array is
+      Result : Offer_Array (1 .. Natural (List.List.Length));
+      Index  : Natural := 0;
    begin
       for Offer of List.List loop
-         if Test (Offer) then
-            return Offer;
-         end if;
+         Index := Index + 1;
+         Result (Index) := Offer;
       end loop;
-      return Nothing;
-   end First;
+      return Result;
+   end Get_Offers;
 
    --------------------
    -- Matching_Index --
@@ -208,29 +205,6 @@ package body Agrippa.Deals is
          end loop;
       end loop;
    end Scan;
-
-   ------------
-   -- Second --
-   ------------
-
-   function Second (List : Offer_List;
-                    Test : not null access
-                      function (Offer : Offer_Type) return Boolean)
-                    return Offer_Type
-   is
-      Found : Boolean := False;
-   begin
-      for Offer of List.List loop
-         if Test (Offer) then
-            if Found then
-               return Offer;
-            else
-               Found := True;
-            end if;
-         end if;
-      end loop;
-      return Nothing;
-   end Second;
 
    ----------
    -- Show --
