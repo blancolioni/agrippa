@@ -1858,6 +1858,80 @@ package body Agrippa.Game is
                end if;
             end;
 
+         when Persuasion_Attempt =>
+            declare
+               Response : constant Agrippa.Messages.Message_Type :=
+                            To_Player (Message);
+            begin
+               if Response in Persuasion_Attempt_Message then
+                  declare
+                     Spend    : constant Talents := Get_Money (Response);
+                     Senator  : constant Senator_Id := Get_Senator (Response);
+                     Target   : constant Senator_Id :=
+                                  Get_Persuasion_Target (Response);
+                     Roll     : constant Agrippa.Dice.DR_Range :=
+                                  Agrippa.Dice.DR;
+                     Ora      : constant Natural :=
+                                  Natural (Game.Oratory (Senator));
+                     Inf      : constant Natural :=
+                                  Natural (Game.Influence (Senator));
+                     Loy      : constant Natural :=
+                                  Natural (Game.Loyalty (Target));
+                     Tre      : constant Natural :=
+                                  Natural (Game.Senator_Treasury (Target));
+                     Base     : constant Integer :=
+                                  Ora + Inf + Natural (Spend) - Loy - Tre;
+                  begin
+                     Game.Notifier.Send_Message (Game, Response);
+                     Game.Notifier.Send_Notification
+                       ("Base = "
+                        & Agrippa.Images.Image (Ora)
+                        & " Ora + "
+                        & Agrippa.Images.Image (Inf)
+                        & " Inf + "
+                        & Agrippa.Images.Image (Spend)
+                        & "t"
+                        & " - "
+                        & Agrippa.Images.Image (Loy)
+                        & " Loy - "
+                        & Agrippa.Images.Image (Tre)
+                        & "t"
+                        & " = " & Agrippa.Images.Image (Base));
+
+                     declare
+                        Success  : constant Boolean := Roll <= Base;
+                     begin
+                        Game.Notifier.Send_Notification
+                          ("Base = "
+                           & Agrippa.Images.Image (Base)
+                           & "; roll of "
+                           & Agrippa.Images.Image (Roll)
+                           & "; "
+                           & (if Success
+                             then "Succeeds! "
+                             & Game.Senator_Name (Target)
+                             & " joins faction "
+                             & Game.Faction_Name
+                               (Get_Faction (Message))
+                             else "Fails! "
+                             & Game.Senator_Name (Target)
+                             & " remains "
+                             & (if Game.Has_Faction (Target)
+                               then " with "
+                               & Game.Faction_Name
+                                 (Game.Senator_Faction (Target))
+                               else " unaligned")));
+                        Game.Senator_State (Target).Add_Talents (Spend);
+                        Game.Senator_State (Senator).Remove_Talents (Spend);
+                        if Success then
+                           Game.Senator_State (Target).Set_Faction
+                             (Get_Faction (Response));
+                        end if;
+                     end;
+                  end;
+               end if;
+            end;
+
          when Attract_Knights =>
             declare
                Response : constant Agrippa.Messages.Message_Type :=

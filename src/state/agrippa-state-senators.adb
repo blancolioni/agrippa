@@ -146,6 +146,7 @@ package body Agrippa.State.Senators is
       Faction : Faction_Id)
    is
    begin
+      Senator.In_Curia := False;
       Senator.Has_Faction := True;
       Senator.Faction := Faction;
    end Set_Faction;

@@ -574,6 +574,16 @@ package body Agrippa.UI.Text is
             end if;
             Ada.Text_IO.New_Line;
 
+         when Persuasion_Attempt =>
+            Ada.Text_IO.Put_Line
+              (State.Senator_Name (Get_Senator (Message))
+               & " attempts to persuade unaligned "
+               & State.Senator_Name (Get_Persuasion_Target (Message))
+               & (if Get_Money (Message) = 0 then " with no bribe"
+                 else " with bribe of "
+                 & Agrippa.Images.Image (Get_Money (Message))
+                 & "t"));
+
          when Attract_Knights =>
             declare
                Senator : constant Senator_Id := Get_Senator (Message);
@@ -907,7 +917,7 @@ package body Agrippa.UI.Text is
       Agrippa.Players.Robots.Configure.Configure_Robots
         (Game, (1, 2, 3, 4, 5, 6));
 
-      for I in 1 .. 3 loop
+      for I in 1 .. 4 loop
          Text_UI.Start_Turn;
 
          declare

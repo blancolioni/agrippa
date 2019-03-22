@@ -136,6 +136,14 @@ package body Agrippa.Players.Robots is
       State  : Agrippa.State.State_Interface'Class)
       return Agrippa.Deals.Offer_List;
 
+   function Make_Persuasion_Attempt
+     (Robot     : Robot_Player_Type'Class;
+      State     : Agrippa.State.State_Interface'Class;
+      Persuader : out Senator_Id;
+      Target    : out Senator_Id;
+      Spend     : out Talents)
+      return Boolean;
+
    procedure Attract_Knights
      (Robot   : Robot_Player_Type'Class;
       State   : Agrippa.State.State_Interface'Class;
@@ -788,6 +796,79 @@ package body Agrippa.Players.Robots is
       Robot.Faction := Faction;
    end Initialize;
 
+   function Make_Persuasion_Attempt
+     (Robot     : Robot_Player_Type'Class;
+      State     : Agrippa.State.State_Interface'Class;
+      Persuader : out Senator_Id;
+      Target    : out Senator_Id;
+      Spend     : out Talents)
+      return Boolean
+   is
+      Senators      : constant Senator_Id_Array :=
+                        State.Faction_Senators (Robot.Faction);
+      Highest_Score : Natural := 0;
+
+      Curia : constant Senator_Id_Array :=
+                State.Curia_Senators;
+   begin
+      for Senator of Senators loop
+         declare
+            This_Score : constant Natural :=
+                           Natural (State.Oratory (Senator))
+                           + Natural (State.Influence (Senator));
+         begin
+            if This_Score > Highest_Score then
+               Highest_Score := This_Score;
+               Persuader := Senator;
+            end if;
+         end;
+      end loop;
+
+      if Highest_Score = 0 then
+         return False;
+      end if;
+
+      Highest_Score := 0;
+
+      for Senator of Curia loop
+         declare
+            This_Score : constant Natural :=
+                           (1000 - Natural (State.Loyalty (Senator))
+                            - Natural (State.Senator_Treasury (Senator)))
+                           * 20 + Natural (State.Military (Senator))
+                           + Natural (State.Oratory (Senator));
+         begin
+            if This_Score > Highest_Score then
+               Highest_Score := This_Score;
+               Target := Senator;
+            end if;
+         end;
+      end loop;
+
+      if Highest_Score = 0 then
+         return False;
+      end if;
+
+      declare
+         Base : constant Integer :=
+                  Natural (State.Oratory (Persuader))
+                  + Natural (State.Influence (Persuader))
+                  - Natural (State.Loyalty (Target))
+                  - Natural (State.Senator_Treasury (Target));
+      begin
+         if Base < 7 and then
+           Natural (State.Senator_Treasury (Persuader)) + Base >= 7
+         then
+            Spend := Talents (7 - Base);
+         else
+            Spend := 0;
+         end if;
+      end;
+
+      return True;
+
+   end Make_Persuasion_Attempt;
+
    ---------------------------
    -- Proposal_Matches_Deal --
    ---------------------------
@@ -1031,6 +1112,22 @@ package body Agrippa.Players.Robots is
                end case;
 
                return Response;
+            end;
+
+         when Persuasion_Attempt =>
+
+            declare
+               Persuader, Target : Senator_Id;
+               Bribe             : Talents;
+            begin
+               if Make_Persuasion_Attempt
+                 (Robot, State, Persuader, Target, Bribe)
+               then
+                  return Persuasion_Attempt
+                    (Message, Persuader, Target, Bribe);
+               else
+                  return Empty_Message;
+               end if;
             end;
 
          when Make_Proposal =>

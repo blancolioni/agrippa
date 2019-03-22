@@ -57,12 +57,15 @@ package Agrippa.Messages is
 
    type Message_Content_Type is
      (Empty_Message,
-      Mortality_Roll, Faction_Transfers, Initiative_Roll, Attract_Knights,
+      Mortality_Roll, Faction_Transfers,
+      Initiative_Roll, Persuasion_Attempt, Attract_Knights,
       Population_Roll, Make_Proposal, Proposal_Vote, Attack);
 
    type Message_Type
      (Content : Message_Content_Type := Empty_Message)
    is private;
+
+   function Empty_Message return Message_Type;
 
    function Has_Roll (Message : Message_Type) return Boolean;
    function Get_Roll (Message : Message_Type) return Positive
@@ -122,6 +125,8 @@ package Agrippa.Messages is
    subtype Faction_Transfers_Message is Message_Type (Faction_Transfers);
 
    subtype Initiative_Roll_Message is Message_Type (Initiative_Roll);
+
+   subtype Persuasion_Attempt_Message is Message_Type (Persuasion_Attempt);
 
    subtype Attract_Knights_Message is Message_Type (Attract_Knights);
 
@@ -205,6 +210,21 @@ package Agrippa.Messages is
       Roll    : Agrippa.Dice.DR_Range;
       Card    : Card_Id)
       return Initiative_Roll_Message;
+
+   function Persuasion_Attempt
+     (Faction : Faction_Id)
+      return Persuasion_Attempt_Message;
+
+   function Persuasion_Attempt
+     (Message : Persuasion_Attempt_Message;
+      Senator : Senator_Id;
+      Target  : Senator_Id;
+      Bribe   : Talents)
+      return Persuasion_Attempt_Message;
+
+   function Get_Persuasion_Target
+     (Message : Persuasion_Attempt_Message)
+      return Senator_Id;
 
    function Attract_Knights
      (Faction : Faction_Id)
@@ -350,6 +370,8 @@ private
    type Allowed_Offices_Array is
      array (Office_Type) of Boolean;
 
+   type Bribery_Array is array (Faction_Id) of Talents;
+
    type Message_Type
      (Content : Message_Content_Type := Empty_Message) is
       record
@@ -373,7 +395,10 @@ private
                Transfer_List : Transfer_Lists.List;
             when Initiative_Roll =>
                Event_Roll : Agrippa.Dice.TDR_Range;
-               Drawn_Card : Card_Id;
+               Drawn_Card    : Card_Id;
+            when Persuasion_Attempt =>
+               Target            : Senator_Id;
+               Persuasion_Bribes : Bribery_Array := (others => 0);
             when Attract_Knights =>
                null;
             when Population_Roll =>
@@ -448,6 +473,11 @@ private
      (Message : Initiative_Roll_Message)
       return Card_Id
    is (Message.Drawn_Card);
+
+   function Get_Persuasion_Target
+     (Message : Persuasion_Attempt_Message)
+      return Senator_Id
+   is (Message.Target);
 
    function Proposals
      (Message : Make_Proposal_Message)

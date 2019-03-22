@@ -171,6 +171,17 @@ package body Agrippa.Messages is
       end return;
    end Attract_Knights;
 
+   -------------------
+   -- Empty_Message --
+   -------------------
+
+   function Empty_Message return Message_Type is
+   begin
+      return Message : Message_Type (Empty_Message) do
+         pragma Unmodified (Message);
+      end return;
+   end Empty_Message;
+
    ----------------------
    -- Event_Occurrence --
    ----------------------
@@ -425,6 +436,41 @@ package body Agrippa.Messages is
          Message.Roll := Roll;
       end return;
    end Mortality_Senator_Dies;
+
+   ------------------------
+   -- Persuasion_Attempt --
+   ------------------------
+
+   function Persuasion_Attempt
+     (Faction : Faction_Id)
+      return Persuasion_Attempt_Message
+   is
+   begin
+      return Message : Persuasion_Attempt_Message do
+         Message.Has_Faction := True;
+         Message.Faction := Faction;
+      end return;
+   end Persuasion_Attempt;
+
+   ------------------------
+   -- Persuasion_Attempt --
+   ------------------------
+
+   function Persuasion_Attempt
+     (Message : Persuasion_Attempt_Message;
+      Senator : Senator_Id;
+      Target  : Senator_Id;
+      Bribe   : Talents)
+      return Persuasion_Attempt_Message
+   is
+   begin
+      return Response : Persuasion_Attempt_Message := Message do
+         Response.Has_Senator := True;
+         Response.Senator := Senator;
+         Response.Target := Target;
+         Response.Money := Bribe;
+      end return;
+   end Persuasion_Attempt;
 
    ---------------------
    -- Population_Roll --

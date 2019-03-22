@@ -156,10 +156,9 @@ package body Agrippa.Phases.Forum is
                   when Initiative_Roll =>
                      State.Send_Message
                        (Agrippa.Messages.Initiative_Roll (Faction));
---
---                       State.Execute_Initiative_Roll (Faction);
                   when Persuasion =>
-                     null;
+                     State.Send_Message
+                       (Agrippa.Messages.Persuasion_Attempt (Faction));
                   when Knights =>
                      State.Send_Message
                        (Agrippa.Messages.Attract_Knights (Faction));
