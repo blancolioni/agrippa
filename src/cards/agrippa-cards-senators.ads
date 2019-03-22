@@ -23,6 +23,10 @@ package Agrippa.Cards.Senators is
      (Id : Senator_Id)
      return Senator_Card_Type'Class;
 
+   function Senator
+     (Card : Senator_Card_Type'Class)
+      return Senator_Id;
+
    function All_Senators return Senator_Id_Array;
 
 private
@@ -30,6 +34,7 @@ private
    type Senator_Card_Type is
      new Card_Type with
       record
+         S_Id      : Senator_Id;
          Military  : Attribute_Range;
          Oratory   : Attribute_Range;
          Loyalty   : Attribute_Range;
@@ -55,6 +60,11 @@ private
      (Senator : Senator_Card_Type'Class)
       return Attribute_Range
    is (Senator.Influence);
+
+   function Senator
+     (Card : Senator_Card_Type'Class)
+      return Senator_Id
+   is (Card.S_Id);
 
    procedure New_Senator
      (Card : in out Senator_Card_Type'Class);

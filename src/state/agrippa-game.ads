@@ -20,6 +20,7 @@ with Agrippa.Cards.Decks;
 with Agrippa.Messages;
 
 with Agrippa.State.Fleets;
+with Agrippa.State.Leaders;
 with Agrippa.State.Legions;
 with Agrippa.State.Senators;
 with Agrippa.State.Wars;
@@ -192,6 +193,14 @@ package Agrippa.Game is
       Faction : Faction_Id)
       return Senator_Id_Array;
 
+   overriding function Curia_Senators
+     (Game    : Game_Type)
+      return Senator_Id_Array;
+
+   overriding function Curia_Leaders
+     (Game    : Game_Type)
+      return Leader_Id_Array;
+
    function Current_Legion_Maintenance
      (Game : Game_Type'Class)
       return Talents;
@@ -301,6 +310,9 @@ private
    type Senator_State_Array is
      array (Senator_Id) of Agrippa.State.Senators.Senator_State_Type;
 
+   type Leader_State_Array is
+     array (Leader_Id) of Agrippa.State.Leaders.Leader_State_Type;
+
    type Legion_State_Array is
      array (Legion_Index) of Agrippa.State.Legions.Legion_State_Type;
 
@@ -371,6 +383,7 @@ private
          Unrest           : Unrest_Level := 0;
          Senate_Adjourned : Boolean := False;
          Senator_State    : Senator_State_Array;
+         Leader_State     : Leader_State_Array;
          War_State        : War_State_Vectors.Vector;
          Legion_State     : Legion_State_Array;
          Fleet_State      : Fleet_State_Array;

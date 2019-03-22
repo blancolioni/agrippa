@@ -682,6 +682,46 @@ package body Agrippa.Game is
       raise Constraint_Error with "no more legions";
    end Create_Legion;
 
+   -------------------
+   -- Curia_Leaders --
+   -------------------
+
+   overriding function Curia_Leaders
+     (Game    : Game_Type)
+      return Leader_Id_Array
+   is
+      Result : Leader_Id_Array (1 .. Max_Leaders);
+      Count  : Natural := 0;
+   begin
+      for S of Game.Leader_State loop
+         if S.In_Play and then S.In_Curia then
+            Count := Count + 1;
+            Result (Count) := S.Id;
+         end if;
+      end loop;
+      return Result (1 .. Count);
+   end Curia_Leaders;
+
+   --------------------
+   -- Curia_Senators --
+   --------------------
+
+   overriding function Curia_Senators
+     (Game    : Game_Type)
+      return Senator_Id_Array
+   is
+      Result : Senator_Id_Array (1 .. Max_Senators);
+      Count  : Natural := 0;
+   begin
+      for S of Game.Senator_State loop
+         if S.In_Play and then S.In_Curia then
+            Count := Count + 1;
+            Result (Count) := S.Id;
+         end if;
+      end loop;
+      return Result (1 .. Count);
+   end Curia_Senators;
+
    ------------------------
    -- Current_Fleet_Cost --
    ------------------------
@@ -1619,10 +1659,14 @@ package body Agrippa.Game is
             null;
 
          when Leader_Card =>
-            null;
+            Game.Leader_State
+              (Agrippa.Cards.Leaders.Leader_Card_Type'Class (Card).Leader)
+                .Set_In_Curia;
 
          when Senator_Card =>
-            null;
+            Game.Senator_State
+              (Agrippa.Cards.Senators.Senator_Card_Type'Class (Card).Senator)
+                .Set_In_Curia;
 
          when Statesman_Card =>
             null;
@@ -2224,6 +2268,7 @@ package body Agrippa.Game is
             Card    : constant Agrippa.Cards.Leaders.Leader_Card_Type'Class :=
                         Agrippa.Cards.Leaders.Leader (Id);
          begin
+            Game.Leader_State (Id).Set_In_Play (Id);
             Game.Forum_Deck.Add (Card);
          end;
       end loop;

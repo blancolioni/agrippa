@@ -19,15 +19,16 @@ package body Agrippa.Cards.Senators.Configure is
 
             Card : Senator_Card_Type :=
                      Senator_Card_Type'
-                           (Id        => No_Card,
-                            Tag       => new String'(Config.Config_Name),
-                            Scenario  => Scenario,
-                            Class     => Senator_Card,
-                            Keep      => False,
-                            Military  => Get ("mil"),
-                            Oratory   => Get ("ora"),
-                            Loyalty   => Get ("loy"),
-                            Influence => Get ("infl"));
+                       (Id        => No_Card,
+                        S_Id      => Senator_Id'First,
+                        Tag       => new String'(Config.Config_Name),
+                        Scenario  => Scenario,
+                        Class     => Senator_Card,
+                        Keep      => False,
+                        Military  => Get ("mil"),
+                        Oratory   => Get ("ora"),
+                        Loyalty   => Get ("loy"),
+                        Influence => Get ("infl"));
          begin
             New_Senator (Card);
          end;

@@ -6,6 +6,7 @@ package Agrippa is
    Max_Fleets     : constant := 25;
    Max_Turns      : constant := 30;
    Max_Senators   : constant := 30;
+   Max_Leaders    : constant := 20;
    Max_Statesmen  : constant := 30;
    Max_Factions   : constant := 6;
 
@@ -130,7 +131,7 @@ private
 
    type War_Id is range 1 .. 50;
 
-   type Leader_Id is range 1 .. 20;
+   type Leader_Id is range 1 .. Max_Leaders;
 
    type Concession_Id is range 1 .. 30;
 

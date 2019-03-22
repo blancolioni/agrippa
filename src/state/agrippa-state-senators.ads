@@ -106,6 +106,15 @@ package Agrippa.State.Senators is
      and then Senator.Treasury = 0
      and then Senator.Id = Id;
 
+   procedure Set_In_Curia
+     (Senator : in out Senator_State_Type)
+     with Pre => Senator.In_Play
+     and then not Senator.Has_Faction
+     and then not Senator.In_Curia,
+     Post => Senator.In_Curia
+     and then not Senator.Has_Faction
+     and then Senator.In_Curia;
+
    procedure Set_Faction
      (Senator : in out Senator_State_Type'Class;
       Faction : Faction_Id)

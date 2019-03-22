@@ -124,6 +124,11 @@ package Agrippa.State is
       return Senator_Id_Array
       is abstract;
 
+   function Curia_Senators
+     (State   : State_Interface)
+      return Senator_Id_Array
+      is abstract;
+
    function Senator_Name
      (State   : State_Interface;
       Senator : Senator_Id)
@@ -343,6 +348,11 @@ package Agrippa.State is
    function Total_Fleet_Count
      (State : State_Interface)
       return Fleet_Count
+      is abstract;
+
+   function Curia_Leaders
+     (State : State_Interface)
+      return Leader_Id_Array
       is abstract;
 
    function Get_War_State

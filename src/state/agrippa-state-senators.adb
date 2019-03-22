@@ -150,6 +150,17 @@ package body Agrippa.State.Senators is
       Senator.Faction := Faction;
    end Set_Faction;
 
+   ------------------
+   -- Set_In_Curia --
+   ------------------
+
+   procedure Set_In_Curia
+     (Senator : in out Senator_State_Type)
+   is
+   begin
+      Senator.In_Curia := True;
+   end Set_In_Curia;
+
    -----------------
    -- Set_In_Play --
    -----------------

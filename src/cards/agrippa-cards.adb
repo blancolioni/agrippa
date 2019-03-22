@@ -1,4 +1,5 @@
 with Ada.Containers.Indefinite_Vectors;
+
 with WL.String_Maps;
 
 package body Agrippa.Cards is

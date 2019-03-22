@@ -31,6 +31,7 @@ package body Agrippa.Cards.Senators is
      (Card : in out Senator_Card_Type'Class)
    is
    begin
+      Card.S_Id := Senator_Id_To_Card_Id.Last_Index + 1;
       New_Card (Card);
       Senator_Id_To_Card_Id.Append (Card.Id);
    end New_Senator;

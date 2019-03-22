@@ -88,7 +88,6 @@ package body Agrippa.UI.Text is
 
    procedure Put_Senators
      (Game    : Agrippa.Game.Game_Type'Class;
-      Faction : Faction_Id;
       Ids     : Senator_Id_Array);
 
    procedure Put_Phase
@@ -204,7 +203,7 @@ package body Agrippa.UI.Text is
       Ada.Text_IO.New_Line;
 
       Put_Senators
-        (Game, Faction.Id, Game.Faction_Senators (Faction.Id));
+        (Game, Game.Faction_Senators (Faction.Id));
       Put ("     "
            & Agrippa.Images.Image
              (Faction.Card_Count, "card"));
@@ -297,9 +296,8 @@ package body Agrippa.UI.Text is
    ------------------
 
    procedure Put_Senators
-     (Game    : Agrippa.Game.Game_Type'Class;
-      Faction : Faction_Id;
-      Ids     : Senator_Id_Array)
+     (Game : Agrippa.Game.Game_Type'Class;
+      Ids : Senator_Id_Array)
    is
       use Ada.Text_IO;
       use Agrippa.Images;
@@ -335,7 +333,9 @@ package body Agrippa.UI.Text is
 
          begin
             Put (Game.Senator_Name (Id));
-            if Game.Faction_Leader (Faction) = Id then
+            if Game.Has_Faction (Id)
+              and then Game.Faction_Leader (Game.Senator_Faction (Id)) = Id
+            then
                Set_Col (16);
                Put ("L");
             end if;
@@ -1090,6 +1090,21 @@ package body Agrippa.UI.Text is
             end if;
          end;
       end loop;
+
+      Ada.Text_IO.New_Line;
+      Ada.Text_IO.Put_Line ("*** Unaligned Senators");
+
+      declare
+         Curia : constant Senator_Id_Array :=
+                   Game.Curia_Senators;
+      begin
+         if Curia'Length = 0 then
+            Ada.Text_IO.Put_Line ("None");
+         else
+            Put_Senators (Game, Curia);
+         end if;
+         Ada.Text_IO.New_Line;
+      end;
 
    end State_Of_The_Republic;
 
