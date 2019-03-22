@@ -15,6 +15,7 @@ forum-phase,Forum Phase
 population-phase,Population Phase
 senate-phase,Senate Phase
 combat-phase,Combat Phase
+revolution-phase,Revolution Phase
 influence,Influence
 military,Military
 oratory,Oratory

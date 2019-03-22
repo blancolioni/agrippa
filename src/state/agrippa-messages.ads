@@ -8,6 +8,9 @@ with Agrippa.Proposals;
 
 package Agrippa.Messages is
 
+   type Player_Action_Type is
+     (Check_Rebellion, Play_Card);
+
    type Property_Type is (Unrest_Property, Event_Property);
 
    type Property_Update_Type (Property : Property_Type) is private;
@@ -59,7 +62,8 @@ package Agrippa.Messages is
      (Empty_Message,
       Mortality_Roll, Faction_Transfers,
       Initiative_Roll, Persuasion_Attempt, Attract_Knights,
-      Population_Roll, Make_Proposal, Proposal_Vote, Attack);
+      Population_Roll, Make_Proposal, Proposal_Vote, Attack,
+      Player_Action);
 
    type Message_Type
      (Content : Message_Content_Type := Empty_Message)
@@ -78,6 +82,10 @@ package Agrippa.Messages is
    function Has_Senator (Message : Message_Type) return Boolean;
    function Get_Senator (Message : Message_Type) return Senator_Id
      with Pre => Has_Senator (Message);
+
+   function Has_Card (Message : Message_Type) return Boolean;
+   function Get_Card (Message : Message_Type) return Card_Id
+     with Pre => Has_Card (Message);
 
    function Legions (Message : Message_Type) return Legion_Count;
    function Fleets (Message : Message_Type) return Fleet_Count;
@@ -133,6 +141,8 @@ package Agrippa.Messages is
    subtype Make_Proposal_Message is Message_Type (Make_Proposal);
 
    subtype Proposal_Vote_Message is Message_Type (Proposal_Vote);
+
+   subtype Player_Action_Message is Message_Type (Player_Action);
 
    function Mortality_Roll_Twice
      (Message : Mortality_Roll_Message)
@@ -301,6 +311,60 @@ package Agrippa.Messages is
       Fleets    : Fleet_Count)
       return Message_Type;
 
+   type Player_Action_Array is
+     array (Positive range <>) of Player_Action_Type;
+
+   function Player_Action
+     (Faction : Faction_Id;
+      Senator : Senator_Id;
+      Allowed : Player_Action_Array)
+      return Message_Type;
+
+   function Player_Action
+     (Faction : Faction_Id;
+      Senator : Senator_Id;
+      Allowed : Player_Action_Type)
+      return Message_Type;
+
+   function Player_Action
+     (Faction : Faction_Id;
+      Allowed : Player_Action_Array)
+      return Message_Type;
+
+   function Player_Action
+     (Faction : Faction_Id;
+      Allowed : Player_Action_Type)
+      return Message_Type;
+
+   function Allowed_Actions
+     (Message : Player_Action_Message)
+      return Player_Action_Array;
+
+   function Allowed_Action
+     (Message : Player_Action_Message;
+      Action  : Player_Action_Type)
+      return Boolean;
+
+   function Get_Action
+     (Message : Player_Action_Message)
+      return Player_Action_Type;
+
+   function Play_Card_Action
+     (Message : Player_Action_Message;
+      Card    : Card_Id)
+      return Player_Action_Message
+     with Pre => Allowed_Action (Message, Play_Card);
+
+   function Check_Rebellion_Action
+     (Message : Player_Action_Message;
+      Rebel   : Boolean)
+      return Player_Action_Message
+     with Pre => Allowed_Action (Message, Check_Rebellion);
+
+   function Rebels
+     (Message : Player_Action_Message)
+      return Boolean;
+
 private
 
    type Property_Update_Type (Property : Property_Type) is
@@ -370,6 +434,9 @@ private
    type Allowed_Offices_Array is
      array (Office_Type) of Boolean;
 
+   type Allowed_Actions_Array is
+     array (Player_Action_Type) of Boolean;
+
    type Bribery_Array is array (Faction_Id) of Talents;
 
    type Message_Type
@@ -377,12 +444,14 @@ private
       record
          Has_Faction      : Boolean := False;
          Has_Senator      : Boolean := False;
+         Has_Card         : Boolean := False;
          Has_Table        : Boolean := False;
          Success          : Boolean := False;
          Money            : Talents := 0;
          Roll             : Positive;
          Faction          : Faction_Id;
          Senator          : Senator_Id;
+         Card             : Card_Id;
          Table            : Table_Row_Lists.List;
          Property_Updates : Property_Update_Lists.List;
          case Content is
@@ -414,6 +483,11 @@ private
                War                 : War_Id;
                Legions             : Legion_Count;
                Fleets              : Fleet_Count;
+            when Player_Action =>
+               Allowed_Actions     : Allowed_Actions_Array :=
+                                       (others => False);
+               Action              : Player_Action_Type;
+               Rebelling           : Boolean := False;
          end case;
       end record;
 
@@ -440,6 +514,12 @@ private
 
    function Get_Senator (Message : Message_Type) return Senator_Id
    is (Message.Senator);
+
+   function Has_Card (Message : Message_Type) return Boolean
+   is (Message.Has_Card);
+
+   function Get_Card (Message : Message_Type) return Card_Id
+   is (Message.Card);
 
    function Has_Table (Message : Message_Type) return Boolean
    is (Message.Has_Table);
@@ -504,5 +584,21 @@ private
 
    function War (Message : Message_Type) return War_Id
    is (Message.War);
+
+   function Allowed_Action
+     (Message : Player_Action_Message;
+      Action  : Player_Action_Type)
+      return Boolean
+   is (Message.Allowed_Actions (Action));
+
+   function Get_Action
+     (Message : Player_Action_Message)
+      return Player_Action_Type
+   is (Message.Action);
+
+   function Rebels
+     (Message : Player_Action_Message)
+      return Boolean
+   is (Message.Rebelling);
 
 end Agrippa.Messages;

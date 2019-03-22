@@ -64,6 +64,7 @@ package body Agrippa.State.Senators is
    is
    begin
       Senator.Leading_Army := True;
+      Senator.In_Rome := False;
       Senator.War := War;
    end Attack;
 
@@ -125,6 +126,17 @@ package body Agrippa.State.Senators is
       return Agrippa.Cards.Senators.Senator (Senator.Id).Oratory;
    end Oratory;
 
+   -----------
+   -- Rebel --
+   -----------
+
+   procedure Rebel
+     (Senator : in out Senator_State_Type'Class)
+   is
+   begin
+      Senator.Is_Rebel := True;
+   end Rebel;
+
    --------------------
    -- Remove_Talents --
    --------------------
@@ -136,6 +148,19 @@ package body Agrippa.State.Senators is
    begin
       Senator.Set_Treasury (Senator.Treasury - Count);
    end Remove_Talents;
+
+   --------------------
+   -- Return_To_Rome --
+   --------------------
+
+   procedure Return_To_Rome
+     (Senator : in out Senator_State_Type'Class)
+   is
+   begin
+      Senator.Leading_Army := False;
+      Senator.Victorious := False;
+      Senator.In_Rome := True;
+   end Return_To_Rome;
 
    -----------------
    -- Set_Faction --
@@ -209,6 +234,17 @@ package body Agrippa.State.Senators is
    begin
       Senator.Treasury := Count;
    end Set_Treasury;
+
+   --------------------
+   -- Set_Victorious --
+   --------------------
+
+   procedure Set_Victorious
+     (Senator : in out Senator_State_Type'Class)
+   is
+   begin
+      Senator.Victorious := True;
+   end Set_Victorious;
 
    -----------
    -- Votes --

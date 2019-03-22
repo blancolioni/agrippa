@@ -87,6 +87,29 @@ package body Agrippa.Messages is
             Amount       => Amount));
    end Add_Transfer_To_Senator;
 
+   ---------------------
+   -- Allowed_Actions --
+   ---------------------
+
+   function Allowed_Actions
+     (Message : Player_Action_Message)
+      return Player_Action_Array
+   is
+      Max_Actions : constant :=
+                      Player_Action_Type'Pos
+                        (Player_Action_Type'Last) + 1;
+      Result      : Player_Action_Array (1 .. Max_Actions);
+      Count       : Natural := 0;
+   begin
+      for Allowed in Player_Action_Type loop
+         if Message.Allowed_Actions (Allowed) then
+            Count := Count + 1;
+            Result (Count) := Allowed;
+         end if;
+      end loop;
+      return Result (1 .. Count);
+   end Allowed_Actions;
+
    ------------
    -- Attack --
    ------------
@@ -170,6 +193,21 @@ package body Agrippa.Messages is
          Response.Success := Success;
       end return;
    end Attract_Knights;
+
+   ----------------------------
+   -- Check_Rebellion_Action --
+   ----------------------------
+
+   function Check_Rebellion_Action
+     (Message : Player_Action_Message;
+      Rebel   : Boolean)
+      return Player_Action_Message
+   is
+   begin
+      return Response : Player_Action_Message := Message do
+         Response.Rebelling := Rebel;
+      end return;
+   end Check_Rebellion_Action;
 
    -------------------
    -- Empty_Message --
@@ -471,6 +509,90 @@ package body Agrippa.Messages is
          Response.Money := Bribe;
       end return;
    end Persuasion_Attempt;
+
+   ----------------------
+   -- Play_Card_Action --
+   ----------------------
+
+   function Play_Card_Action
+     (Message : Player_Action_Message;
+      Card    : Card_Id)
+      return Player_Action_Message
+   is
+   begin
+      return Response : Player_Action_Message := Message do
+         Response.Has_Card := True;
+         Response.Card := Card;
+      end return;
+   end Play_Card_Action;
+
+   -------------------
+   -- Player_Action --
+   -------------------
+
+   function Player_Action
+     (Faction : Faction_Id;
+      Senator : Senator_Id;
+      Allowed : Player_Action_Array)
+      return Message_Type
+   is
+   begin
+      return Message : Player_Action_Message do
+         Message.Has_Faction := True;
+         Message.Faction := Faction;
+         Message.Has_Senator := True;
+         Message.Senator := Senator;
+         for Action of Allowed loop
+            Message.Allowed_Actions (Action) := True;
+         end loop;
+      end return;
+   end Player_Action;
+
+   -------------------
+   -- Player_Action --
+   -------------------
+
+   function Player_Action
+     (Faction : Faction_Id;
+      Senator : Senator_Id;
+      Allowed : Player_Action_Type)
+      return Message_Type
+   is
+   begin
+      return Player_Action (Faction, Senator, (1 => Allowed));
+   end Player_Action;
+
+   -------------------
+   -- Player_Action --
+   -------------------
+
+   function Player_Action
+     (Faction : Faction_Id;
+      Allowed : Player_Action_Array)
+      return Message_Type
+   is
+   begin
+      return Message : Player_Action_Message do
+         Message.Has_Faction := True;
+         Message.Faction := Faction;
+         for Action of Allowed loop
+            Message.Allowed_Actions (Action) := True;
+         end loop;
+      end return;
+   end Player_Action;
+
+   -------------------
+   -- Player_Action --
+   -------------------
+
+   function Player_Action
+     (Faction : Faction_Id;
+      Allowed : Player_Action_Type)
+      return Message_Type
+   is
+   begin
+      return Player_Action (Faction, (1 => Allowed));
+   end Player_Action;
 
    ---------------------
    -- Population_Roll --

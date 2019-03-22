@@ -43,6 +43,20 @@ package body Agrippa.State is
       return State.Matching_Wars (Test'Access);
    end Prosecuted_Wars;
 
+   ------------------
+   -- Send_Message --
+   ------------------
+
+   procedure Send_Message
+     (State   : in out State_Interface'Class;
+      Message : Agrippa.Messages.Message_Type)
+   is
+      Response : constant Agrippa.Messages.Message_Type :=
+                   State.Send_Message (Message);
+   begin
+      pragma Unreferenced (Response);
+   end Send_Message;
+
    -----------------------
    -- Unprosecuted_Wars --
    -----------------------

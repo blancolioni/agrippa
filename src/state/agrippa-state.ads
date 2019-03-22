@@ -23,6 +23,13 @@ package Agrippa.State is
 
    type State_Revenue_Array is array (Positive range <>) of State_Revenue_Item;
 
+   type Senator_State_Interface is interface;
+
+   function Victorious
+     (Senator : Senator_State_Interface)
+      return Boolean
+      is abstract;
+
    type War_State_Interface is interface;
 
    function Id
@@ -280,6 +287,12 @@ package Agrippa.State is
       return Popularity_Range
       is abstract;
 
+   function Get_Senator_State
+     (State : State_Interface;
+      Senator : Senator_Id)
+      return Senator_State_Interface'Class
+      is abstract;
+
    function Highest_Ranking_Available_Officer
      (State : State_Interface)
       return Senator_Id
@@ -400,10 +413,15 @@ package Agrippa.State is
      (State : in out State_Interface)
    is abstract;
 
-   procedure Send_Message
+   function Send_Message
      (State   : in out State_Interface;
       Message : Agrippa.Messages.Message_Type)
-   is abstract;
+      return Agrippa.Messages.Message_Type
+      is abstract;
+
+   procedure Send_Message
+     (State   : in out State_Interface'Class;
+      Message : Agrippa.Messages.Message_Type);
 
    procedure Send_Text_Notification
      (State : State_Interface;

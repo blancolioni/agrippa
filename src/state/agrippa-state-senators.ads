@@ -4,7 +4,7 @@ with Agrippa.Cards.Concessions;
 
 package Agrippa.State.Senators is
 
-   type Senator_State_Type is tagged private;
+   type Senator_State_Type is new Senator_State_Interface with private;
 
    function Id
      (State : Senator_State_Type'Class)
@@ -22,8 +22,16 @@ package Agrippa.State.Senators is
      (Senator : Senator_State_Type'Class)
       return Boolean;
 
+   function Is_Rebel
+     (Senator : Senator_State_Type'Class)
+      return Boolean;
+
    function Prior_Consul
      (Senator : Senator_State_Type'Class)
+      return Boolean;
+
+   overriding function Victorious
+     (Senator : Senator_State_Type)
       return Boolean;
 
    function Has_Office
@@ -150,7 +158,23 @@ package Agrippa.State.Senators is
 
    procedure Attack
      (Senator : in out Senator_State_Type;
-      War     : War_Id);
+      War     : War_Id)
+     with Post => not Senator.In_Rome;
+
+   procedure Set_Victorious
+     (Senator : in out Senator_State_Type'Class)
+     with Pre => not Senator.In_Rome,
+          Post => Senator.Victorious;
+
+   procedure Return_To_Rome
+     (Senator : in out Senator_State_Type'Class)
+     with Pre => not Senator.In_Rome,
+          Post => Senator.In_Rome;
+
+   procedure Rebel
+     (Senator : in out Senator_State_Type'Class)
+     with Pre => not Senator.In_Rome,
+     Post => Senator.Is_Rebel;
 
    procedure Add_Influence
      (Senator : in out Senator_State_Type;
@@ -174,16 +198,18 @@ private
        (Agrippa.Cards.Concessions.Concession_Card_Type,
         Agrippa.Cards.Concessions."=");
 
-   type Senator_State_Type is tagged
+   type Senator_State_Type is new Senator_State_Interface with
       record
          Id             : Senator_Id;
          In_Play        : Boolean := False;
          In_Curia       : Boolean := False;
          In_Rome        : Boolean := True;
          Leading_Army   : Boolean := False;
+         Is_Rebel       : Boolean := False;
          Prior_Consul   : Boolean := False;
          Has_Faction    : Boolean := False;
          Has_Office     : Boolean := False;
+         Victorious     : Boolean := False;
          Faction        : Faction_Id;
          War            : War_Id;
          Office         : Office_Type;
@@ -223,6 +249,11 @@ private
      (Senator : Senator_State_Type'Class)
       return Boolean
    is (Senator.In_Rome);
+
+   function Is_Rebel
+     (Senator : Senator_State_Type'Class)
+      return Boolean
+   is (Senator.Is_Rebel);
 
    function Prior_Consul
      (Senator : Senator_State_Type'Class)
@@ -273,5 +304,10 @@ private
      (Senator : Senator_State_Type'Class)
       return Natural
    is (Senator.Knights);
+
+   overriding function Victorious
+     (Senator : Senator_State_Type)
+      return Boolean
+   is (Senator.Victorious);
 
 end Agrippa.State.Senators;

@@ -4,6 +4,7 @@ with Agrippa.Phases.Forum;
 with Agrippa.Phases.Population;
 with Agrippa.Phases.Senate;
 with Agrippa.Phases.Combat;
+with Agrippa.Phases.Revolution;
 
 package body Agrippa.Phases.Sequence is
 
@@ -26,6 +27,8 @@ package body Agrippa.Phases.Sequence is
             return Agrippa.Phases.Senate.Senate_Phase;
          when 6 =>
             return Agrippa.Phases.Combat.Combat_Phase;
+         when 7 =>
+            return Agrippa.Phases.Revolution.Revolution_Phase;
       end case;
    end Phase;
 

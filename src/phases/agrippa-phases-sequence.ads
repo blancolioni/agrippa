@@ -13,7 +13,7 @@ package Agrippa.Phases.Sequence is
 
 private
 
-   type Phase_Id is range 1 .. 6;
+   type Phase_Id is range 1 .. 7;
 
    function First_Phase return Phase_Id is (Phase_Id'First);
 
@@ -30,6 +30,7 @@ private
           when 3 => "III",
           when 4 => "IV",
           when 5 => "V",
-          when 6 => "VI");
+          when 6 => "VI",
+          when 7 => "VII");
 
 end Agrippa.Phases.Sequence;

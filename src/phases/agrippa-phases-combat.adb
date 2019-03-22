@@ -40,6 +40,10 @@ package body Agrippa.Phases.Combat is
      (State : in out Agrippa.State.State_Interface'Class;
       War   : War_Id);
 
+   ------------
+   -- Attack --
+   ------------
+
    procedure Attack
      (State : in out Agrippa.State.State_Interface'Class;
       War   : War_Id)

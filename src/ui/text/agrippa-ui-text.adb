@@ -878,6 +878,23 @@ package body Agrippa.UI.Text is
                     (Natural (Fleets (Message)),
                      "fleet")));
 
+         when Player_Action =>
+
+            case Get_Action (Message) is
+               when Check_Rebellion =>
+
+                  Put_Line
+                    (State.Senator_Name (Get_Senator (Message))
+                     & " returns to Rome and lays down his command");
+
+               when Play_Card =>
+
+                  Put_Line
+                    (State.Faction_Name (Get_Faction (Message))
+                     & " plays a card");
+
+            end case;
+
       end case;
 
    end Send_Message;

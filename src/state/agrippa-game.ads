@@ -459,13 +459,19 @@ private
       Faction : Faction_Id;
       Senator : Senator_Id);
 
-   overriding procedure Send_Message
+   overriding function Send_Message
      (Game    : in out Game_Type;
-      Message : Agrippa.Messages.Message_Type);
+      Message : Agrippa.Messages.Message_Type)
+      return Agrippa.Messages.Message_Type;
 
    overriding procedure Send_Text_Notification
      (Game  : Game_Type;
       Text  : String);
+
+   overriding function Get_Senator_State
+     (Game    : Game_Type;
+      Senator : Senator_Id)
+      return Agrippa.State.Senator_State_Interface'Class;
 
    overriding function Get_War_State
      (Game       : Game_Type;

@@ -1235,6 +1235,16 @@ package body Agrippa.Players.Robots is
                return Make_Proposal (Message, Proposals);
             end;
 
+         when Player_Action =>
+
+            if Allowed_Action (Message, Check_Rebellion) then
+               return Check_Rebellion_Action (Message, False);
+            elsif Allowed_Action (Message, Play_Card) then
+               return Empty_Message;
+            else
+               return Empty_Message;
+            end if;
+
          when others =>
             raise Constraint_Error with
               "player cannot accept message: " & Message.Content'Image;

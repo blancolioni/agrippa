@@ -464,6 +464,7 @@ package body Agrippa.Game is
                   Game.Senator_State (Commander).Add_Influence (Infl_Change);
                   Game.Senator_State (Commander).Change_Popularity
                     (Pop_Change);
+                  Game.Senator_State (Commander).Set_Victorious;
                end;
             end if;
 
@@ -490,10 +491,6 @@ package body Agrippa.Game is
                      Agrippa.Images.Image (Spoils)));
                Game.Treasury := Game.Treasury + Spoils;
             end;
-
-            for Id of Legion_Ids (1 .. Remaining_Count) loop
-               Game.Legion_State (Id).Recall;
-            end loop;
 
             Game.War_State (War).Discard;
 
@@ -1395,6 +1392,19 @@ package body Agrippa.Game is
       return Result (1 .. Count);
    end Get_Legions;
 
+   -----------------------
+   -- Get_Senator_State --
+   -----------------------
+
+   overriding function Get_Senator_State
+     (Game    : Game_Type;
+      Senator : Senator_Id)
+      return Agrippa.State.Senator_State_Interface'Class
+   is
+   begin
+      return Game.Senator (Senator);
+   end Get_Senator_State;
+
    -------------------
    -- Get_War_State --
    -------------------
@@ -1728,9 +1738,10 @@ package body Agrippa.Game is
    -- Send_Message --
    ------------------
 
-   overriding procedure Send_Message
+   overriding function Send_Message
      (Game    : in out Game_Type;
       Message : Agrippa.Messages.Message_Type)
+     return Agrippa.Messages.Message_Type
    is
       use Agrippa.Messages;
 
@@ -1754,6 +1765,8 @@ package body Agrippa.Game is
             Player.Get_Reply (Response);
          end return;
       end To_Player;
+
+      Result : Agrippa.Messages.Message_Type;
 
    begin
       case Message.Content is
@@ -2071,7 +2084,30 @@ package body Agrippa.Game is
                        Fleets    => Game.Deployed_Fleets (War)));
                Game.Attack (War);
             end;
+
+         when Player_Action =>
+
+            Result := To_Player (Message);
+
+            if Result.Content = Player_Action then
+               Game.Notifier.Send_Message (Game, Result);
+               case Get_Action (Result) is
+                  when Check_Rebellion =>
+                     if Rebels (Result) then
+                        Game.Senator_State (Get_Senator (Message)).Rebel;
+                     else
+                        Game.Senator_State (Get_Senator (Message))
+                          .Return_To_Rome;
+                     end if;
+                  when Play_Card =>
+                     null;
+               end case;
+            end if;
+
       end case;
+
+      return Result;
+
    end Send_Message;
 
    ----------------------------
