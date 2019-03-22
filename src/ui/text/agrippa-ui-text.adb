@@ -934,6 +934,20 @@ package body Agrippa.UI.Text is
       Agrippa.Players.Robots.Configure.Configure_Robots
         (Game, (1, 2, 3, 4, 5, 6));
 
+      for Faction in Faction_Id loop
+         loop
+            declare
+               use type Agrippa.Messages.Message_Content_Type;
+               Response : constant Agrippa.Messages.Message_Type :=
+                            Game.Send_Message
+                              (Agrippa.Messages.Player_Action
+                                 (Faction, Agrippa.Messages.Play_Card));
+            begin
+               exit when Response.Content = Agrippa.Messages.Empty_Message;
+            end;
+         end loop;
+      end loop;
+
       for I in 1 .. 4 loop
          Text_UI.Start_Turn;
 
