@@ -52,6 +52,10 @@ package Agrippa.Factions is
      (Faction : Faction_Type'Class)
       return Natural;
 
+   function Cards
+     (Faction : Faction_Type'Class)
+      return Card_Id_Array;
+
    procedure Add_Card
      (Faction : in out Faction_Type'Class;
       Card    : Agrippa.Cards.Card_Type'Class);

@@ -193,6 +193,11 @@ package Agrippa.Game is
       Faction : Faction_Id)
       return Senator_Id_Array;
 
+   overriding function Faction_Cards
+     (Game    : Game_Type;
+      Faction : Faction_Id)
+      return Card_Id_Array;
+
    overriding function Curia_Senators
      (Game    : Game_Type)
       return Senator_Id_Array;
@@ -660,5 +665,11 @@ private
      (Game : Game_Type)
       return Faction_Id
    is (Game.Winning_Faction);
+
+   overriding function Faction_Cards
+     (Game    : Game_Type;
+      Faction : Faction_Id)
+      return Card_Id_Array
+   is (Game.Faction (Faction).Cards);
 
 end Agrippa.Game;

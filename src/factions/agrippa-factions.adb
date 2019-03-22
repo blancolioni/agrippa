@@ -12,6 +12,22 @@ package body Agrippa.Factions is
       Faction.Hand.Append (Card);
    end Add_Card;
 
+   -----------
+   -- Cards --
+   -----------
+
+   function Cards
+     (Faction : Faction_Type'Class)
+      return Card_Id_Array
+   is
+   begin
+      return Result : Card_Id_Array (1 .. Faction.Hand.Last_Index) do
+         for I in Result'Range loop
+            Result (I) := Faction.Hand (I).Id;
+         end loop;
+      end return;
+   end Cards;
+
    --------------------
    -- Create_Faction --
    --------------------

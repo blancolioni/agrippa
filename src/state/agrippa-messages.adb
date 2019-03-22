@@ -516,11 +516,14 @@ package body Agrippa.Messages is
 
    function Play_Card_Action
      (Message : Player_Action_Message;
+      Senator : Senator_Id;
       Card    : Card_Id)
       return Player_Action_Message
    is
    begin
       return Response : Player_Action_Message := Message do
+         Response.Has_Senator := True;
+         Response.Senator := Senator;
          Response.Has_Card := True;
          Response.Card := Card;
       end return;

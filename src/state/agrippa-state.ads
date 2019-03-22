@@ -131,6 +131,12 @@ package Agrippa.State is
       return Senator_Id_Array
       is abstract;
 
+   function Faction_Cards
+     (State   : State_Interface;
+      Faction : Faction_Id)
+      return Card_Id_Array
+      is abstract;
+
    function Curia_Senators
      (State   : State_Interface)
       return Senator_Id_Array

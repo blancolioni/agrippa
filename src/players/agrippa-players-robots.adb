@@ -150,6 +150,12 @@ package body Agrippa.Players.Robots is
       Senator : out Senator_Id;
       Spend   : out Talents);
 
+   procedure Play_Card
+     (Robot   : Robot_Player_Type'Class;
+      State   : Agrippa.State.State_Interface'Class;
+      Senator : out Senator_Id;
+      Card    : out Card_Id);
+
    function Create_Coalition
      (Robot   : Robot_Player_Type'Class;
       State   : Agrippa.State.State_Interface'Class)
@@ -869,6 +875,57 @@ package body Agrippa.Players.Robots is
 
    end Make_Persuasion_Attempt;
 
+   ---------------
+   -- Play_Card --
+   ---------------
+
+   procedure Play_Card
+     (Robot   : Robot_Player_Type'Class;
+      State   : Agrippa.State.State_Interface'Class;
+      Senator : out Senator_Id;
+      Card    : out Card_Id)
+   is
+      Available : constant Card_Id_Array :=
+                    State.Faction_Cards (Robot.Faction);
+   begin
+      Card := No_Card;
+      Senator := 1;
+      for Id of Available loop
+         declare
+            use all type Agrippa.Cards.Card_Class;
+            Card : constant Agrippa.Cards.Card_Type'Class :=
+                     Agrippa.Cards.Card (Id);
+         begin
+            case Card.Class is
+               when Concession_Card =>
+                  Ada.Text_IO.Put_Line
+                    (State.Faction_Name (Robot.Faction)
+                     & " playing a concession "
+                     & Card.Tag);
+               when Intrigue_Card =>
+                  Ada.Text_IO.Put_Line
+                    (State.Faction_Name (Robot.Faction)
+                     & " keeping an intrigue "
+                     & Card.Tag);
+               when Senator_Card =>
+                  Ada.Text_IO.Put_Line
+                    (State.Faction_Name (Robot.Faction)
+                     & " playing a senator "
+                     & Card.Tag);
+               when Statesman_Card =>
+                  Ada.Text_IO.Put_Line
+                    (State.Faction_Name (Robot.Faction)
+                     & " playing a statesman "
+                     & Card.Tag);
+               when others =>
+                  raise Constraint_Error with
+                  State.Faction_Name (Robot.Faction)
+                    & "unexpected card " & Card.Tag & " in hand";
+            end case;
+         end;
+      end loop;
+   end Play_Card;
+
    ---------------------------
    -- Proposal_Matches_Deal --
    ---------------------------
@@ -1240,7 +1297,18 @@ package body Agrippa.Players.Robots is
             if Allowed_Action (Message, Check_Rebellion) then
                return Check_Rebellion_Action (Message, False);
             elsif Allowed_Action (Message, Play_Card) then
-               return Empty_Message;
+               declare
+                  Card : Card_Id;
+                  Senator : Senator_Id;
+               begin
+                  Robot.Play_Card (State, Senator, Card);
+                  if Card /= No_Card then
+                     return Play_Card_Action
+                       (Message, Senator, Card);
+                  else
+                     return Empty_Message;
+                  end if;
+               end;
             else
                return Empty_Message;
             end if;
