@@ -920,6 +920,7 @@ package body Agrippa.Players.Robots is
                         end;
                      end loop;
                   end;
+                  exit;
 
                when Intrigue_Card =>
                   Ada.Text_IO.Put_Line
