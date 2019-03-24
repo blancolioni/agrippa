@@ -6,6 +6,14 @@ package Agrippa.Cards.Concessions is
    type Concession_Card_Type is
      new Card_Type with private;
 
+   function Income
+     (Concession : Concession_Card_Type'Class)
+      return Talents;
+
+   function Income_Source
+     (Concession : Concession_Card_Type'Class)
+      return Concession_Income_Source;
+
    function Concession (Id : Concession_Id) return Concession_Card_Type'Class;
    function Concession
      (Card : Concession_Card_Type'Class)
@@ -27,6 +35,16 @@ private
          Destroyed_By_Disaster : Boolean;
          Destroy_Die_Roll      : Positive;
       end record;
+
+   function Income
+     (Concession : Concession_Card_Type'Class)
+      return Talents
+   is (Concession.Income);
+
+   function Income_Source
+     (Concession : Concession_Card_Type'Class)
+      return Concession_Income_Source
+   is (Concession.Source);
 
    function Concession
      (Card : Concession_Card_Type'Class)
