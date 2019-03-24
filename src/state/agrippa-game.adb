@@ -1013,13 +1013,39 @@ package body Agrippa.Game is
          if Faction.Active then
             declare
                Total_Income : Talents := 0;
+
+               function Concession_Income
+                 (Cards : Concession_Id_Array)
+                  return Talents;
+
+               -----------------------
+               -- Concession_Income --
+               -----------------------
+
+               function Concession_Income
+                 (Cards : Concession_Id_Array)
+                  return Talents
+               is
+                  use Agrippa.Cards.Concessions;
+               begin
+                  return Income : Talents := 0 do
+                     for Id of Cards loop
+                        if Concession (Id).Income_Source = Per_Turn then
+                           Income := Income + Concession (Id).Income;
+                        end if;
+                     end loop;
+                  end return;
+               end Concession_Income;
+
             begin
                for Id of Game.Faction_Senators (Faction.Id) loop
                   declare
                      Income : constant Talents :=
                                 (if Game.Is_Faction_Leader (Id)
                                  then 3 else 1)
-                                + Talents (Game.Senator_State (Id).Knights);
+                                + Talents (Game.Senator_State (Id).Knights)
+                                + Concession_Income
+                                  (Game.Senator_State (Id).Concessions);
                   begin
                      Total_Income := Total_Income + Income;
                      Game.Senator_State (Id).Add_Talents (Income);
