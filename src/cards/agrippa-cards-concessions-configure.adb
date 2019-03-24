@@ -7,6 +7,7 @@ package body Agrippa.Cards.Concessions.Configure is
    procedure Configure_Concessions
      (Concession_Config : Tropos.Configuration)
    is
+      Next_Id : Concession_Id := Concession_Id'First;
    begin
       for Config of Concession_Config loop
          declare
@@ -48,6 +49,7 @@ package body Agrippa.Cards.Concessions.Configure is
             Card : Concession_Card_Type :=
                      Concession_Card_Type'
                        (Id        => No_Card,
+                        C_Id      => Next_Id,
                         Tag       => new String'(Config.Config_Name),
                         Scenario  => Scenario,
                         Class     => Concession_Card,
@@ -63,6 +65,7 @@ package body Agrippa.Cards.Concessions.Configure is
                         .Contains ("disaster-event"),
                         Destroy_Die_Roll      => Config.Get ("destroy-dr", 1));
          begin
+            Next_Id := Next_Id + 1;
             New_Concession (Card);
          end;
       end loop;

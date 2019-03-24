@@ -522,6 +522,7 @@ package body Agrippa.Messages is
    is
    begin
       return Response : Player_Action_Message := Message do
+         Response.Action := Play_Card;
          Response.Has_Senator := True;
          Response.Senator := Senator;
          Response.Has_Card := True;

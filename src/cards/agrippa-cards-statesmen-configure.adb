@@ -1,3 +1,5 @@
+with Agrippa.Cards.Senators;
+
 package body Agrippa.Cards.Statesmen.Configure is
 
    ------------------------
@@ -24,6 +26,12 @@ package body Agrippa.Cards.Statesmen.Configure is
                             Scenario  => Scenario,
                             Class     => Statesman_Card,
                             Keep      => True,
+                            Family    =>
+                              Agrippa.Cards.Senators.Senator_Card_Type
+                                (Agrippa.Cards.Card
+                                     (Agrippa.Cards.Get
+                                          (Config.Get ("family"))))
+                              .Senator,
                             Military  => Get ("mil"),
                             Oratory   => Get ("ora"),
                             Loyalty   => Get ("loy"),

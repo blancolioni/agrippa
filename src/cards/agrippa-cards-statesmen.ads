@@ -19,6 +19,10 @@ package Agrippa.Cards.Statesmen is
      (Statesman : Statesman_Card_Type'Class)
       return Attribute_Range;
 
+   function Family
+     (Statesman : Statesman_Card_Type'Class)
+      return Senator_Id;
+
    function Statesman
      (Id : Statesman_Id)
      return Statesman_Card_Type'Class;
@@ -32,6 +36,7 @@ private
    type Statesman_Card_Type is
      new Card_Type with
       record
+         Family    : Senator_Id;
          Military  : Attribute_Range;
          Oratory   : Attribute_Range;
          Loyalty   : Attribute_Range;
@@ -57,6 +62,11 @@ private
      (Statesman : Statesman_Card_Type'Class)
       return Attribute_Range
    is (Statesman.Influence);
+
+   function Family
+     (Statesman : Statesman_Card_Type'Class)
+      return Senator_Id
+   is (Statesman.Family);
 
    procedure New_Statesman
      (Card : in out Statesman_Card_Type'Class);

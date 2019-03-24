@@ -67,8 +67,10 @@ package body Agrippa.Game is
       Event   : Agrippa.Events.Event_Type);
 
    procedure Play_Card
-     (Game : in out Game_Type'Class;
-      Card : Agrippa.Cards.Card_Type'Class);
+     (Game    : in out Game_Type'Class;
+      Faction : Faction_Id;
+      Senator : Senator_Id;
+      Card    : Agrippa.Cards.Card_Type'Class);
 
    function Event_Tag
      (Event : Agrippa.Events.Event_Type)
@@ -1656,14 +1658,19 @@ package body Agrippa.Game is
    ---------------
 
    procedure Play_Card
-     (Game : in out Game_Type'Class;
-      Card : Agrippa.Cards.Card_Type'Class)
+     (Game    : in out Game_Type'Class;
+      Faction : Faction_Id;
+      Senator : Senator_Id;
+      Card    : Agrippa.Cards.Card_Type'Class)
    is
+      pragma Unreferenced (Faction);
       use all type Agrippa.Cards.Card_Class;
    begin
       case Card.Class is
          when Concession_Card =>
-            null;
+            Game.Senator_State (Senator).Assign_Concession
+              (Agrippa.Cards.Concessions.Concession_Card_Type
+                 (Card).Concession);
 
          when Intrigue_Card =>
             null;
@@ -1861,7 +1868,12 @@ package body Agrippa.Game is
                         Game.Faction_State (Get_Faction (Message))
                           .Add_Card (Card);
                      else
-                        Game.Play_Card (Card);
+                        Game.Play_Card
+                          (Faction => Get_Faction (Message),
+                           Senator => (if Has_Senator (Message)
+                                       then Get_Senator (Message)
+                                       else Senator_Id'First),
+                           Card    => Card);
                      end if;
 
                      Game.Notify
@@ -2094,13 +2106,21 @@ package body Agrippa.Game is
                case Get_Action (Result) is
                   when Check_Rebellion =>
                      if Rebels (Result) then
-                        Game.Senator_State (Get_Senator (Message)).Rebel;
+                        Game.Senator_State (Get_Senator (Result)).Rebel;
                      else
-                        Game.Senator_State (Get_Senator (Message))
+                        Game.Senator_State (Get_Senator (Result))
                           .Return_To_Rome;
                      end if;
                   when Play_Card =>
-                     null;
+                     declare
+                        Card : constant Agrippa.Cards.Card_Type'Class :=
+                                 Agrippa.Cards.Card (Get_Card (Result));
+                     begin
+                        Game.Faction_State (Get_Faction (Result)).Remove_Card
+                          (Card);
+                        Game.Play_Card
+                          (Get_Faction (Result), Get_Senator (Result), Card);
+                     end;
                end case;
             end if;
 
@@ -2366,7 +2386,7 @@ package body Agrippa.Game is
             WS.Initialize (Id, In_Play);
             Game.War_State.Append (WS);
             if Card.Tag = "first-punic-war" then
-               Game.Play_Card (Card);
+               Game.Play_Card (Faction_Id'First, Senator_Id'First, Card);
             else
                Game.Forum_Deck.Add (Card);
             end if;

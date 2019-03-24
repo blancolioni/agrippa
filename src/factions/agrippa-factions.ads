@@ -60,6 +60,10 @@ package Agrippa.Factions is
      (Faction : in out Faction_Type'Class;
       Card    : Agrippa.Cards.Card_Type'Class);
 
+   procedure Remove_Card
+     (Faction : in out Faction_Type'Class;
+      Card    : Agrippa.Cards.Card_Type'Class);
+
 private
 
    type Faction_Type is tagged

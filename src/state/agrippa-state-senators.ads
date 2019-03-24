@@ -1,13 +1,11 @@
 private with Ada.Containers.Doubly_Linked_Lists;
 
-with Agrippa.Cards.Concessions;
-
 package Agrippa.State.Senators is
 
    type Senator_State_Type is new Senator_State_Interface with private;
 
-   function Id
-     (State : Senator_State_Type'Class)
+   overriding function Id
+     (State : Senator_State_Type)
       return Senator_Id;
 
    function In_Curia
@@ -152,9 +150,25 @@ package Agrippa.State.Senators is
      and then Senator.Influence =
        Senator'Old.Influence + Influence_Gain (Office);
 
-   procedure Assign
+   overriding function Concessions
+     (Senator : Senator_State_Type)
+      return Concession_Id_Array;
+
+   overriding procedure Assign_Concession
      (Senator    : in out Senator_State_Type;
-      Concession : Agrippa.Cards.Concessions.Concession_Card_Type'Class);
+      Concession : Concession_Id);
+
+   overriding function Has_Statesman
+     (Senator : Senator_State_Type)
+      return Boolean;
+
+   overriding function Statesman
+     (Senator : Senator_State_Type)
+      return Statesman_Id;
+
+   overriding procedure Assign_Statesman
+     (Senator    : in out Senator_State_Type;
+      Statesman  : Statesman_Id);
 
    procedure Attack
      (Senator : in out Senator_State_Type;
@@ -189,14 +203,17 @@ package Agrippa.State.Senators is
       Leader  : Boolean)
      with Pre => Senator.In_Play,
      Post => Senator.In_Play
-     and then (Leader = Senator.Has_Faction);
+     and then (Leader = Senator.Has_Faction)
+     and then not Senator.Has_Statesman
+     and then Senator.Treasury = 0
+     and then Senator.Popularity = 0
+     and then Senator.Influence = 0
+     and then Senator.Concessions'Length = 0;
 
 private
 
    package Concession_Lists is
-     new Ada.Containers.Doubly_Linked_Lists
-       (Agrippa.Cards.Concessions.Concession_Card_Type,
-        Agrippa.Cards.Concessions."=");
+     new Ada.Containers.Doubly_Linked_Lists (Concession_Id);
 
    type Senator_State_Type is new Senator_State_Interface with
       record
@@ -210,6 +227,7 @@ private
          Has_Faction    : Boolean := False;
          Has_Office     : Boolean := False;
          Victorious     : Boolean := False;
+         Has_Statesman  : Boolean := False;
          Faction        : Faction_Id;
          War            : War_Id;
          Office         : Office_Type;
@@ -217,6 +235,7 @@ private
          Influence      : Influence_Range;
          Treasury       : Talents := 0;
          Knights        : Natural := 0;
+         Statesman      : Statesman_Id;
          Concessions    : Concession_Lists.List;
       end record;
 
@@ -225,8 +244,8 @@ private
       return Senator_Id
    is (State.Id);
 
-   function Id
-     (State : Senator_State_Type'Class)
+   overriding function Id
+     (State : Senator_State_Type)
       return Senator_Id
    is (State.Id);
 
@@ -309,5 +328,15 @@ private
      (Senator : Senator_State_Type)
       return Boolean
    is (Senator.Victorious);
+
+   overriding function Has_Statesman
+     (Senator : Senator_State_Type)
+      return Boolean
+   is (Senator.Has_Statesman);
+
+   overriding function Statesman
+     (Senator : Senator_State_Type)
+      return Statesman_Id
+   is (Senator.Statesman);
 
 end Agrippa.State.Senators;

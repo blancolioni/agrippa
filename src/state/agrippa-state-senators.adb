@@ -41,18 +41,30 @@ package body Agrippa.State.Senators is
       Senator.Set_Treasury (Senator.Treasury + Count);
    end Add_Talents;
 
-   ------------
-   -- Assign --
-   ------------
+   -----------------------
+   -- Assign_Concession --
+   -----------------------
 
-   procedure Assign
+   overriding procedure Assign_Concession
      (Senator    : in out Senator_State_Type;
-      Concession : Agrippa.Cards.Concessions.Concession_Card_Type'Class)
+      Concession : Concession_Id)
    is
    begin
-      Senator.Concessions.Append
-        (Agrippa.Cards.Concessions.Concession_Card_Type (Concession));
-   end Assign;
+      Senator.Concessions.Append (Concession);
+   end Assign_Concession;
+
+   ----------------------
+   -- Assign_Statesman --
+   ----------------------
+
+   overriding procedure Assign_Statesman
+     (Senator    : in out Senator_State_Type;
+      Statesman  : Statesman_Id)
+   is
+   begin
+      Senator.Has_Statesman := True;
+      Senator.Statesman := Statesman;
+   end Assign_Statesman;
 
    ------------
    -- Attack --
@@ -96,6 +108,24 @@ package body Agrippa.State.Senators is
    begin
       Senator.Has_Office := False;
    end Clear_Office;
+
+   -----------------
+   -- Concessions --
+   -----------------
+
+   overriding function Concessions
+     (Senator : Senator_State_Type)
+      return Concession_Id_Array
+   is
+      Result : Concession_Id_Array (1 .. Natural (Senator.Concessions.Length));
+      Index  : Natural := 0;
+   begin
+      for Item of Senator.Concessions loop
+         Index := Index + 1;
+         Result (Index) := Item;
+      end loop;
+      return Result;
+   end Concessions;
 
    ----------
    -- Kill --

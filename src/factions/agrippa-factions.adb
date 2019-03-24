@@ -44,6 +44,21 @@ package body Agrippa.Factions is
         Ada.Strings.Unbounded.To_Unbounded_String (Name);
    end Create_Faction;
 
+   -----------------
+   -- Remove_Card --
+   -----------------
+
+   procedure Remove_Card
+     (Faction : in out Faction_Type'Class;
+      Card    : Agrippa.Cards.Card_Type'Class)
+   is
+      use Agrippa.Cards.Vectors;
+      Position : Cursor := Faction.Hand.Find (Card);
+   begin
+      pragma Assert (Has_Element (Position));
+      Faction.Hand.Delete (Position);
+   end Remove_Card;
+
    ----------------
    -- Set_Leader --
    ----------------

@@ -14,6 +14,7 @@ with Agrippa.Scenarios;
 with Agrippa.Messages;
 with Agrippa.Proposals;
 
+with Agrippa.Cards.Concessions;
 with Agrippa.Cards.Senators;
 with Agrippa.Cards.Wars;
 
@@ -395,6 +396,14 @@ package body Agrippa.UI.Text is
                Put (Agrippa.Images.Image (State.Treasury));
                Put ("t");
             end if;
+
+            declare
+               use Agrippa.Cards.Concessions;
+            begin
+               for Id of State.Concessions loop
+                  Put (" " & Game.Local_Text (Concession (Id).Tag));
+               end loop;
+            end;
 
          end;
 

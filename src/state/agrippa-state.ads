@@ -7,6 +7,8 @@ with Agrippa.Events;
 
 with Agrippa.Messages;
 
+with Agrippa.Cards.Statesmen;
+
 package Agrippa.State is
 
    type State_Revenue_Item is private;
@@ -25,10 +27,46 @@ package Agrippa.State is
 
    type Senator_State_Interface is interface;
 
+   function Id
+     (Senator : Senator_State_Interface)
+      return Senator_Id
+      is abstract;
+
    function Victorious
      (Senator : Senator_State_Interface)
       return Boolean
       is abstract;
+
+   function Concessions
+     (Senator : Senator_State_Interface)
+      return Concession_Id_Array
+      is abstract;
+
+   procedure Assign_Concession
+     (Senator    : in out Senator_State_Interface;
+      Concession : Concession_Id)
+   is abstract;
+
+   function Has_Statesman
+     (Senator : Senator_State_Interface)
+      return Boolean
+      is abstract;
+
+   function Statesman
+     (Senator : Senator_State_Interface)
+      return Statesman_Id
+   is abstract
+     with Pre'Class => Senator.Has_Statesman;
+
+   procedure Assign_Statesman
+     (Senator    : in out Senator_State_Interface;
+      Statesman  : Statesman_Id)
+   is abstract
+     with Pre'Class =>
+       not Senator.Has_Statesman
+       and then Agrippa.Cards.Statesmen.Statesman (Statesman).Family
+     = Senator.Id,
+     Post'Class => Senator.Has_Statesman;
 
    type War_State_Interface is interface;
 

@@ -893,34 +893,53 @@ package body Agrippa.Players.Robots is
       for Id of Available loop
          declare
             use all type Agrippa.Cards.Card_Class;
-            Card : constant Agrippa.Cards.Card_Type'Class :=
-                     Agrippa.Cards.Card (Id);
+            Card_Rec : constant Agrippa.Cards.Card_Type'Class :=
+                         Agrippa.Cards.Card (Id);
          begin
-            case Card.Class is
+            case Card_Rec.Class is
                when Concession_Card =>
                   Ada.Text_IO.Put_Line
                     (State.Faction_Name (Robot.Faction)
                      & " playing a concession "
-                     & Card.Tag);
+                     & Card_Rec.Tag);
+
+                  Card := Card_Rec.Id;
+                  declare
+                     Shortest : Natural := Natural'Last;
+                  begin
+                     for Sid of State.Faction_Senators (Robot.Faction) loop
+                        declare
+                           Current : constant Concession_Id_Array :=
+                                       State.Get_Senator_State (Sid)
+                                       .Concessions;
+                        begin
+                           if Current'Length < Shortest then
+                              Shortest := Current'Length;
+                              Senator  := Sid;
+                           end if;
+                        end;
+                     end loop;
+                  end;
+
                when Intrigue_Card =>
                   Ada.Text_IO.Put_Line
                     (State.Faction_Name (Robot.Faction)
                      & " keeping an intrigue "
-                     & Card.Tag);
+                     & Card_Rec.Tag);
                when Senator_Card =>
                   Ada.Text_IO.Put_Line
                     (State.Faction_Name (Robot.Faction)
                      & " playing a senator "
-                     & Card.Tag);
+                     & Card_Rec.Tag);
                when Statesman_Card =>
                   Ada.Text_IO.Put_Line
                     (State.Faction_Name (Robot.Faction)
                      & " playing a statesman "
-                     & Card.Tag);
+                     & Card_Rec.Tag);
                when others =>
                   raise Constraint_Error with
                   State.Faction_Name (Robot.Faction)
-                    & "unexpected card " & Card.Tag & " in hand";
+                    & "unexpected card " & Card_Rec.Tag & " in hand";
             end case;
          end;
       end loop;
