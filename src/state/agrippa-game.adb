@@ -1449,7 +1449,7 @@ package body Agrippa.Game is
       return Agrippa.State.Senator_State_Interface'Class
    is
    begin
-      return Game.Senator (Senator);
+      return Game.Senator_State (Senator);
    end Get_Senator_State;
 
    -------------------
