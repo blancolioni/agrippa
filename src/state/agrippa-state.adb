@@ -1,3 +1,5 @@
+with Ada.Text_IO;
+
 package body Agrippa.State is
 
    -----------------
@@ -27,6 +29,20 @@ package body Agrippa.State is
    begin
       return State.Matching_Wars (Test'Access);
    end Inactive_Wars;
+
+   ---------
+   -- Log --
+   ---------
+
+   procedure Log
+     (State   : State_Interface'Class;
+      Message : String)
+   is
+   begin
+      Ada.Text_IO.Put_Line
+        (State.Current_Activity
+         & ": " & Message);
+   end Log;
 
    ---------------------
    -- Prosecuted_Wars --

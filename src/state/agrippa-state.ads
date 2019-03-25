@@ -148,6 +148,15 @@ package Agrippa.State is
      and End_State_Interface
      and WL.Localisation.Localisation_Interface;
 
+   function Current_Activity
+     (State : State_Interface)
+      return String
+      is abstract;
+
+   procedure Log
+     (State   : State_Interface'Class;
+      Message : String);
+
    function Current_Treasury
      (State   : State_Interface)
       return Talents
