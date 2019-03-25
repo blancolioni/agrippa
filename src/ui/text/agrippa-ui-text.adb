@@ -315,8 +315,9 @@ package body Agrippa.UI.Text is
             use Agrippa.Cards.Senators;
             Card : constant Senator_Card_Type'Class :=
                      Agrippa.Cards.Senators.Senator (Id);
-            State : constant Agrippa.State.Senators.Senator_State_Type'Class :=
-                      Game.Senator (Id);
+            State : constant Agrippa.State.Senators.Senator_State_Type :=
+                      Agrippa.State.Senators.Senator_State_Type
+                        (Game.Get_Senator_State (Id));
 
             procedure Put_Attribute (Attribute : Attribute_Range);
 
@@ -900,7 +901,13 @@ package body Agrippa.UI.Text is
 
                   Put_Line
                     (State.Faction_Name (Get_Faction (Message))
-                     & " plays a card");
+                     & " plays "
+                     & State.Local_Text
+                       (Agrippa.Cards.Card
+                            (Get_Card (Message)).Tag)
+                     & " on "
+                     & State.Senator_Name
+                       (Get_Senator (Message)));
 
             end case;
 
@@ -943,19 +950,28 @@ package body Agrippa.UI.Text is
       Agrippa.Players.Robots.Configure.Configure_Robots
         (Game, (1, 2, 3, 4, 5, 6));
 
-      for Faction in Faction_Id loop
-         loop
-            declare
-               use type Agrippa.Messages.Message_Content_Type;
-               Response : constant Agrippa.Messages.Message_Type :=
-                            Game.Send_Message
-                              (Agrippa.Messages.Player_Action
-                                 (Faction, Agrippa.Messages.Play_Card));
-            begin
-               exit when Response.Content = Agrippa.Messages.Empty_Message;
-            end;
+      declare
+         Phase_Number : Natural := 0;
+         Step_Number  : Natural;
+      begin
+         for Faction in Faction_Id loop
+            Phase_Number := Phase_Number + 1;
+            Step_Number := 0;
+            loop
+               Step_Number := Step_Number + 1;
+               Game.Set_Current_Activity (Phase_Number, Step_Number);
+               declare
+                  use type Agrippa.Messages.Message_Content_Type;
+                  Response : constant Agrippa.Messages.Message_Type :=
+                               Game.Send_Message
+                                 (Agrippa.Messages.Player_Action
+                                    (Faction, Agrippa.Messages.Play_Card));
+               begin
+                  exit when Response.Content = Agrippa.Messages.Empty_Message;
+               end;
+            end loop;
          end loop;
-      end loop;
+      end;
 
       for I in 1 .. 4 loop
          Text_UI.Start_Turn;
@@ -963,9 +979,12 @@ package body Agrippa.UI.Text is
          declare
             Id : Agrippa.Phases.Sequence.Phase_Id :=
                    Agrippa.Phases.Sequence.First_Phase;
+            Phase_Number : Natural := 0;
          begin
 
             loop
+               Phase_Number := Phase_Number + 1;
+               Game.Set_Current_Activity (Phase_Number, 0);
 
                Put_Phase (Game, Id, Agrippa.Phases.Sequence.Phase (Id));
 
@@ -974,6 +993,7 @@ package body Agrippa.UI.Text is
                             Agrippa.Phases.Sequence.Phase (Id);
                   State : Agrippa.Phases.Phase_State_Type'Class :=
                             Phase.Start (Game);
+                  Step_Number : Natural := 0;
                begin
 
                   while not State.Is_Finished loop
@@ -987,6 +1007,8 @@ package body Agrippa.UI.Text is
                         end if;
                      end;
 
+                     Step_Number := Step_Number + 1;
+                     Game.Set_Current_Activity (Phase_Number, Step_Number);
                      Phase.Step (State, Game);
 
                   end loop;
@@ -1005,7 +1027,6 @@ package body Agrippa.UI.Text is
          exit when Game.End_Of_Game;
 
          Text_UI.State_Of_The_Republic;
-         Game.Next_Turn;
 
       end loop;
 
@@ -1034,6 +1055,7 @@ package body Agrippa.UI.Text is
    is
       Game : Agrippa.Game.Game_Type renames UI.Game;
    begin
+      Game.Start_Turn;
       Put_Field (Game, "Scenario", Agrippa.Scenarios.Show (Game.Scenario));
       Put_Field (Game, "Turn", Positive (Game.Current_Turn));
       if Game.Current_Turn = 1 then
@@ -1051,7 +1073,6 @@ package body Agrippa.UI.Text is
       use Agrippa.Images;
       Game : Agrippa.Game.Game_Type renames UI.Game;
    begin
-      Game.Start_Turn;
       Put_Heading ("State of the Republic");
       Put_Field (Game, "treasury-heading",
                  Natural (Game.Current_Treasury), "t");
