@@ -1,0 +1,12 @@
+tax-farmer-1,Tax Farmer I
+tax-farmer-2,Tax Farmer II
+tax-farmer-3,Tax Farmer III
+tax-farmer-4,Tax Farmer IV
+tax-farmer-5,Tax Farmer V
+tax-farmer-6,Tax Farmer VI
+harbour-fees,Harbour Fees
+mining,Mining
+armaments,Armaments
+ship-building,Ship Building
+egyptian-grain,Egyptian Grain
+sicilian-grain,Sicilian Grain
