@@ -205,6 +205,7 @@ package body Agrippa.Messages is
    is
    begin
       return Response : Player_Action_Message := Message do
+         Response.Action := Check_Rebellion;
          Response.Rebelling := Rebel;
       end return;
    end Check_Rebellion_Action;
