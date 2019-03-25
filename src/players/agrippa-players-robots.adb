@@ -1,6 +1,5 @@
 with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded;
-with Ada.Text_IO;
 
 with Agrippa.Dice;
 with Agrippa.Proposals;
@@ -187,6 +186,7 @@ package body Agrippa.Players.Robots is
 
    function Create_Election_Deal
      (Robot     : Robot_Player_Type'Class;
+      State     : Agrippa.State.State_Interface'Class;
       Coalition : Faction_Vectors.Vector)
       return Agrippa.Deals.Deal_Type;
 
@@ -271,7 +271,7 @@ package body Agrippa.Players.Robots is
                               else raise Constraint_Error with
                                 "no available commander");
    begin
-      Ada.Text_IO.Put_Line
+      State.Log
         ("attacking " & Agrippa.Cards.Wars.War (War).Tag
          & ": land strength" & Land_Strength'Image
          & "; required strength" & Required_Strength'Image
@@ -281,7 +281,7 @@ package body Agrippa.Players.Robots is
          & "; canceled recruitment" & Canceled_Recuitment'Image);
 
       if Canceled_Recuitment > 0 then
-         Ada.Text_IO.Put_Line
+         State.Log
            ("Canceling attack because we could not recruit"
             & Canceled_Recuitment'Image
             & " legions");
@@ -289,7 +289,7 @@ package body Agrippa.Players.Robots is
       end if;
 
       if Final_Strength < Required_Strength then
-         Ada.Text_IO.Put_Line
+         State.Log
            ("Canceling attack because final strength is"
             & Final_Strength'Image
             & " but we need"
@@ -507,6 +507,7 @@ package body Agrippa.Players.Robots is
 
    function Create_Election_Deal
      (Robot     : Robot_Player_Type'Class;
+      State     : Agrippa.State.State_Interface'Class;
       Coalition : Faction_Vectors.Vector)
       return Agrippa.Deals.Deal_Type
    is
@@ -528,7 +529,7 @@ package body Agrippa.Players.Robots is
                      if not Allocated (Office) then
                         Allocated (Office) := True;
                         Add (Deal, Rec.Faction, Choice);
-                        Ada.Text_IO.Put_Line
+                        State.Log
                           (Ada.Strings.Unbounded.To_String (Rec.Name)
                            & " accepts "
                            & Office'Image);
@@ -540,7 +541,7 @@ package body Agrippa.Players.Robots is
             end loop;
 
             if not Success then
-               Ada.Text_IO.Put_Line
+               State.Log
                  (Ada.Strings.Unbounded.To_String (Rec.Name)
                   & " rejects remaining offices");
             end if;
@@ -572,7 +573,7 @@ package body Agrippa.Players.Robots is
       end if;
 
       if not Success then
-         Ada.Text_IO.Put_Line
+         State.Log
            ("failed to find a deal: returning best available");
       end if;
 
@@ -622,7 +623,7 @@ package body Agrippa.Players.Robots is
                Attacked          : Boolean := False;
             begin
 
-               Ada.Text_IO.Put_Line
+               State.Log
                  ("unprosecuted wars:"
                   & Natural'Image (Unprosecuted_Wars'Length));
 
@@ -898,11 +899,6 @@ package body Agrippa.Players.Robots is
          begin
             case Card_Rec.Class is
                when Concession_Card =>
-                  Ada.Text_IO.Put_Line
-                    (State.Faction_Name (Robot.Faction)
-                     & " playing a concession "
-                     & Card_Rec.Tag);
-
                   Card := Card_Rec.Id;
                   declare
                      Shortest : Natural := Natural'Last;
@@ -923,20 +919,11 @@ package body Agrippa.Players.Robots is
                   exit;
 
                when Intrigue_Card =>
-                  Ada.Text_IO.Put_Line
-                    (State.Faction_Name (Robot.Faction)
-                     & " keeping an intrigue "
-                     & Card_Rec.Tag);
+                  null;
                when Senator_Card =>
-                  Ada.Text_IO.Put_Line
-                    (State.Faction_Name (Robot.Faction)
-                     & " playing a senator "
-                     & Card_Rec.Tag);
+                  null;
                when Statesman_Card =>
-                  Ada.Text_IO.Put_Line
-                    (State.Faction_Name (Robot.Faction)
-                     & " playing a statesman "
-                     & Card_Rec.Tag);
+                  null;
                when others =>
                   raise Constraint_Error with
                   State.Faction_Name (Robot.Faction)
@@ -1216,13 +1203,12 @@ package body Agrippa.Players.Robots is
                Deal      : Agrippa.Deals.Deal_Type;
             begin
 
-               Ada.Text_IO.Put ("coalition:");
+               State.Log
+                 ("Coalition");
                for Rec of Coalition loop
-                  Ada.Text_IO.Put
-                    (" " & State.Faction_Name (Rec.Faction));
+                  State.Log
+                    ("    " & State.Faction_Name (Rec.Faction));
                end loop;
-
-               Ada.Text_IO.New_Line;
 
                if Has_Proposal_Office (Message, Rome_Consul) then
                   for Faction in Faction_Id loop
@@ -1234,7 +1220,7 @@ package body Agrippa.Players.Robots is
                         Offers (Faction) := Robot.Senate_Phase_Desire (State);
                      end if;
 
-                     Ada.Text_IO.Put_Line
+                     State.Log
                        (State.Faction_Name (Faction)
                         & " wants "
                         & Agrippa.Deals.Show (Offers (Faction)));
@@ -1248,13 +1234,13 @@ package body Agrippa.Players.Robots is
                      end loop;
                   end loop;
 
-                  Deal := Create_Election_Deal (Robot, Coalition);
+                  Deal := Create_Election_Deal (Robot, State, Coalition);
 
                   declare
                      function Faction_Name (Faction : Faction_Id) return String
                      is (State.Faction_Name (Faction));
                   begin
-                     Ada.Text_IO.Put_Line
+                     State.Log
                        ("Deal: "
                         & Agrippa.Deals.Show (Deal, Faction_Name'Access));
                   end;
@@ -1272,7 +1258,7 @@ package body Agrippa.Players.Robots is
                               Robot.Handlers (Rec.Faction).Get_Agreement_Reply
                                 (Agreed);
                               if not Agreed then
-                                 Ada.Text_IO.Put_Line
+                                 State.Log
                                    (State.Faction_Name (Rec.Faction)
                                     & " vetos deal!");
                                  Accepted := False;
@@ -1536,13 +1522,13 @@ package body Agrippa.Players.Robots is
    begin
       Agrippa.Deals.Scan (Deal, Check_Terms'Access);
       if Score > 0 then
-         Ada.Text_IO.Put_Line
+         State.Log
            (State.Faction_Name (Robot.Faction)
             & " agrees");
          Robot.Current_Deal := Deal;
          return True;
       else
-         Ada.Text_IO.Put_Line
+         State.Log
            (State.Faction_Name (Robot.Faction)
             & " rejects");
          return False;
