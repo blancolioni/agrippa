@@ -54,7 +54,7 @@ package body Agrippa.State is
    is
       function Test (War : War_Id) return Boolean
       is (State.Get_War_State (War).Active
-          and then State.Get_War_State (War).Prosecuted);
+          and then not State.Get_War_State (War).Unprosecuted);
    begin
       return State.Matching_Wars (Test'Access);
    end Prosecuted_Wars;
@@ -83,7 +83,7 @@ package body Agrippa.State is
    is
       function Test (War : War_Id) return Boolean
       is (State.Get_War_State (War).Active
-          and then not State.Get_War_State (War).Prosecuted);
+          and then State.Get_War_State (War).Unprosecuted);
    begin
       return State.Matching_Wars (Test'Access);
    end Unprosecuted_Wars;

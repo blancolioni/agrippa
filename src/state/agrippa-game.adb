@@ -92,7 +92,8 @@ package body Agrippa.Game is
    function War_Commander
      (Game : Game_Type'Class;
       War  : War_Id)
-      return Senator_Id;
+      return Senator_Id
+     with Pre => Game.Has_Commander (War);
 
    function Deployed_Legions
      (Game : Game_Type'Class;
@@ -325,6 +326,9 @@ package body Agrippa.Game is
                               then "no-losses"
                               else "legions-lost");
    begin
+
+      Game.War_State (War).Start_Combat;
+
       Game.Notifier.Send_Notification
         (Game.Local_Text
            ("senator-has-strength",
@@ -984,7 +988,7 @@ package body Agrippa.Game is
 
             when Attack =>
 
-               Game.War_State (War (Proposal)).Prosecute;
+               Game.War_State (War (Proposal)).Attack;
                Game.Deploy_Fleets (Fleets (Proposal), War (Proposal));
                Game.Deploy_Regular_Legions
                  (Regular_Legions (Proposal), War (Proposal));
@@ -1464,6 +1468,26 @@ package body Agrippa.Game is
    begin
       return Game.War_State (War);
    end Get_War_State;
+
+   -------------------
+   -- Has_Commander --
+   -------------------
+
+   overriding function Has_Commander
+     (Game : Game_Type;
+      War  : War_Id)
+      return Boolean
+   is
+   begin
+      for Senator of Game.Senator_State loop
+         if Senator.Has_Command
+           and then Senator.Command = War
+         then
+            return True;
+         end if;
+      end loop;
+      return False;
+   end Has_Commander;
 
    ---------------------------------------
    -- Highest_Ranking_Available_Officer --
@@ -2036,7 +2060,7 @@ package body Agrippa.Game is
                   W : Agrippa.State.Wars.War_State_Type renames
                         Game.War_State.Element (War);
                begin
-                  return W.Active and then not W.Prosecuted;
+                  return W.Active and then W.Unprosecuted;
                end Unprosecuted;
 
             begin
@@ -2311,7 +2335,7 @@ package body Agrippa.Game is
       end loop;
    end Set_Player_Handlers;
 
-      ------------------
+   ------------------
    -- Set_Treasury --
    ------------------
 
@@ -2322,6 +2346,18 @@ package body Agrippa.Game is
    begin
       Game.Treasury := New_Treasury;
    end Set_Treasury;
+
+   ----------------------
+   -- Set_Unprosecuted --
+   ----------------------
+
+   overriding procedure Set_Unprosecuted
+     (Game : in out Game_Type;
+      War  : War_Id)
+   is
+   begin
+      Game.War_State (War).Unprosecuted;
+   end Set_Unprosecuted;
 
    -----------
    -- Start --
@@ -2479,6 +2515,14 @@ package body Agrippa.Game is
       Game.Current_Turn := 0;
 
    end Start;
+
+   ------------------
+   -- Start_Combat --
+   ------------------
+
+   overriding procedure Start_Combat
+     (Game    : in out Game_Type)
+   is null;
 
    --------------------------
    -- Start_Senate_Session --

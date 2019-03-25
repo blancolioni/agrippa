@@ -614,37 +614,35 @@ package body Agrippa.Players.Robots is
 
          when Attack =>
             declare
-               Unprosecuted_Wars : constant War_Id_Array :=
-                                     State.Unprosecuted_Wars;
-               Prosecuted_Wars   : constant War_Id_Array :=
-                                     State.Prosecuted_Wars;
-               Inactive_Wars     : constant War_Id_Array :=
-                                     State.Inactive_Wars;
-               Attacked          : Boolean := False;
+               Active_Wars    : constant War_Id_Array :=
+                                  State.Active_Wars;
+               Inactive_Wars  : constant War_Id_Array :=
+                                  State.Inactive_Wars;
+               Attacked       : Boolean := False;
             begin
 
                State.Log
-                 ("unprosecuted wars:"
-                  & Natural'Image (Unprosecuted_Wars'Length));
+                 ("active wars:"
+                  & Natural'Image (Active_Wars'Length));
 
-               if Unprosecuted_Wars'Length > 0 then
+               if Active_Wars'Length > 0 then
                   Find_Unprosecuted_War :
                   for Minimal in Boolean loop
-                     for War of Unprosecuted_Wars loop
-                        Attacked := Attack_War
-                          (Robot     => Robot,
-                           State     => State,
-                           War       => War,
-                           Minimal   => Minimal,
-                           Overwhelm => False,
-                           Coalition => Coalition,
-                           Container => Container);
-                        exit Find_Unprosecuted_War when Attacked;
+                     for War of Active_Wars loop
+                        if not State.Has_Commander (War) then
+                           Attacked := Attack_War
+                             (Robot     => Robot,
+                              State     => State,
+                              War       => War,
+                              Minimal   => Minimal,
+                              Overwhelm => False,
+                              Coalition => Coalition,
+                              Container => Container);
+                           exit Find_Unprosecuted_War when Attacked;
+                        end if;
                      end loop;
                   end loop Find_Unprosecuted_War;
-               elsif Inactive_Wars'Length > 0
-                 and then Prosecuted_Wars'Length = 0
-               then
+               elsif Inactive_Wars'Length > 0 then
                   for War of Inactive_Wars loop
                      exit when Attack_War
                        (Robot     => Robot,

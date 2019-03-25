@@ -49,7 +49,11 @@ package body Agrippa.Phases.Combat is
       War   : War_Id)
    is
    begin
-      State.Send_Message (Agrippa.Messages.Attack (War));
+      if State.Has_Commander (War) then
+         State.Send_Message (Agrippa.Messages.Attack (War));
+      else
+         State.Set_Unprosecuted (War);
+      end if;
    end Attack;
 
    ----------------------
@@ -101,8 +105,9 @@ package body Agrippa.Phases.Combat is
       pragma Unreferenced (Phase);
       Result : Combat_Phase_State_Type;
       Wars   : constant War_Id_Array :=
-                 State.Prosecuted_Wars;
+                 State.Active_Wars;
    begin
+      State.Start_Combat;
       for War of Wars loop
          Result.Wars.Append (War);
       end loop;

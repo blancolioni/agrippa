@@ -105,7 +105,7 @@ package Agrippa.State is
       return Boolean
       is abstract;
 
-   function Prosecuted
+   function Unprosecuted
      (State : War_State_Interface)
       return Boolean
       is abstract;
@@ -427,6 +427,12 @@ package Agrippa.State is
       return War_State_Interface'Class
       is abstract;
 
+   function Has_Commander
+     (State : State_Interface;
+      War  : War_Id)
+      return Boolean
+      is abstract;
+
    function Matching_Wars
      (State : State_Interface;
       Test  : not null access
@@ -449,6 +455,11 @@ package Agrippa.State is
    function Prosecuted_Wars
      (State : State_Interface'Class)
       return War_Id_Array;
+
+   procedure Set_Unprosecuted
+     (State : in out State_Interface;
+      War   : War_Id)
+   is abstract;
 
    function Event_Tag
      (State : State_Interface;
@@ -479,6 +490,10 @@ package Agrippa.State is
    procedure Send_Text_Notification
      (State : State_Interface;
       Text  : String)
+   is abstract;
+
+   procedure Start_Combat
+     (State : in out State_Interface)
    is abstract;
 
    procedure Start_Senate_Session

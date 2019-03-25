@@ -5,6 +5,10 @@ package Agrippa.State.Wars is
    type War_State_Type is
      new War_State_Interface with private;
 
+   overriding function Unprosecuted
+     (War : War_State_Type)
+      return Boolean;
+
    function Tag
      (State : War_State_Type'Class)
       return String;
@@ -24,7 +28,15 @@ package Agrippa.State.Wars is
    procedure Activate
      (War : in out War_State_Type);
 
-   procedure Prosecute
+   procedure Unprosecuted
+     (War : in out War_State_Type)
+     with Pre => War.Drawn;
+
+   procedure Attack
+     (War : in out War_State_Type)
+     with Pre => War.Drawn;
+
+   procedure Start_Combat
      (War : in out War_State_Type)
      with Pre => War.Drawn;
 
@@ -43,7 +55,8 @@ private
          Active         : Boolean := False;
          Drawn          : Boolean := False;
          Discarded      : Boolean := False;
-         Prosecuted     : Boolean := False;
+         Unprosecuted   : Boolean := False;
+         Attacked       : Boolean := False;
       end record;
 
    overriding function Id
@@ -79,11 +92,6 @@ private
       return Boolean
    is (War.Discarded);
 
-   overriding function Prosecuted
-     (War : War_State_Type)
-      return Boolean
-   is (War.Prosecuted);
-
    overriding function Land_Strength
      (State : War_State_Type)
       return Legion_Count
@@ -103,5 +111,10 @@ private
      (War : War_State_Type)
       return Boolean
    is (War.Drawn);
+
+   overriding function Unprosecuted
+     (War : War_State_Type)
+      return Boolean
+   is (War.Unprosecuted);
 
 end Agrippa.State.Wars;

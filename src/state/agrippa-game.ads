@@ -93,6 +93,11 @@ package Agrippa.Game is
       Senator : Senator_Id)
       return War_Id;
 
+   overriding function Has_Commander
+     (Game : Game_Type;
+      War  : War_Id)
+      return Boolean;
+
    overriding function Has_Faction_Leader
      (Game    : Game_Type;
       Faction : Faction_Id)
@@ -278,6 +283,10 @@ package Agrippa.Game is
       Count   : Fleet_Count;
       War     : War_Id);
 
+   overriding procedure Set_Unprosecuted
+     (Game : in out Game_Type;
+      War  : War_Id);
+
    function Forum_Deck
      (Game : Game_Type'Class)
       return Agrippa.Cards.Decks.Deck_Type'Class;
@@ -439,6 +448,9 @@ private
    is (Game.Status (Event).Level);
 
    overriding procedure Start_Senate_Session
+     (Game    : in out Game_Type);
+
+   overriding procedure Start_Combat
      (Game    : in out Game_Type);
 
    overriding procedure Clear_Status
