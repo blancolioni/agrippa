@@ -2141,12 +2141,35 @@ package body Agrippa.Game is
                Game.Notifier.Send_Message (Game, Result);
                case Get_Action (Result) is
                   when Check_Rebellion =>
-                     if Rebels (Result) then
-                        Game.Senator_State (Get_Senator (Result)).Rebel;
-                     else
-                        Game.Senator_State (Get_Senator (Result))
-                          .Return_To_Rome;
-                     end if;
+                     declare
+                        Senator : constant Senator_Id :=
+                                    Get_Senator (Result);
+                        War     : constant War_Id :=
+                                    Game.Senator_State (Senator).Command;
+                     begin
+                        if Rebels (Result) then
+                           Game.Senator_State (Senator).Rebel;
+                        else
+                           for Legion of Game.Legion_State loop
+                              if Legion.Deployed
+                                and then Legion.War = War
+                              then
+                                 Legion.Recall;
+                              end if;
+                           end loop;
+
+                           for Fleet of Game.Fleet_State loop
+                              if Fleet.Deployed
+                                and then Fleet.War = War
+                              then
+                                 Fleet.Recall;
+                              end if;
+                           end loop;
+
+                           Game.Senator_State (Senator).Return_To_Rome;
+                        end if;
+                     end;
+
                   when Play_Card =>
                      declare
                         Card : constant Agrippa.Cards.Card_Type'Class :=

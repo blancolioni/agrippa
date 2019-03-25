@@ -25,6 +25,11 @@ package Agrippa.State.Fleets is
      Post => Fleet.Deployed
      and then Fleet.War = War;
 
+   procedure Recall
+     (Fleet : in out Fleet_State_Type'Class)
+     with Pre => Fleet.Created and then Fleet.Deployed,
+     Post => not Fleet.Deployed;
+
 private
 
    type Fleet_State_Type is tagged

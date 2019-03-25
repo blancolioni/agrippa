@@ -36,4 +36,15 @@ package body Agrippa.State.Fleets is
       Fleet.Created := False;
    end Destroy;
 
+   ------------
+   -- Recall --
+   ------------
+
+   procedure Recall
+     (Fleet : in out Fleet_State_Type'Class)
+   is
+   begin
+      Fleet.Deployed := False;
+   end Recall;
+
 end Agrippa.State.Fleets;
