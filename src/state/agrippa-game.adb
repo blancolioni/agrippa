@@ -722,7 +722,7 @@ package body Agrippa.Game is
       Count  : Natural := 0;
    begin
       for S of Game.Senator_State loop
-         if S.In_Play and then S.In_Curia then
+         if S.In_Play and then S.In_Forum then
             Count := Count + 1;
             Result (Count) := S.Id;
          end if;
@@ -1748,7 +1748,7 @@ package body Agrippa.Game is
          when Senator_Card =>
             Game.Senator_State
               (Agrippa.Cards.Senators.Senator_Card_Type'Class (Card).Senator)
-                .Set_In_Curia;
+                .Set_In_Forum;
 
          when Statesman_Card =>
             null;

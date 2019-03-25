@@ -8,7 +8,7 @@ package Agrippa.State.Senators is
      (State : Senator_State_Type)
       return Senator_Id;
 
-   function In_Curia
+   function In_Forum
      (Senator : Senator_State_Type'Class)
       return Boolean;
 
@@ -107,26 +107,26 @@ package Agrippa.State.Senators is
       Id      : Senator_Id)
      with Pre => not Senator.In_Play,
      Post => Senator.In_Play
-     and then not Senator.In_Curia
+     and then not Senator.In_Forum
      and then not Senator.Has_Faction
      and then Senator.Treasury = 0
      and then Senator.Id = Id;
 
-   procedure Set_In_Curia
+   procedure Set_In_Forum
      (Senator : in out Senator_State_Type)
      with Pre => Senator.In_Play
      and then not Senator.Has_Faction
-     and then not Senator.In_Curia,
-     Post => Senator.In_Curia
+     and then not Senator.In_Forum,
+     Post => Senator.In_Forum
      and then not Senator.Has_Faction
-     and then Senator.In_Curia;
+     and then Senator.In_Forum;
 
    procedure Set_Faction
      (Senator : in out Senator_State_Type'Class;
       Faction : Faction_Id)
      with Pre => Senator.In_Play,
      Post => Senator.In_Play
-     and then not Senator.In_Curia
+     and then not Senator.In_Forum
      and then Senator.Has_Faction
      and then Senator.Faction = Faction;
 
@@ -141,7 +141,7 @@ package Agrippa.State.Senators is
      (Senator : in out Senator_State_Type'Class;
       Office  : Office_Type)
      with Pre => Senator.In_Play
-     and then not Senator.In_Curia
+     and then not Senator.In_Forum
      and then Senator.Has_Faction,
      Post => Senator.In_Play
      and then Senator.Has_Office
@@ -219,7 +219,7 @@ private
       record
          Id             : Senator_Id;
          In_Play        : Boolean := False;
-         In_Curia       : Boolean := False;
+         In_Forum       : Boolean := False;
          In_Rome        : Boolean := True;
          Leading_Army   : Boolean := False;
          Is_Rebel       : Boolean := False;
@@ -254,10 +254,10 @@ private
       return Boolean
    is (Senator.Has_Faction);
 
-   function In_Curia
+   function In_Forum
      (Senator : Senator_State_Type'Class)
       return Boolean
-   is (Senator.In_Curia);
+   is (Senator.In_Forum);
 
    function In_Play
      (Senator : Senator_State_Type'Class)

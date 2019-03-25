@@ -201,21 +201,21 @@ package body Agrippa.State.Senators is
       Faction : Faction_Id)
    is
    begin
-      Senator.In_Curia := False;
+      Senator.In_Forum := False;
       Senator.Has_Faction := True;
       Senator.Faction := Faction;
    end Set_Faction;
 
    ------------------
-   -- Set_In_Curia --
+   -- Set_In_Forum --
    ------------------
 
-   procedure Set_In_Curia
+   procedure Set_In_Forum
      (Senator : in out Senator_State_Type)
    is
    begin
-      Senator.In_Curia := True;
-   end Set_In_Curia;
+      Senator.In_Forum := True;
+   end Set_In_Forum;
 
    -----------------
    -- Set_In_Play --
