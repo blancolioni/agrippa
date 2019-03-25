@@ -10,7 +10,7 @@ package Agrippa is
    Max_Statesmen  : constant := 30;
    Max_Factions   : constant := 6;
 
-   type Turn_Number is range 1 .. Max_Turns;
+   type Turn_Number is range 0 .. Max_Turns;
 
    type Unrest_Level is range 0 .. 99;
 

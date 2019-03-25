@@ -721,6 +721,25 @@ package body Agrippa.Game is
       return Result (1 .. Count);
    end Curia_Senators;
 
+   ----------------------
+   -- Current_Activity --
+   ----------------------
+
+   overriding function Current_Activity
+     (Game : Game_Type)
+      return String
+   is
+   begin
+      return Agrippa.Images.Image
+        (Natural (Game.Current_Turn))
+        & "."
+        & Agrippa.Images.Image
+        (Game.Phase_Number)
+        & "."
+        & Agrippa.Images.Image
+        (Game.Step_Number);
+   end Current_Activity;
+
    ------------------------
    -- Current_Fleet_Cost --
    ------------------------
@@ -1640,15 +1659,6 @@ package body Agrippa.Game is
       end loop;
    end Mortality_Roll;
 
-   ---------------
-   -- Next_Turn --
-   ---------------
-
-   procedure Next_Turn (Game : in out Game_Type'Class) is
-   begin
-      Game.Current_Turn := Game.Current_Turn + 1;
-   end Next_Turn;
-
    ------------
    -- Notify --
    ------------
@@ -2182,6 +2192,20 @@ package body Agrippa.Game is
         Autoplayer_Holders.To_Holder (Player);
    end Set_Autoplayer;
 
+   --------------------------
+   -- Set_Current_Activity --
+   --------------------------
+
+   procedure Set_Current_Activity
+     (Game  : in out Game_Type'Class;
+      Phase : Natural;
+      Step  : Natural)
+   is
+   begin
+      Game.Phase_Number := Phase;
+      Game.Step_Number := Step;
+   end Set_Current_Activity;
+
    ------------------------
    -- Set_Faction_Leader --
    ------------------------
@@ -2429,6 +2453,8 @@ package body Agrippa.Game is
          end;
       end loop;
 
+      Game.Current_Turn := 0;
+
    end Start;
 
    --------------------------
@@ -2496,6 +2522,7 @@ package body Agrippa.Game is
      (Game : in out Game_Type'Class)
    is
    begin
+      Game.Current_Turn := Game.Current_Turn + 1;
       for Player of Game.Player_State loop
          Player.Handler.Start_Turn (Game);
       end loop;

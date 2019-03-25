@@ -36,6 +36,15 @@ package Agrippa.Game is
      (Game : Game_Type)
       return Boolean;
 
+   overriding function Current_Activity
+     (Game : Game_Type)
+      return String;
+
+   procedure Set_Current_Activity
+     (Game  : in out Game_Type'Class;
+      Phase : Natural;
+      Step  : Natural);
+
    overriding function Has_Winner
      (Game : Game_Type)
       return Boolean;
@@ -148,8 +157,6 @@ package Agrippa.Game is
      (Game : Game_Type'Class)
       return Turn_Number;
 
-   procedure Next_Turn (Game : in out Game_Type'Class);
-
    overriding function Current_Treasury
      (Game : Game_Type)
       return Talents;
@@ -161,11 +168,6 @@ package Agrippa.Game is
    function Current_Unrest
      (Game : Game_Type'Class)
       return Unrest_Level;
-
-   function Senator
-     (Game : Game_Type'Class;
-      Id    : Senator_Id)
-      return Agrippa.State.Senators.Senator_State_Type'Class;
 
    function Faction
      (Game  : Game_Type'Class;
@@ -397,6 +399,8 @@ private
          Events           : Event_Table;
          Status           : Status_Table;
          Forum_Deck       : Agrippa.Cards.Decks.Deck_Type;
+         Phase_Number     : Natural := 0;
+         Step_Number      : Natural := 0;
       end record;
 
    overriding procedure Initialize (Game : in out Game_Type);
@@ -514,12 +518,6 @@ private
      (Game : Game_Type'Class)
       return Unrest_Level
    is (Game.Unrest);
-
-   function Senator
-     (Game : Game_Type'Class;
-      Id    : Senator_Id)
-      return Agrippa.State.Senators.Senator_State_Type'Class
-   is (Game.Senator_State (Id));
 
    function Faction
      (Game  : Game_Type'Class;
