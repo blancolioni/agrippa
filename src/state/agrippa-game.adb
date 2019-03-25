@@ -110,6 +110,10 @@ package body Agrippa.Game is
       War  : War_Id)
       return Fleet_Count;
 
+   procedure Recall_Forces
+     (Game : in out Game_Type'Class;
+      War  : War_Id);
+
    procedure Attack
      (Game : in out Game_Type'Class;
       War  : War_Id);
@@ -410,6 +414,7 @@ package body Agrippa.Game is
             Game.Notifier.Send_Notification
               (Game.Local_Text
                  ("commander-killed", Game.Senator_Name (Commander)));
+            Game.Recall_Forces (War);
          else
             if Remaining_Count >= 1 then
                declare
@@ -1760,6 +1765,33 @@ package body Agrippa.Game is
       end case;
    end Play_Card;
 
+   -------------------
+   -- Recall_Forces --
+   -------------------
+
+   procedure Recall_Forces
+     (Game : in out Game_Type'Class;
+      War  : War_Id)
+   is
+   begin
+      for Legion of Game.Legion_State loop
+         if Legion.Deployed
+           and then Legion.War = War
+         then
+            Legion.Recall;
+         end if;
+      end loop;
+
+      for Fleet of Game.Fleet_State loop
+         if Fleet.Deployed
+           and then Fleet.War = War
+         then
+            Fleet.Recall;
+         end if;
+      end loop;
+
+   end Recall_Forces;
+
    --------------------------
    -- Regular_Legion_Count --
    --------------------------
@@ -2174,22 +2206,7 @@ package body Agrippa.Game is
                         if Rebels (Result) then
                            Game.Senator_State (Senator).Rebel;
                         else
-                           for Legion of Game.Legion_State loop
-                              if Legion.Deployed
-                                and then Legion.War = War
-                              then
-                                 Legion.Recall;
-                              end if;
-                           end loop;
-
-                           for Fleet of Game.Fleet_State loop
-                              if Fleet.Deployed
-                                and then Fleet.War = War
-                              then
-                                 Fleet.Recall;
-                              end if;
-                           end loop;
-
+                           Game.Recall_Forces (War);
                            Game.Senator_State (Senator).Return_To_Rome;
                         end if;
                      end;
