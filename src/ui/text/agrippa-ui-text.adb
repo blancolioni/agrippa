@@ -1115,14 +1115,22 @@ package body Agrippa.UI.Text is
             else
                for I in Match'Range loop
                   declare
+                     use Agrippa.Cards.Wars;
+                     War        : constant War_Card_Type'Class :=
+                                    Agrippa.Cards.Wars.War (Match (I));
                      Field_Name : constant String :=
                                     (if I = Match'First
                                      then Field_Tag
                                      else "");
                   begin
                      Put_Field (Game, Field_Name,
-                                Game.Local_Text
-                                  (Agrippa.Cards.Wars.War (Match (I)).Tag));
+                                Game.Local_Text (War.Tag)
+                                & " "
+                                & Image (War.Land_Strength)
+                                & "/"
+                                & Image (War.Fleet_Support)
+                                & "/"
+                                & Image (War.Fleet_Strength));
                   end;
                end loop;
             end if;
