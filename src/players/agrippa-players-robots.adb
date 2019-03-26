@@ -4,6 +4,7 @@ with Ada.Strings.Unbounded;
 with Agrippa.Dice;
 with Agrippa.Proposals;
 
+with Agrippa.Cards.Senators;
 with Agrippa.Cards.Statesmen;
 with Agrippa.Cards.Wars;
 
@@ -211,9 +212,10 @@ package body Agrippa.Players.Robots is
       Fleet_Strength     : constant Fleet_Count := War_State.Fleet_Strength;
       Fleet_Support      : constant Fleet_Count := War_State.Fleet_Support;
       Required_Fleets    : constant Fleet_Count :=
-                             Fleet_Count'Max
-                               (Fleet_Count'Max
-                                  (Fleet_Strength, Fleet_Support), 5);
+                             (if Fleet_Strength = 0
+                              then Fleet_Support
+                              else Fleet_Count'Max
+                                (Fleet_Strength + 2, Fleet_Support));
       Land_Strength      : constant Legion_Count := War_State.Land_Strength;
       Required_Strength  : constant Legion_Count :=
                              Legion_Count'Max
@@ -573,6 +575,58 @@ package body Agrippa.Players.Robots is
          end loop;
       end if;
 
+      declare
+         Dictator : Senator_Id := Senator_Id'First;
+         MoH      : Senator_Id := Senator_Id'First;
+         Highest  : Attribute_Range := Attribute_Range'First;
+         Wars     : constant War_Id_Array := State.Active_Wars;
+      begin
+         for Sid of Agrippa.Cards.Senators.All_Senators loop
+            if not State.Has_Office (Sid) then
+               declare
+                  This_Score : constant Attribute_Range :=
+                                 State.Military (Sid);
+               begin
+                  if This_Score > Highest then
+                     Highest := This_Score;
+                     MoH      := Dictator;
+                     Dictator := Sid;
+                  elsif Highest > Attribute_Range'First
+                    and then This_Score = Highest
+                  then
+                     declare
+                        Current : Agrippa.State.Senator_State_Interface'Class
+                        renames State.Get_Senator_State (Dictator);
+                        This    : Agrippa.State.Senator_State_Interface'Class
+                        renames State.Get_Senator_State (Sid);
+                     begin
+                        for War of Wars loop
+                           if Current.Voids_DS (War)
+                             and then not This.Voids_DS (War)
+                           then
+                              exit;
+                           elsif This.Voids_DS (War)
+                             and then not Current.Voids_DS (War)
+                           then
+                              MoH      := Dictator;
+                              Dictator := Sid;
+                              exit;
+                           end if;
+                        end loop;
+                     end;
+                  end if;
+               end;
+            end if;
+         end loop;
+
+         if Highest > Attribute_Range'First then
+            Add (Deal, State.Senator_Faction (Dictator),
+                 Office (Agrippa.Dictator, Dictator));
+            Add (Deal, State.Senator_Faction (MoH),
+                 Office (Agrippa.Master_Of_Horse, MoH));
+         end if;
+      end;
+
       if not Success then
          State.Log
            ("failed to find a deal: returning best available");
@@ -801,6 +855,10 @@ package body Agrippa.Players.Robots is
    begin
       Robot.Faction := Faction;
    end Initialize;
+
+   -----------------------------
+   -- Make_Persuasion_Attempt --
+   -----------------------------
 
    function Make_Persuasion_Attempt
      (Robot     : Robot_Player_Type'Class;

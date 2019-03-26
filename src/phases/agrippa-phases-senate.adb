@@ -6,7 +6,7 @@ with Agrippa.Proposals;
 package body Agrippa.Phases.Senate is
 
    type Senate_Step is
-     (Consul_Nomination, Censor_Nomination, Open_Session);
+     (Consul_Nomination, Dictator_Nomination, Censor_Nomination, Open_Session);
 
    type Senate_Step_Progress is
      (Nomination, Voting);
@@ -66,6 +66,8 @@ package body Agrippa.Phases.Senate is
       case Senate_State.Step is
          when Consul_Nomination =>
             return State.Local_Text ("consuls");
+         when Dictator_Nomination =>
+            return State.Local_Text ("dictator");
          when Censor_Nomination =>
             return State.Local_Text ("censor");
          when Open_Session =>
@@ -133,6 +135,50 @@ package body Agrippa.Phases.Senate is
               (Agrippa.Messages.Make_Consular_Nomination
                  (Senate_State.Magistrate,
                   State.Senator_Faction (Senate_State.Magistrate)));
+
+            declare
+               Old_Magistrate : constant Senator_Id :=
+                                  Senate_State.Magistrate;
+            begin
+               Senate_State.Magistrate :=
+                 State.Highest_Ranking_Available_Officer;
+
+               if Senate_State.Magistrate /= Old_Magistrate then
+                  State.Send_Text_Notification
+                    (State.Local_Text
+                       ("x-is-now-presiding",
+                        State.Full_Name_And_Faction
+                          (Senate_State.Magistrate)));
+               end if;
+            end;
+
+            declare
+               Wars        : constant War_Id_Array := State.Active_Wars;
+               Can_Appoint : Boolean := Wars'Length >= 3;
+            begin
+               if not Can_Appoint then
+                  for War of Wars loop
+                     if State.Get_War_State (War).Land_Strength >= 16 then
+                        Can_Appoint := True;
+                        exit;
+                     end if;
+                  end loop;
+               end if;
+
+               if Can_Appoint then
+                  Senate_State.Step := Dictator_Nomination;
+               else
+                  Senate_State.Step := Censor_Nomination;
+               end if;
+            end;
+
+         when Dictator_Nomination =>
+
+            State.Send_Message
+              (Agrippa.Messages.Make_Office_Nomination
+                 (Senate_State.Magistrate,
+                  State.Senator_Faction (Senate_State.Magistrate),
+                  Dictator));
 
             declare
                Old_Magistrate : constant Senator_Id :=
