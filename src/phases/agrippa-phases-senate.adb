@@ -147,7 +147,7 @@ package body Agrippa.Phases.Senate is
                   State.Send_Text_Notification
                     (State.Local_Text
                        ("x-is-now-presiding",
-                        State.Full_Name_And_Faction
+                        State.Senator_Name_And_Faction
                           (Senate_State.Magistrate)));
                end if;
             end;
@@ -191,7 +191,7 @@ package body Agrippa.Phases.Senate is
                   State.Send_Text_Notification
                     (State.Local_Text
                        ("x-is-now-presiding",
-                        State.Full_Name_And_Faction
+                        State.Senator_Name_And_Faction
                           (Senate_State.Magistrate)));
                end if;
             end;

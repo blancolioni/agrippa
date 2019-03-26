@@ -130,7 +130,7 @@ package body Agrippa.Players.Robots is
      (Robot  : Robot_Player_Type'Class;
       State  : Agrippa.State.State_Interface'Class;
       Office : Office_Type)
-      return Senator_Id;
+      return Nullable_Senator_Id;
 
    function Desired_Spoils
      (Robot  : Robot_Player_Type'Class;
@@ -763,27 +763,73 @@ package body Agrippa.Players.Robots is
      (Robot  : Robot_Player_Type'Class;
       State  : Agrippa.State.State_Interface'Class;
       Office : Office_Type)
-      return Senator_Id
+      return Nullable_Senator_Id
    is
-      pragma Unreferenced (Office);
+      pragma Unreferenced (Robot);
+      function Score_Candidate
+        (Senator : Senator_Id)
+         return Natural;
+
+      ---------------------
+      -- Score_Candidate --
+      ---------------------
 
       function Score_Candidate
         (Senator : Senator_Id)
          return Natural
-      is (if State.Has_Office (Senator)
-          then 1
-          else 100 - Natural (State.Influence (Senator)));
+      is
+         Base : constant Natural := 50;
+
+         Pop  : constant Popularity_Range := State.Popularity (Senator);
+         Inf  : constant Influence_Range := State.Influence (Senator);
+         Mil  : constant Attribute_Range := State.Military (Senator);
+
+         Fac_Bonus : Integer := 50;
+         Pop_Bonus : Integer := 0;
+         Inf_Bonus : Integer := 0;
+         Mil_Bonus : Integer := 0;
+      begin
+         if State.Has_Office (Senator) then
+            if Office in Consular_Office
+              and then State.Office (Senator) in Consular_Office
+            then
+               return 0;
+            end if;
+         end if;
+
+         if Office = Censor and then not State.Is_Prior_Consul (Senator) then
+            return 0;
+         end if;
+
+         if Office = Rome_Consul then
+            if Integer (Pop) < Natural (State.Current_Unrest) then
+               Pop_Bonus := -50;
+            else
+               Pop_Bonus := 2 * Natural (State.Current_Unrest)
+                 + Integer (Pop);
+            end if;
+         elsif Office = Dictator or else Office = Master_Of_Horse then
+            Mil_Bonus := Natural (Mil);
+            Fac_Bonus := 1;
+         elsif Office = Field_Consul then
+            Mil_Bonus := Natural (Mil);
+            Inf_Bonus := -Natural (Inf);
+         end if;
+
+         return Integer'Max
+           (Base + Fac_Bonus + Pop_Bonus + Inf_Bonus + Mil_Bonus, 0);
+      end Score_Candidate;
 
       Highest : Natural := 0;
-      Result  : Senator_Id;
+      Result  : Nullable_Senator_Id := No_Senator;
    begin
-      for Sid of State.Faction_Senators (Robot.Faction) loop
+      for Sid of State.Senators_In_Rome loop
          declare
             Score : constant Natural :=
                       Score_Candidate (Sid);
          begin
             if Score > Highest then
-               Result := Sid;
+               Result := To_Nullable_Id (Sid);
                Highest := Score;
             end if;
          end;
@@ -806,6 +852,11 @@ package body Agrippa.Players.Robots is
       function Office (Item : Office_Type) return Offer_Type
       is (Agrippa.Deals.Office (Item, Robot.Desired_Candidate (State, Item)));
 
+      procedure Add (Office : Office_Type);
+
+      procedure Add (Office : Office_Type) is
+      begin
+      end Add;
    begin
       case Robot.Robot_Faction is
          when Conservative =>
@@ -1298,7 +1349,7 @@ package body Agrippa.Players.Robots is
                      State.Log
                        (State.Faction_Name (Faction)
                         & " wants "
-                        & Agrippa.Deals.Show (Offers (Faction)));
+                        & Agrippa.Deals.Show (Offers (Faction), State));
                   end loop;
 
                   for Rec of Coalition loop
@@ -1311,14 +1362,9 @@ package body Agrippa.Players.Robots is
 
                   Deal := Create_Election_Deal (Robot, State, Coalition);
 
-                  declare
-                     function Faction_Name (Faction : Faction_Id) return String
-                     is (State.Faction_Name (Faction));
-                  begin
-                     State.Log
-                       ("Deal: "
-                        & Agrippa.Deals.Show (Deal, Faction_Name'Access));
-                  end;
+                  State.Log
+                    ("Deal: "
+                     & Agrippa.Deals.Show (Deal, State));
 
                   declare
                      Accepted : Boolean := True;

@@ -65,6 +65,7 @@ faction-leader-of-faction-dies,{1}, Faction Leader of {2} dies
 succeeded-by-son,He is succeeded by his son {1}
 name-of-faction-dies,{1} of {2} dies
 unaligned-dies,{1}, an unaligned senator dies
+unaligned-senator,unaligned {1}
 no-change,No Change
 mortality-roll-none,No Effect
 mortality-roll-twice,Roll Twice

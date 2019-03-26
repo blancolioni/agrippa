@@ -165,6 +165,7 @@ package Agrippa.State is
 
    type State_Interface is limited interface
      and End_State_Interface
+     and Show_Senator_Interface
      and WL.Localisation.Localisation_Interface;
 
    function Current_Activity
@@ -179,6 +180,11 @@ package Agrippa.State is
    function Current_Treasury
      (State   : State_Interface)
       return Talents
+      is abstract;
+
+   function Current_Unrest
+     (State   : State_Interface)
+      return Unrest_Level
       is abstract;
 
    function Current_Legion_Cost
@@ -197,6 +203,11 @@ package Agrippa.State is
       return Senator_Id_Array
       is abstract;
 
+   function Senators_In_Rome
+     (State   : State_Interface)
+      return Senator_Id_Array
+      is abstract;
+
    function Faction_Cards
      (State   : State_Interface;
       Faction : Faction_Id)
@@ -207,17 +218,6 @@ package Agrippa.State is
      (State   : State_Interface)
       return Senator_Id_Array
       is abstract;
-
-   function Senator_Name
-     (State   : State_Interface;
-      Senator : Senator_Id)
-      return String
-      is abstract;
-
-   function Full_Name_And_Faction
-     (State   : State_Interface'Class;
-      Senator : Senator_Id)
-      return String;
 
    function Senator_Treasury
      (State   : State_Interface;
@@ -231,10 +231,22 @@ package Agrippa.State is
       return Vote_Count
       is abstract;
 
+   function Is_Prior_Consul
+     (State   : State_Interface;
+      Senator : Senator_Id)
+      return Boolean
+      is abstract;
+
    function Has_Office
      (State   : State_Interface;
       Senator : Senator_Id)
       return Boolean
+      is abstract;
+
+   function Office
+     (State   : State_Interface;
+      Senator : Senator_Id)
+      return Office_Type
       is abstract;
 
    function Has_Command
@@ -259,12 +271,6 @@ package Agrippa.State is
      (State   : State_Interface;
       Senator : Senator_Id)
       return Faction_Id
-      is abstract;
-
-   function Faction_Name
-     (State   : State_Interface;
-      Faction : Faction_Id)
-      return String
       is abstract;
 
    function Faction_Treasury

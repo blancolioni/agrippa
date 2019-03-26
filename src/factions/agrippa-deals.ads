@@ -34,7 +34,10 @@ package Agrippa.Deals is
    function Get_Holder (Offer : Offer_Type) return Senator_Id
      with Pre => Is_Office_Offer (Offer);
 
-   function Show (Offer : Offer_Type) return String;
+   function Show
+     (Offer        : Offer_Type;
+      Show_Senator : Show_Senator_Interface'Class)
+      return String;
 
    type Offer_List is private;
 
@@ -49,7 +52,10 @@ package Agrippa.Deals is
                    Process : not null access
                      procedure (Offer : Offer_Type));
 
-   function Show (Offer : Offer_List) return String;
+   function Show
+     (Offer : Offer_List;
+      Show_Senator : Show_Senator_Interface'Class)
+      return String;
 
    function Matching_Index
      (List  : Offer_List;
@@ -84,8 +90,7 @@ package Agrippa.Deals is
 
    function Show
      (Deal : Deal_Type;
-      Name : not null access
-        function (Faction : Faction_Id) return String)
+      Show_Senator : Show_Senator_Interface'Class)
       return String;
 
    function Contradicts

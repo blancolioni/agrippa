@@ -1898,6 +1898,26 @@ package body Agrippa.Game is
         (Agrippa.Cards.Senators.Senator (Senator).Tag);
    end Senator_Name;
 
+   ----------------------
+   -- Senators_In_Rome --
+   ----------------------
+
+   overriding function Senators_In_Rome
+     (Game    : Game_Type)
+      return Senator_Id_Array
+   is
+      Result : Senator_Id_Array (1 .. Max_Senators);
+      Count  : Natural := 0;
+   begin
+      for S of Game.Senator_State loop
+         if S.In_Rome then
+            Count := Count + 1;
+            Result (Count) := S.Id;
+         end if;
+      end loop;
+      return Result (1 .. Count);
+   end Senators_In_Rome;
+
    ------------------
    -- Send_Message --
    ------------------
@@ -2377,7 +2397,7 @@ package body Agrippa.Game is
          Game.Notifier.Send_Notification
            (Game.Local_Text
               ("x-is-the-new-office-holder",
-               Game.Full_Name_And_Faction (Senator),
+               Game.Senator_Name_And_Faction (Senator),
                Game.Local_Text (Office'Image)));
       end if;
 
