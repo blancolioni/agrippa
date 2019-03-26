@@ -23,6 +23,11 @@ package Agrippa.Cards.Statesmen is
      (Statesman : Statesman_Card_Type'Class)
       return Senator_Id;
 
+   function Voids_DS
+     (Statesman : Statesman_Card_Type'Class;
+      War       : War_Id)
+      return Boolean;
+
    function Statesman
      (Id : Statesman_Id)
      return Statesman_Card_Type'Class;
@@ -46,6 +51,7 @@ private
          Oratory   : Attribute_Range;
          Loyalty   : Attribute_Range;
          Influence : Attribute_Range;
+         Voids_DS  : access constant War_Id_Array;
       end record;
 
    function Statesman
@@ -80,5 +86,11 @@ private
 
    procedure New_Statesman
      (Card : in out Statesman_Card_Type'Class);
+
+   function Voids_DS
+     (Statesman : Statesman_Card_Type'Class;
+      War       : War_Id)
+      return Boolean
+   is (for some X of Statesman.Voids_DS.all => X = War);
 
 end Agrippa.Cards.Statesmen;

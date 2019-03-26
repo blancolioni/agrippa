@@ -78,6 +78,15 @@ package Agrippa.State is
      = Senator.Id,
      Post'Class => Senator.Has_Statesman;
 
+   function Voids_DS
+     (Senator : Senator_State_Interface'Class;
+      War     : War_Id)
+      return Boolean
+     with Post => Voids_DS'Result =
+       (Senator.Has_Statesman
+        and then Agrippa.Cards.Statesmen.Statesman (Senator.Statesman)
+        .Voids_DS (War));
+
    type War_State_Interface is interface;
 
    function Id
@@ -560,5 +569,13 @@ private
         State.Senator_Name (Senator),
         State.Faction_Name
           (State.Senator_Faction (Senator))));
+
+   function Voids_DS
+     (Senator : Senator_State_Interface'Class;
+      War     : War_Id)
+      return Boolean
+   is (Senator.Has_Statesman
+       and then Agrippa.Cards.Statesmen.Statesman (Senator.Statesman)
+       .Voids_DS (War));
 
 end Agrippa.State;
