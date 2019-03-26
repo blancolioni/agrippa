@@ -42,6 +42,8 @@ x-selects-office,{1} selects {2} (gains 5 influence and a PC marker)
 x-adjourns-the-senate,{1} adjourns the Senate
 rome_consul,Rome Consul
 field_consul,Field Consul
+dictator,Dictator
+master_of_horse,Master of Horse
 senator-of-faction,{1} of {2}
 hrao-is-x-of-y,HRAO is {1} of {2}
 hrao-popularity,HRAO Popularity
