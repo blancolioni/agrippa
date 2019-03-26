@@ -32,6 +32,17 @@ package Agrippa.State is
       return Senator_Id
       is abstract;
 
+   function Has_Faction
+     (Senator : Senator_State_Interface)
+      return Boolean
+      is abstract;
+
+   function Faction
+     (Senator : Senator_State_Interface)
+      return Faction_Id
+   is abstract
+     with Pre'Class => Senator.Has_Faction;
+
    function Victorious
      (Senator : Senator_State_Interface)
       return Boolean

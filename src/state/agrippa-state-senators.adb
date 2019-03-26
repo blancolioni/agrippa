@@ -109,6 +109,17 @@ package body Agrippa.State.Senators is
       Senator.Has_Office := False;
    end Clear_Office;
 
+   --------------------------
+   -- Clear_Statesman_Only --
+   --------------------------
+
+   procedure Clear_Statesman_Only
+     (Senator : in out Senator_State_Type'Class)
+   is
+   begin
+      Senator.Is_Statesman_Only := False;
+   end Clear_Statesman_Only;
+
    -----------------
    -- Concessions --
    -----------------
@@ -145,6 +156,38 @@ package body Agrippa.State.Senators is
    end Kill;
 
    -------------
+   -- Loyalty --
+   -------------
+
+   function Loyalty
+     (Senator : Senator_State_Type'Class)
+      return Attribute_Range
+   is
+   begin
+      return (if Senator.Has_Statesman
+              then Agrippa.Cards.Statesmen.Statesman
+                (Senator.Statesman).Loyalty
+              else Agrippa.Cards.Senators.Senator
+                (Senator.Id).Loyalty);
+   end Loyalty;
+
+   --------------
+   -- Military --
+   --------------
+
+   function Military
+     (Senator : Senator_State_Type'Class)
+      return Attribute_Range
+   is
+   begin
+      return (if Senator.Has_Statesman
+              then Agrippa.Cards.Statesmen.Statesman
+                (Senator.Statesman).Military
+              else Agrippa.Cards.Senators.Senator
+                (Senator.Id).Military);
+   end Military;
+
+   -------------
    -- Oratory --
    -------------
 
@@ -153,7 +196,11 @@ package body Agrippa.State.Senators is
       return Attribute_Range
    is
    begin
-      return Agrippa.Cards.Senators.Senator (Senator.Id).Oratory;
+      return (if Senator.Has_Statesman
+              then Agrippa.Cards.Statesmen.Statesman
+                (Senator.Statesman).Oratory
+              else Agrippa.Cards.Senators.Senator
+                (Senator.Id).Oratory);
    end Oratory;
 
    -----------
@@ -206,6 +253,21 @@ package body Agrippa.State.Senators is
       Senator.Faction := Faction;
    end Set_Faction;
 
+   ------------
+   -- Set_Id --
+   ------------
+
+   procedure Set_Id
+     (Senator : in out Senator_State_Type;
+      Id      : Senator_Id)
+   is
+   begin
+      Senator :=
+        Senator_State_Type'
+          (Id     => Id,
+           others => <>);
+   end Set_Id;
+
    ------------------
    -- Set_In_Forum --
    ------------------
@@ -222,14 +284,13 @@ package body Agrippa.State.Senators is
    -----------------
 
    procedure Set_In_Play
-     (Senator : in out Senator_State_Type;
-      Id      : Senator_Id)
+     (Senator : in out Senator_State_Type)
    is
       Base_Influence : constant Attribute_Range :=
-                         Agrippa.Cards.Senators.Senator (Id).Influence;
+                         Agrippa.Cards.Senators.Senator (Senator.Id).Influence;
    begin
       Senator :=
-        (Id        => Id,
+        (Id        => Senator.Id,
          In_Play   => True,
          Influence =>
            Influence_Range (Base_Influence),
@@ -252,6 +313,40 @@ package body Agrippa.State.Senators is
          Senator.Prior_Consul := True;
       end if;
    end Set_Office;
+
+   -------------------
+   -- Set_Statesman --
+   -------------------
+
+   procedure Set_Statesman
+     (Senator   : in out Senator_State_Type'Class;
+      Faction   : Faction_Id;
+      Statesman : Statesman_Id)
+   is
+   begin
+      if not Senator.Has_Faction then
+         if not Senator.In_Forum
+           and then not Senator.In_Curia
+         then
+            Senator.Is_Statesman_Only := True;
+         end if;
+         Senator.Set_Faction (Faction);
+      end if;
+
+      Senator.Has_Statesman := True;
+      Senator.Statesman := Statesman;
+
+      declare
+         use Agrippa.Cards.Statesmen;
+         Card : constant Statesman_Card_Type'Class :=
+                  Agrippa.Cards.Statesmen.Statesman (Statesman);
+      begin
+         Senator.Influence :=
+           Influence_Range'Max (Senator.Influence,
+                                Influence_Range (Card.Influence));
+      end;
+
+   end Set_Statesman;
 
    ------------------
    -- Set_Treasury --

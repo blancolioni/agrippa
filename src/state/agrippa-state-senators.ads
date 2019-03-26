@@ -8,7 +8,15 @@ package Agrippa.State.Senators is
      (State : Senator_State_Type)
       return Senator_Id;
 
+   procedure Set_Id
+     (Senator : in out Senator_State_Type;
+      Id      : Senator_Id);
+
    function In_Forum
+     (Senator : Senator_State_Type'Class)
+      return Boolean;
+
+   function In_Curia
      (Senator : Senator_State_Type'Class)
       return Boolean;
 
@@ -23,6 +31,15 @@ package Agrippa.State.Senators is
    function Is_Rebel
      (Senator : Senator_State_Type'Class)
       return Boolean;
+
+   function Is_Statesman_Only
+     (Senator : Senator_State_Type'Class)
+      return Boolean;
+
+   procedure Clear_Statesman_Only
+     (Senator : in out Senator_State_Type'Class)
+     with Pre => Senator.Is_Statesman_Only,
+     Post => not Senator.Is_Statesman_Only;
 
    function Prior_Consul
      (Senator : Senator_State_Type'Class)
@@ -50,20 +67,27 @@ package Agrippa.State.Senators is
       return War_Id
      with Pre => Senator.Has_Command;
 
-   function Has_Faction
-     (Senator : Senator_State_Type'Class)
+   overriding function Has_Faction
+     (Senator : Senator_State_Type)
       return Boolean;
 
-   function Faction
-     (Senator : Senator_State_Type'Class)
-      return Faction_Id
-     with Pre => Senator.Has_Faction;
+   overriding function Faction
+     (Senator : Senator_State_Type)
+      return Faction_Id;
 
    function Treasury
      (Senator : Senator_State_Type'Class)
       return Talents;
 
+   function Military
+     (Senator : Senator_State_Type'Class)
+      return Attribute_Range;
+
    function Oratory
+     (Senator : Senator_State_Type'Class)
+      return Attribute_Range;
+
+   function Loyalty
      (Senator : Senator_State_Type'Class)
       return Attribute_Range;
 
@@ -103,14 +127,13 @@ package Agrippa.State.Senators is
      with Post => Senator.Treasury = Count;
 
    procedure Set_In_Play
-     (Senator : in out Senator_State_Type;
-      Id      : Senator_Id)
+     (Senator : in out Senator_State_Type)
      with Pre => not Senator.In_Play,
      Post => Senator.In_Play
      and then not Senator.In_Forum
+     and then not Senator.In_Curia
      and then not Senator.Has_Faction
-     and then Senator.Treasury = 0
-     and then Senator.Id = Id;
+     and then Senator.Treasury = 0;
 
    procedure Set_In_Forum
      (Senator : in out Senator_State_Type)
@@ -124,9 +147,20 @@ package Agrippa.State.Senators is
    procedure Set_Faction
      (Senator : in out Senator_State_Type'Class;
       Faction : Faction_Id)
-     with Pre => Senator.In_Play,
-     Post => Senator.In_Play
+     with Pre => Senator.In_Play or else Senator.Is_Statesman_Only,
+     Post => not Senator.In_Forum
+     and then Senator.Has_Faction
+     and then Senator.Faction = Faction;
+
+   procedure Set_Statesman
+     (Senator : in out Senator_State_Type'Class;
+      Faction : Faction_Id;
+      Statesman : Statesman_Id)
+     with Pre => not Senator.Has_Faction
+     or else Senator.Faction = Faction,
+     Post => (Senator.In_Play or else Senator.Is_Statesman_Only)
      and then not Senator.In_Forum
+     and then not Senator.In_Curia
      and then Senator.Has_Faction
      and then Senator.Faction = Faction;
 
@@ -217,26 +251,28 @@ private
 
    type Senator_State_Type is new Senator_State_Interface with
       record
-         Id             : Senator_Id;
-         In_Play        : Boolean := False;
-         In_Forum       : Boolean := False;
-         In_Rome        : Boolean := True;
-         Leading_Army   : Boolean := False;
-         Is_Rebel       : Boolean := False;
-         Prior_Consul   : Boolean := False;
-         Has_Faction    : Boolean := False;
-         Has_Office     : Boolean := False;
-         Victorious     : Boolean := False;
-         Has_Statesman  : Boolean := False;
-         Faction        : Faction_Id;
-         War            : War_Id;
-         Office         : Office_Type;
-         Popularity     : Popularity_Range := 0;
-         Influence      : Influence_Range;
-         Treasury       : Talents := 0;
-         Knights        : Natural := 0;
-         Statesman      : Statesman_Id;
-         Concessions    : Concession_Lists.List;
+         Id                : Senator_Id;
+         In_Play           : Boolean := False;
+         In_Forum          : Boolean := False;
+         In_Curia          : Boolean := False;
+         In_Rome           : Boolean := True;
+         Leading_Army      : Boolean := False;
+         Is_Rebel          : Boolean := False;
+         Prior_Consul      : Boolean := False;
+         Has_Faction       : Boolean := False;
+         Has_Office        : Boolean := False;
+         Victorious        : Boolean := False;
+         Has_Statesman     : Boolean := False;
+         Is_Statesman_Only : Boolean := False;
+         Faction           : Faction_Id;
+         War               : War_Id;
+         Office            : Office_Type;
+         Popularity        : Popularity_Range := 0;
+         Influence         : Influence_Range := 0;
+         Treasury          : Talents := 0;
+         Knights           : Natural := 0;
+         Statesman         : Statesman_Id;
+         Concessions       : Concession_Lists.List;
       end record;
 
    function Senator
@@ -249,8 +285,8 @@ private
       return Senator_Id
    is (State.Id);
 
-   function Has_Faction
-     (Senator : Senator_State_Type'Class)
+   overriding function Has_Faction
+     (Senator : Senator_State_Type)
       return Boolean
    is (Senator.Has_Faction);
 
@@ -258,6 +294,11 @@ private
      (Senator : Senator_State_Type'Class)
       return Boolean
    is (Senator.In_Forum);
+
+   function In_Curia
+     (Senator : Senator_State_Type'Class)
+      return Boolean
+   is (Senator.In_Curia);
 
    function In_Play
      (Senator : Senator_State_Type'Class)
@@ -279,8 +320,8 @@ private
       return Boolean
    is (Senator.Prior_Consul);
 
-   function Faction
-     (Senator : Senator_State_Type'Class)
+   overriding function Faction
+     (Senator : Senator_State_Type)
       return Faction_Id
    is (Senator.Faction);
 
@@ -338,5 +379,10 @@ private
      (Senator : Senator_State_Type)
       return Statesman_Id
    is (Senator.Statesman);
+
+   function Is_Statesman_Only
+     (Senator : Senator_State_Type'Class)
+      return Boolean
+   is (Senator.Is_Statesman_Only);
 
 end Agrippa.State.Senators;

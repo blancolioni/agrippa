@@ -4,6 +4,7 @@ with Ada.Strings.Unbounded;
 with Agrippa.Dice;
 with Agrippa.Proposals;
 
+with Agrippa.Cards.Statesmen;
 with Agrippa.Cards.Wars;
 
 with Agrippa.Players.Autohandler;
@@ -444,12 +445,12 @@ package body Agrippa.Players.Robots is
               (2, 5, 0),
               (2, 4, 0),
               (2, 3, 0),
-              (3, 4, 5),
-              (2, 3, 4),
               (1, 5, 0),
               (1, 4, 0),
               (1, 3, 0),
               (1, 2, 0),
+              (3, 4, 5),
+              (2, 3, 4),
               (1, 2, 5),
               (1, 2, 4),
               (1, 2, 3));
@@ -921,7 +922,25 @@ package body Agrippa.Players.Robots is
                when Senator_Card =>
                   null;
                when Statesman_Card =>
-                  null;
+                  declare
+                     use Agrippa.State;
+                     use Agrippa.Cards.Statesmen;
+                     Statesman : constant Statesman_Card_Type :=
+                                   Statesman_Card_Type
+                                     (Card_Rec);
+                     Family    : constant Senator_Id :=
+                                   Statesman.Family;
+                     Senator   : constant Senator_State_Interface'Class :=
+                                   State.Get_Senator_State (Family);
+                  begin
+                     if not Senator.Has_Faction
+                       or else Senator.Faction = Robot.Faction
+                     then
+                        Card := Card_Rec.Id;
+                        exit;
+                     end if;
+                  end;
+
                when others =>
                   raise Constraint_Error with
                   State.Faction_Name (Robot.Faction)

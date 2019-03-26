@@ -12,6 +12,7 @@ with Agrippa.Proposals;
 with Agrippa.Cards.Concessions;
 with Agrippa.Cards.Intrigue;
 with Agrippa.Cards.Leaders;
+with Agrippa.Cards.Senators;
 with Agrippa.Cards.Statesmen;
 with Agrippa.Cards.Wars;
 
@@ -71,6 +72,11 @@ package body Agrippa.Game is
       Faction : Faction_Id;
       Senator : Senator_Id;
       Card    : Agrippa.Cards.Card_Type'Class);
+
+   procedure Play_Statesman
+     (Game      : in out Game_Type'Class;
+      Faction   : Faction_Id;
+      Statesman : Statesman_Id);
 
    function Event_Tag
      (Event : Agrippa.Events.Event_Type)
@@ -1393,7 +1399,7 @@ package body Agrippa.Game is
       Count  : Natural := 0;
    begin
       for S of Game.Senator_State loop
-         if S.In_Play and then S.Has_Faction
+         if S.Has_Faction
            and then S.Faction = Faction
          then
             Count := Count + 1;
@@ -1728,7 +1734,6 @@ package body Agrippa.Game is
       Senator : Senator_Id;
       Card    : Agrippa.Cards.Card_Type'Class)
    is
-      pragma Unreferenced (Faction);
       use all type Agrippa.Cards.Card_Class;
    begin
       case Card.Class is
@@ -1746,12 +1751,31 @@ package body Agrippa.Game is
                 .Set_In_Curia;
 
          when Senator_Card =>
-            Game.Senator_State
-              (Agrippa.Cards.Senators.Senator_Card_Type'Class (Card).Senator)
-                .Set_In_Forum;
+
+            declare
+               State : Agrippa.State.Senators.Senator_State_Type renames
+                         Game.Senator_State
+                           (Agrippa.Cards.Senators
+                            .Senator_Card_Type'Class (Card).Senator);
+            begin
+               if State.Is_Statesman_Only then
+                  Game.Notifier.Send_Notification
+                    (Game.Senator_Name (State.Id)
+                     & " joins statesman in faction "
+                     & Game.Faction_Name (State.Faction));
+                  State.Clear_Statesman_Only;
+               else
+                  State.Set_In_Forum;
+               end if;
+            end;
 
          when Statesman_Card =>
-            null;
+            Play_Statesman
+              (Game      => Game,
+               Faction   => Faction,
+               Statesman =>
+                  Agrippa.Cards.Statesmen.Statesman_Card_Type'Class (Card)
+               .Statesman);
 
          when War_Card =>
             declare
@@ -1764,6 +1788,23 @@ package body Agrippa.Game is
             end;
       end case;
    end Play_Card;
+
+   --------------------
+   -- Play_Statesman --
+   --------------------
+
+   procedure Play_Statesman
+     (Game      : in out Game_Type'Class;
+      Faction   : Faction_Id;
+      Statesman : Statesman_Id)
+   is
+      Card : constant Agrippa.Cards.Statesmen.Statesman_Card_Type'Class :=
+               Agrippa.Cards.Statesmen.Statesman (Statesman);
+      State : Agrippa.State.Senators.Senator_State_Type renames
+                Game.Senator_State (Card.Family);
+   begin
+      State.Set_Statesman (Faction, Statesman);
+   end Play_Statesman;
 
    -------------------
    -- Recall_Forces --
@@ -2419,11 +2460,12 @@ package body Agrippa.Game is
       end;
 
       for Id of Agrippa.Cards.Senators.All_Senators loop
+         Game.Senator_State (Id).Set_Id (Id);
          if Agrippa.Scenarios.Includes
            (Game.Scenario,
             Agrippa.Cards.Senators.Senator (Id).Scenario)
          then
-            Game.Senator_State (Id).Set_In_Play (Id);
+            Game.Senator_State (Id).Set_In_Play;
             Senator_Ids.Append (Id);
          end if;
       end loop;

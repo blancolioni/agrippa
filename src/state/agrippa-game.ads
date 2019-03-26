@@ -2,8 +2,6 @@ private with Ada.Containers.Indefinite_Holders;
 private with Ada.Containers.Vectors;
 private with Ada.Finalization;
 
-private with Agrippa.Cards.Senators;
-
 with WL.Localisation;
 
 with Agrippa.Dice;
@@ -598,19 +596,19 @@ private
      (Game    : Game_Type;
       Senator : Senator_Id)
       return Attribute_Range
-   is (Agrippa.Cards.Senators.Senator (Senator).Military);
+   is (Game.Senator_State (Senator).Military);
 
    overriding function Oratory
      (Game    : Game_Type;
       Senator : Senator_Id)
       return Attribute_Range
-   is (Agrippa.Cards.Senators.Senator (Senator).Oratory);
+   is (Game.Senator_State (Senator).Oratory);
 
    overriding function Loyalty
      (Game    : Game_Type;
       Senator : Senator_Id)
       return Attribute_Range
-   is (Agrippa.Cards.Senators.Senator (Senator).Loyalty);
+   is (Game.Senator_State (Senator).Loyalty);
 
    overriding function Influence
      (Game    : Game_Type;

@@ -15,7 +15,6 @@ with Agrippa.Messages;
 with Agrippa.Proposals;
 
 with Agrippa.Cards.Concessions;
-with Agrippa.Cards.Senators;
 with Agrippa.Cards.Wars;
 
 with Agrippa.State.Senators;
@@ -309,12 +308,8 @@ package body Agrippa.UI.Text is
       for Id of Ids loop
          Put ("#");
          Put (Trim (Id'Image));
-         Set_Col (6);
 
          declare
-            use Agrippa.Cards.Senators;
-            Card : constant Senator_Card_Type'Class :=
-                     Agrippa.Cards.Senators.Senator (Id);
             State : constant Agrippa.State.Senators.Senator_State_Type :=
                       Agrippa.State.Senators.Senator_State_Type
                         (Game.Get_Senator_State (Id));
@@ -334,6 +329,10 @@ package body Agrippa.UI.Text is
             end Put_Attribute;
 
          begin
+            if State.Has_Statesman then
+               Put ("A");
+            end if;
+            Set_Col (6);
             Put (Game.Senator_Name (Id));
             if Game.Has_Faction (Id)
               and then Game.Faction_Leader (Game.Senator_Faction (Id)) = Id
@@ -343,11 +342,11 @@ package body Agrippa.UI.Text is
             end if;
 
             Set_Col (18);
-            Put_Attribute (Card.Military);
+            Put_Attribute (State.Military);
             Put (" ");
-            Put_Attribute (Card.Oratory);
+            Put_Attribute (State.Oratory);
             Put (" ");
-            Put_Attribute (Card.Loyalty);
+            Put_Attribute (State.Loyalty);
             Put (" ");
             if State.Influence < 10 then
                Put (" ");

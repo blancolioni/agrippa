@@ -39,6 +39,7 @@ package body Agrippa.Cards.Statesmen is
      (Card : in out Statesman_Card_Type'Class)
    is
    begin
+      Card.S_Id := Statesman_Id_To_Card_Id.Last_Index + 1;
       New_Card (Card);
       Statesman_Id_To_Card_Id.Append (Card.Id);
    end New_Statesman;

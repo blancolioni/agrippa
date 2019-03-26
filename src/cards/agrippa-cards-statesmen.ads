@@ -27,6 +27,10 @@ package Agrippa.Cards.Statesmen is
      (Id : Statesman_Id)
      return Statesman_Card_Type'Class;
 
+   function Statesman
+     (Card : Statesman_Card_Type'Class)
+      return Statesman_Id;
+
    function All_Statesmen
      (Scenario : Agrippa.Scenarios.Scenario_Type)
       return Statesman_Id_Array;
@@ -36,12 +40,18 @@ private
    type Statesman_Card_Type is
      new Card_Type with
       record
+         S_Id      : Statesman_Id;
          Family    : Senator_Id;
          Military  : Attribute_Range;
          Oratory   : Attribute_Range;
          Loyalty   : Attribute_Range;
          Influence : Attribute_Range;
       end record;
+
+   function Statesman
+     (Card : Statesman_Card_Type'Class)
+      return Statesman_Id
+   is (Card.S_Id);
 
    function Military
      (Statesman : Statesman_Card_Type'Class)
