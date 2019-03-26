@@ -19,6 +19,16 @@ package Agrippa.Cards.Wars is
 
    function Spoils (Card : War_Card_Type'Class) return Talents;
 
+   function Is_Disaster
+     (Card : War_Card_Type'Class;
+      Roll : TDR_Range)
+      return Boolean;
+
+   function Is_Standoff
+     (Card : War_Card_Type'Class;
+      Roll : TDR_Range)
+      return Boolean;
+
 private
 
    type Roll_Array is array (Positive range <>) of Positive;

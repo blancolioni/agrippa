@@ -291,8 +291,8 @@ package body Agrippa.Messages is
 
    function Initiative_Roll
      (Message : Initiative_Roll_Message;
-      Roll    : Agrippa.Dice.DR_Range;
-      Event   : Agrippa.Dice.TDR_Range)
+      Roll    : DR_Range;
+      Event   : TDR_Range)
       return Initiative_Roll_Message
    is
    begin
@@ -308,7 +308,7 @@ package body Agrippa.Messages is
 
    function Initiative_Roll
      (Message : Initiative_Roll_Message;
-      Roll    : Agrippa.Dice.DR_Range;
+      Roll    : DR_Range;
       Card    : Card_Id)
       return Initiative_Roll_Message
    is

@@ -2,12 +2,6 @@ private with WL.Random;
 
 package Agrippa.Dice is
 
-   subtype Die_Range is Integer range 1 .. 6;
-
-   subtype DR_Range is Integer range 2 .. 12;
-
-   subtype TDR_Range is Integer range 3 .. 18;
-
    function Roll_Die return Die_Range;
 
    function DR return DR_Range;

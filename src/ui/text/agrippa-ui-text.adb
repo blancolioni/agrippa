@@ -6,7 +6,6 @@ with Ada.Strings.Unbounded;
 with WL.Localisation;
 with WL.Numerics.Roman;
 
-with Agrippa.Dice;
 with Agrippa.Events;
 with Agrippa.Images;
 with Agrippa.Scenarios;
@@ -554,7 +553,7 @@ package body Agrippa.UI.Text is
 
             if Event_Initiative_Roll (Message) then
                declare
-                  Event_Roll : constant Agrippa.Dice.TDR_Range :=
+                  Event_Roll : constant TDR_Range :=
                                  Event_Type (Message);
                begin
                   Ada.Text_IO.Put

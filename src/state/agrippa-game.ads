@@ -4,7 +4,6 @@ private with Ada.Finalization;
 
 with WL.Localisation;
 
-with Agrippa.Dice;
 with Agrippa.Events;
 with Agrippa.Scenarios;
 
@@ -352,7 +351,7 @@ private
         Agrippa.Phases."=");
 
    type Event_Table is
-     array (Agrippa.Dice.TDR_Range) of Agrippa.Events.Event_Type;
+     array (TDR_Range) of Agrippa.Events.Event_Type;
 
    type Status_Effect is
       record
@@ -436,7 +435,7 @@ private
 
    overriding function Event_Tag
      (Game  : Game_Type;
-      Event : Agrippa.Dice.TDR_Range)
+      Event : TDR_Range)
       return String;
 
    overriding function Current_Status

@@ -1147,7 +1147,7 @@ package body Agrippa.Players.Robots is
 
                   when Imperial =>
                      declare
-                        Roll : constant Agrippa.Dice.Die_Range :=
+                        Roll : constant Die_Range :=
                                  Agrippa.Dice.Roll_Die;
                         Leader_Cash : constant Talents :=
                                         Talents'Min (Talents (Roll),

@@ -2,7 +2,6 @@ private with Ada.Containers.Doubly_Linked_Lists;
 private with Ada.Containers.Indefinite_Doubly_Linked_Lists;
 private with Ada.Strings.Unbounded;
 
-with Agrippa.Dice;
 with Agrippa.Events;
 with Agrippa.Proposals;
 
@@ -173,7 +172,7 @@ package Agrippa.Messages is
 
    function Event_Type
      (Message : Initiative_Roll_Message)
-      return Agrippa.Dice.TDR_Range
+      return TDR_Range
      with Pre => Event_Initiative_Roll (Message);
 
    function Initiative_Card
@@ -211,13 +210,13 @@ package Agrippa.Messages is
 
    function Initiative_Roll
      (Message : Initiative_Roll_Message;
-      Roll    : Agrippa.Dice.DR_Range;
-      Event   : Agrippa.Dice.TDR_Range)
+      Roll    : DR_Range;
+      Event   : TDR_Range)
       return Initiative_Roll_Message;
 
    function Initiative_Roll
      (Message : Initiative_Roll_Message;
-      Roll    : Agrippa.Dice.DR_Range;
+      Roll    : DR_Range;
       Card    : Card_Id)
       return Initiative_Roll_Message;
 
@@ -464,7 +463,7 @@ private
             when Faction_Transfers =>
                Transfer_List : Transfer_Lists.List;
             when Initiative_Roll =>
-               Event_Roll : Agrippa.Dice.TDR_Range;
+               Event_Roll : TDR_Range;
                Drawn_Card    : Card_Id;
             when Persuasion_Attempt =>
                Target            : Senator_Id;
@@ -547,7 +546,7 @@ private
 
    function Event_Type
      (Message : Initiative_Roll_Message)
-      return Agrippa.Dice.TDR_Range
+      return TDR_Range
    is (Message.Event_Roll);
 
    function Initiative_Card

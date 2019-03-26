@@ -30,11 +30,11 @@ package Agrippa.State.Leaders is
 
    function Disaster
      (Leader : Leader_State_Type'Class)
-      return Agrippa.Dice.TDR_Range;
+      return TDR_Range;
 
    function Stand_Off
      (Leader : Leader_State_Type'Class)
-      return Agrippa.Dice.TDR_Range;
+      return TDR_Range;
 
    procedure Set_In_Play
      (Leader : in out Leader_State_Type;
@@ -114,12 +114,12 @@ private
 
    function Disaster
      (Leader : Leader_State_Type'Class)
-      return Agrippa.Dice.TDR_Range
+      return TDR_Range
    is (Agrippa.Cards.Leaders.Leader (Leader.Id).Disaster);
 
    function Stand_Off
      (Leader : Leader_State_Type'Class)
-      return Agrippa.Dice.TDR_Range
+      return TDR_Range
    is (Agrippa.Cards.Leaders.Leader (Leader.Id).Stand_Off);
 
 end Agrippa.State.Leaders;

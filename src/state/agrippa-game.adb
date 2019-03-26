@@ -5,6 +5,7 @@ with Ada.Text_IO;
 with WL.Numerics.Roman;
 with WL.Random;
 
+with Agrippa.Dice;
 with Agrippa.Images;
 
 with Agrippa.Proposals;
@@ -20,7 +21,7 @@ with Agrippa.Cards.Vectors;
 
 package body Agrippa.Game is
 
-   type Combat_Result is (Defeat, Stalemate, Victory);
+   type Combat_Result is (Disaster, Standoff, Defeat, Stalemate, Victory);
 
    type Combat_Result_Record is
       record
@@ -29,7 +30,11 @@ package body Agrippa.Game is
       end record;
 
    function Adjudicate_Combat
-     (Roll    : Integer)
+     (War       : War_Id;
+      DS_Voided : Boolean;
+      TDR       : TDR_Range;
+      Forces    : Positive;
+      Result    : Integer)
       return Combat_Result_Record;
 
    function Count_Legions
@@ -144,9 +149,15 @@ package body Agrippa.Game is
    -----------------------
 
    function Adjudicate_Combat
-     (Roll    : Integer)
+     (War       : War_Id;
+      DS_Voided : Boolean;
+      TDR       : TDR_Range;
+      Forces    : Positive;
+      Result    : Integer)
       return Combat_Result_Record
    is
+      Card : constant Agrippa.Cards.Wars.War_Card_Type'Class :=
+               Agrippa.Cards.Wars.War (War);
       Combat_Result_Table : constant array (3 .. 18) of Combat_Result_Record :=
                               (3 => (Defeat, Max_Legions),
                                4 => (Defeat, 4),
@@ -165,8 +176,18 @@ package body Agrippa.Game is
                                17 => (Victory, 1),
                                18 => (Victory, 0));
    begin
-      return Combat_Result_Table
-        (Integer'Max (3, Integer'Min (18, Roll)));
+      if not DS_Voided and then Card.Is_Disaster (TDR) then
+         return (Disaster, (Forces + 1) / 2);
+      elsif not DS_Voided and then Card.Is_Standoff (TDR) then
+         return (Standoff, (Forces + 3) / 4);
+      else
+         return CR : Combat_Result_Record :=
+           Combat_Result_Table
+             (Integer'Max (3, Integer'Min (18, Result)))
+         do
+            CR.Losses := Natural'Min (CR.Losses, Forces);
+         end return;
+      end if;
    end Adjudicate_Combat;
 
    ---------------------------
@@ -318,16 +339,19 @@ package body Agrippa.Game is
                              Natural
                                (Agrippa.Cards.Wars.War (War)
                                 .Land_Strength);
-      Roll               : constant Agrippa.Dice.TDR_Range :=
+      Roll               : constant TDR_Range :=
                              Agrippa.Dice.TDR;
       Combat_Bonus       : constant Integer :=
                              Total_Attack - War_Strength;
       Final_Roll         : constant Integer :=
                              Roll + Combat_Bonus;
       Result             : constant Combat_Result_Record :=
-                             Adjudicate_Combat (Final_Roll);
+                             Adjudicate_Combat
+                               (War, False, Roll, Legion_Strength, Final_Roll);
       Result_Tag         : constant String :=
                              (case Result.Result is
+                                 when Disaster => "disaster",
+                                 when Standoff => "stand-off",
                                  when Defeat    => "defeat",
                                  when Stalemate => "stalemate",
                                  when Victory   => "victory");
@@ -1277,7 +1301,7 @@ package body Agrippa.Game is
 
    overriding function Event_Tag
      (Game  : Game_Type;
-      Event : Agrippa.Dice.TDR_Range)
+      Event : TDR_Range)
       return String
    is
    begin
@@ -1977,12 +2001,12 @@ package body Agrippa.Game is
 
          when Initiative_Roll =>
             declare
-               Roll : constant Agrippa.Dice.DR_Range :=
+               Roll : constant DR_Range :=
                         Agrippa.Dice.DR;
             begin
                if Roll = 7 then
                   declare
-                     Event_Roll : constant Agrippa.Dice.TDR_Range :=
+                     Event_Roll : constant TDR_Range :=
                                     Agrippa.Dice.TDR;
                   begin
                      Game.Notifier.Send_Message
@@ -2027,7 +2051,7 @@ package body Agrippa.Game is
                      Senator  : constant Senator_Id := Get_Senator (Response);
                      Target   : constant Senator_Id :=
                                   Get_Persuasion_Target (Response);
-                     Roll     : constant Agrippa.Dice.DR_Range :=
+                     Roll     : constant DR_Range :=
                                   Agrippa.Dice.DR;
                      Ora      : constant Natural :=
                                   Natural (Game.Oratory (Senator));
@@ -2096,7 +2120,7 @@ package body Agrippa.Game is
                             To_Player (Message);
                Spend    : constant Talents := Get_Money (Response);
                Senator  : constant Senator_Id := Get_Senator (Response);
-               Roll     : constant Agrippa.Dice.Die_Range :=
+               Roll     : constant Die_Range :=
                             Agrippa.Dice.Roll_Die;
                Success  : constant Boolean :=
                             Roll + Natural (Spend) >= 6;
@@ -2115,7 +2139,7 @@ package body Agrippa.Game is
 
             declare
                Response          : Agrippa.Messages.Message_Type := Message;
-               Roll              : constant Agrippa.Dice.TDR_Range :=
+               Roll              : constant TDR_Range :=
                                      Agrippa.Dice.TDR;
                HRAO              : constant Senator_Id :=
                                      Game.Highest_Ranking_Available_Officer;

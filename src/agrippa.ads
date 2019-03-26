@@ -10,6 +10,12 @@ package Agrippa is
    Max_Statesmen  : constant := 30;
    Max_Factions   : constant := 6;
 
+   subtype Die_Range is Integer range 1 .. 6;
+
+   subtype DR_Range is Integer range 2 .. 12;
+
+   subtype TDR_Range is Integer range 3 .. 18;
+
    type Turn_Number is range 0 .. Max_Turns;
 
    type Unrest_Level is range 0 .. 99;

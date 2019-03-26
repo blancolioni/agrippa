@@ -2,7 +2,6 @@ private with Ada.Strings.Unbounded;
 
 with WL.Localisation;
 
-with Agrippa.Dice;
 with Agrippa.Events;
 
 with Agrippa.Messages;
@@ -474,7 +473,7 @@ package Agrippa.State is
 
    function Event_Tag
      (State : State_Interface;
-      Event : Agrippa.Dice.TDR_Range)
+      Event : TDR_Range)
       return String
       is abstract;
 

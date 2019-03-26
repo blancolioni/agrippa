@@ -39,6 +39,30 @@ package body Agrippa.Cards.Wars is
         "no such war: " & Tag;
    end Get;
 
+   -----------------
+   -- Is_Disaster --
+   -----------------
+
+   function Is_Disaster
+     (Card : War_Card_Type'Class;
+      Roll : TDR_Range)
+      return Boolean
+   is
+   begin
+      for X of Card.Disaster.all loop
+         if X = Roll then
+            return True;
+         end if;
+      end loop;
+      return False;
+   end Is_Disaster;
+
+   function Is_Standoff
+     (Card : War_Card_Type'Class;
+      Roll : TDR_Range)
+      return Boolean
+   is (for some X of Card.Stand_Off.all => X = Roll);
+
    -------------
    -- New_War --
    -------------

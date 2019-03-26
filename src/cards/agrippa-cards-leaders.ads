@@ -1,5 +1,3 @@
-with Agrippa.Dice;
-
 package Agrippa.Cards.Leaders is
 
    type Leader_Card_Type is
@@ -16,11 +14,11 @@ package Agrippa.Cards.Leaders is
 
    function Disaster
      (Card : Leader_Card_Type'Class)
-      return Agrippa.Dice.TDR_Range;
+      return TDR_Range;
 
    function Stand_Off
      (Card : Leader_Card_Type'Class)
-      return Agrippa.Dice.TDR_Range;
+      return TDR_Range;
 
    function Matching_Wars
      (Card : Leader_Card_Type'Class)
@@ -33,8 +31,8 @@ private
       record
          L_Id           : Leader_Id;
          Strength       : Natural;
-         Disaster       : Agrippa.Dice.TDR_Range;
-         Stand_Off      : Agrippa.Dice.TDR_Range;
+         Disaster       : TDR_Range;
+         Stand_Off      : TDR_Range;
          Matching_Wars  : access constant War_Id_Array;
       end record;
 
@@ -46,12 +44,12 @@ private
 
    function Disaster
      (Card : Leader_Card_Type'Class)
-      return Agrippa.Dice.TDR_Range
+      return TDR_Range
    is (Card.Disaster);
 
    function Stand_Off
      (Card : Leader_Card_Type'Class)
-      return Agrippa.Dice.TDR_Range
+      return TDR_Range
    is (Card.Stand_Off);
 
    function Matching_Wars
