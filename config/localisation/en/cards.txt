@@ -4,7 +4,7 @@ tax-farmer-3,Tax Farmer III
 tax-farmer-4,Tax Farmer IV
 tax-farmer-5,Tax Farmer V
 tax-farmer-6,Tax Farmer VI
-harbour-fees,Harbour Fees
+harbor-fees,Harbour Fees
 mining,Mining
 armaments,Armaments
 ship-building,Ship Building
