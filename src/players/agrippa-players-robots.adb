@@ -528,8 +528,12 @@ package body Agrippa.Players.Robots is
                   declare
                      Office : constant Office_Type :=
                                 Agrippa.Deals.Get_Office (Choice);
+                     Holder : constant Senator_Id :=
+                                Agrippa.Deals.Get_Holder (Choice);
                   begin
-                     if not Allocated (Office) then
+                     if not Allocated (Office)
+                       and then State.Senator_Faction (Holder) = Rec.Faction
+                     then
                         Allocated (Office) := True;
                         Add (Deal, Rec.Faction, Choice);
                         State.Log
@@ -849,41 +853,49 @@ package body Agrippa.Players.Robots is
       use Agrippa.Deals;
       Result : Offer_List;
 
-      function Office (Item : Office_Type) return Offer_Type
-      is (Agrippa.Deals.Office (Item, Robot.Desired_Candidate (State, Item)));
-
       procedure Add (Office : Office_Type);
 
+      ---------
+      -- Add --
+      ---------
+
       procedure Add (Office : Office_Type) is
+         S : constant Nullable_Senator_Id :=
+               Robot.Desired_Candidate (State, Office);
       begin
+         if S /= No_Senator then
+            Add (Result,
+                 Agrippa.Deals.Office
+                   (Office, To_Senator_Id (S)));
+         end if;
       end Add;
    begin
       case Robot.Robot_Faction is
          when Conservative =>
-            Add (Result, Office (Rome_Consul));
-            Add (Result, Office (Censor));
-            Add (Result, Office (Field_Consul));
+            Add (Rome_Consul);
+            Add (Censor);
+            Add (Field_Consul);
             Add (Result, Province);
             Add (Result, Concession);
 
          when Imperial =>
-            Add (Result, Office (Field_Consul));
-            Add (Result, Office (Rome_Consul));
+            Add (Field_Consul);
+            Add (Rome_Consul);
             Add (Result, Province);
-            Add (Result, Office (Censor));
+            Add (Censor);
             Add (Result, Concession);
 
          when Plutocratic =>
-            Add (Result, Office (Censor));
+            Add (Censor);
             Add (Result, Concession);
             Add (Result, Province);
-            Add (Result, Office (Rome_Consul));
-            Add (Result, Office (Field_Consul));
+            Add (Rome_Consul);
+            Add (Field_Consul);
 
          when Populist =>
-            Add (Result, Office (Rome_Consul));
-            Add (Result, Office (Field_Consul));
-            Add (Result, Office (Censor));
+            Add (Rome_Consul);
+            Add (Field_Consul);
+            Add (Censor);
             Add (Result, Concession);
             Add (Result, Province);
 
@@ -1610,6 +1622,7 @@ package body Agrippa.Players.Robots is
         (Faction : Faction_Id;
          Terms   : Agrippa.Deals.Offer_List)
       is
+         pragma Unreferenced (Faction);
          This_Score : Natural := 0;
 
          procedure Check_My_Offer (Offer : Agrippa.Deals.Offer_Type);
@@ -1632,16 +1645,15 @@ package body Agrippa.Players.Robots is
          end Check_My_Offer;
 
       begin
-         if Faction = Robot.Faction then
-            Agrippa.Deals.Scan (Terms, Check_My_Offer'Access);
-            if This_Score >= 8 then
-               Score := Score + 1;
-            end if;
-         end if;
+         Agrippa.Deals.Scan (Terms, Check_My_Offer'Access);
+         Score := Score + This_Score;
       end Check_Terms;
 
    begin
       Agrippa.Deals.Scan (Deal, Check_Terms'Access);
+      State.Log
+        (State.Faction_Name (Robot.Faction)
+         & " scores deal" & Score'Image);
       if Score > 0 then
          State.Log
            (State.Faction_Name (Robot.Faction)
