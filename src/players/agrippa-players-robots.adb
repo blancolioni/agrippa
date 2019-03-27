@@ -551,8 +551,11 @@ package body Agrippa.Players.Robots is
       package Assignment_Lists is
         new Ada.Containers.Doubly_Linked_Lists (Assignment);
 
-      Tried_List : Assignment_Lists.List;
+      Tried_List  : Assignment_Lists.List;
       Current_Try : Assignment := (others => No_Senator);
+
+      Nominated   : array (Senator_Id) of Boolean :=
+                      (others => False);
 
       function Tried
         (Current : Deal_Type;
@@ -643,6 +646,7 @@ package body Agrippa.Players.Robots is
 
             Allocated := (others => False);
             Current_Try := (others => No_Senator);
+            Nominated := (others => False);
 
             Clear (Deal);
 
@@ -711,6 +715,7 @@ package body Agrippa.Players.Robots is
                           and then not Tried (Deal, Office, Holder)
                         then
                            Allocated (Office) := True;
+                           Nominated (Holder) := True;
                            Add (Deal, Rec.Faction, Choice);
                            State.Log
                              (Ada.Strings.Unbounded.To_String (Rec.Name)
@@ -753,6 +758,8 @@ package body Agrippa.Players.Robots is
       if not Success then
          State.Log
            ("could not find a deal");
+         Clear (Deal);
+         return Deal;
       end if;
 
       if State.Crisis then
@@ -763,7 +770,7 @@ package body Agrippa.Players.Robots is
             Wars     : constant War_Id_Array := State.Active_Wars;
          begin
             for Sid of Agrippa.Cards.Senators.All_Senators loop
-               if not State.Has_Office (Sid) then
+               if not Nominated (Sid) then
                   declare
                      This_Score : constant Attribute_Range :=
                                     State.Military (Sid);
