@@ -95,7 +95,7 @@ package Agrippa is
 
    type Popularity_Range is range -9 .. 9;
 
-   type Influence_Range is range 0 .. 35;
+   type Influence_Range is range 0 .. 55;
 
    type Faction_Influence_Range is range 0 .. 99;
 
