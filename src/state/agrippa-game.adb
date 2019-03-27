@@ -2387,9 +2387,26 @@ package body Agrippa.Game is
    is
       State : Agrippa.State.Senators.Senator_State_Type renames
                 Game.Senator_State (Senator);
+
+      procedure Clear_Office (Office : Office_Type);
+
+      ------------------
+      -- Clear_Office --
+      ------------------
+
+      procedure Clear_Office (Office : Office_Type) is
+      begin
+         if Game.Has_Holder (Office) then
+            Game.Senator_State (Game.Office_Holder (Office)).Clear_Office;
+         end if;
+      end Clear_Office;
+
    begin
-      if Game.Has_Holder (Office) then
-         Game.Senator_State (Game.Office_Holder (Office)).Clear_Office;
+      Clear_Office (Office);
+
+      if Office = Rome_Consul or else Office = Field_Consul then
+         Clear_Office (Dictator);
+         Clear_Office (Master_Of_Horse);
       end if;
 
       State.Set_Office (Office);
