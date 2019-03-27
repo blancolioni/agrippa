@@ -177,6 +177,10 @@ package Agrippa.State is
      (State   : State_Interface'Class;
       Message : String);
 
+   function Crisis
+     (State : State_Interface'Class)
+      return Boolean;
+
    function Current_Treasury
      (State   : State_Interface)
       return Talents

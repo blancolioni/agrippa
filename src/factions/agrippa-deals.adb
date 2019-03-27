@@ -78,19 +78,22 @@ package body Agrippa.Deals is
          return True;
       end if;
       for Terms of Deal.Terms loop
-         for Offer of Terms.Terms.List loop
-            if Offer.Category = Agrippa.Deals.Office
-              and then Offer.Offer_Office = Office
-            then
-               declare
-                  Result : constant Boolean :=
-                             Offer.Holder /= Holder
-                                 or else Terms.Faction /= Faction;
-               begin
-                  return Result;
-               end;
-            end if;
-         end loop;
+         if Terms.Faction = Faction then
+            for Offer of Terms.Terms.List loop
+               if Offer.Category = Agrippa.Deals.Office
+                 and then Offer.Offer_Office = Office
+               then
+                  declare
+                     Result : constant Boolean :=
+                                Offer.Holder /= Holder;
+                  begin
+                     if Result then
+                        return Result;
+                     end if;
+                  end;
+               end if;
+            end loop;
+         end if;
       end loop;
       return False;
    end Contradicts;

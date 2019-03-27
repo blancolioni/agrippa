@@ -94,6 +94,7 @@ package body Agrippa.Game is
 
    procedure  Hold_Vote
      (Game      : in out Game_Type'Class;
+      Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type);
 
    procedure Enact_Proposals
@@ -1597,8 +1598,13 @@ package body Agrippa.Game is
       return Result;
    end Highest_Score;
 
+   ---------------
+   -- Hold_Vote --
+   ---------------
+
    procedure  Hold_Vote
      (Game      : in out Game_Type'Class;
+      Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type)
    is
       Result : Faction_Vote_Type := (others => 0);
@@ -1610,7 +1616,7 @@ package body Agrippa.Game is
                            Game.Player_State (Faction.Id).Handler;
                Votes   : Faction_Vote_Type;
             begin
-               Handler.Vote_Proposal (Game, Proposals);
+               Handler.Vote_Proposal (Game, Sponsor, Proposals);
                Handler.Get_Votes (Votes);
                Ada.Text_IO.Put
                  (Faction.Name & ": ");
@@ -2250,7 +2256,8 @@ package body Agrippa.Game is
                   Game.Notifier.Send_Message (Game, Response);
 
                   Game.Hold_Vote
-                    (Agrippa.Messages.Proposals (Response));
+                    (Agrippa.Messages.Get_Senator (Response),
+                     Agrippa.Messages.Proposals (Response));
 
                end if;
             end;

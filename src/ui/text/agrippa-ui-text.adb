@@ -184,6 +184,7 @@ package body Agrippa.UI.Text is
    is
       use Ada.Text_IO;
    begin
+      New_Line;
       Put ("*** ");
       Put_Faction_Name (Faction);
       Set_Col (18);

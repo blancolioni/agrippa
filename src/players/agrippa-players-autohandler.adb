@@ -96,11 +96,12 @@ package body Agrippa.Players.Autohandler is
             end Get_Offer_Reply;
          or
             accept Vote_Proposal
-              (State : Agrippa.State.State_Interface'Class;
+              (State    : Agrippa.State.State_Interface'Class;
+               Sponsor  : Senator_Id;
                Proposal : in Agrippa.Proposals.Proposal_Container_Type)
             do
                Current_Votes :=
-                 My_Player.Element.Vote (State, Proposal);
+                 My_Player.Element.Vote (State, Sponsor, Proposal);
             end Vote_Proposal;
             accept Get_Votes (Votes : out Faction_Vote_Type) do
                Votes := Current_Votes;

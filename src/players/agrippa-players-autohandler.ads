@@ -55,6 +55,7 @@ private
 
       entry Vote_Proposal
         (State    : Agrippa.State.State_Interface'Class;
+         Sponsor  : Senator_Id;
          Proposal : Agrippa.Proposals.Proposal_Container_Type);
 
       entry Get_Votes

@@ -152,25 +152,11 @@ package body Agrippa.Phases.Senate is
                end if;
             end;
 
-            declare
-               Wars        : constant War_Id_Array := State.Active_Wars;
-               Can_Appoint : Boolean := Wars'Length >= 3;
-            begin
-               if not Can_Appoint then
-                  for War of Wars loop
-                     if State.Get_War_State (War).Land_Strength >= 16 then
-                        Can_Appoint := True;
-                        exit;
-                     end if;
-                  end loop;
-               end if;
-
-               if Can_Appoint then
-                  Senate_State.Step := Dictator_Nomination;
-               else
-                  Senate_State.Step := Censor_Nomination;
-               end if;
-            end;
+            if State.Crisis then
+               Senate_State.Step := Dictator_Nomination;
+            else
+               Senate_State.Step := Censor_Nomination;
+            end if;
 
          when Dictator_Nomination =>
 

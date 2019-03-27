@@ -1,3 +1,4 @@
+with Ada.Containers.Doubly_Linked_Lists;
 with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded;
 
@@ -53,6 +54,14 @@ package body Agrippa.Players.Robots is
 
    package Faction_Sorting is
      new Faction_Vectors.Generic_Sorting (More_Votes);
+
+   type Coalition_Type is
+      record
+         Index  : Natural;
+         Vector : Faction_Vectors.Vector;
+      end record;
+
+   function Show (Coalition : Coalition_Type) return String;
 
    type Robot_Player_Type is
      new Autoplayer_Interface with
@@ -119,6 +128,7 @@ package body Agrippa.Players.Robots is
    overriding function Vote
      (Player    : Robot_Player_Type;
       State     : Agrippa.State.State_Interface'Class;
+      Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type)
       return Faction_Vote_Type;
 
@@ -136,6 +146,12 @@ package body Agrippa.Players.Robots is
      (Robot  : Robot_Player_Type'Class;
       State  : Agrippa.State.State_Interface'Class)
       return Agrippa.Deals.Offer_List;
+
+   function Create_Proposal
+     (Robot   : Robot_Player_Type'Class;
+      State   : Agrippa.State.State_Interface'Class;
+      Message : Agrippa.Messages.Make_Proposal_Message)
+      return Agrippa.Messages.Make_Proposal_Message;
 
    function Make_Persuasion_Attempt
      (Robot     : Robot_Player_Type'Class;
@@ -158,9 +174,10 @@ package body Agrippa.Players.Robots is
       Card    : out Card_Id);
 
    function Create_Coalition
-     (Robot   : Robot_Player_Type'Class;
-      State   : Agrippa.State.State_Interface'Class)
-      return Faction_Vectors.Vector;
+     (Robot    : Robot_Player_Type'Class;
+      State    : Agrippa.State.State_Interface'Class;
+      Current  : Natural)
+      return Coalition_Type;
 
    procedure Create_Proposal
      (Robot     : Robot_Player_Type'Class;
@@ -175,6 +192,12 @@ package body Agrippa.Players.Robots is
       Deal     : Agrippa.Deals.Deal_Type;
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
       return Boolean;
+
+   function Score_Proposals
+     (Faction  : Faction_Id;
+      State    : Agrippa.State.State_Interface'Class;
+      Proposal : Agrippa.Proposals.Proposal_Container_Type)
+      return Integer;
 
    function Attack_War
      (Robot     : Robot_Player_Type'Class;
@@ -385,9 +408,10 @@ package body Agrippa.Players.Robots is
    ----------------------
 
    function Create_Coalition
-     (Robot   : Robot_Player_Type'Class;
-      State   : Agrippa.State.State_Interface'Class)
-      return Faction_Vectors.Vector
+     (Robot    : Robot_Player_Type'Class;
+      State    : Agrippa.State.State_Interface'Class;
+      Current  : Natural)
+      return Coalition_Type
    is
       Total_Votes    : Vote_Count := 0;
       Required_Votes : Vote_Count;
@@ -458,15 +482,16 @@ package body Agrippa.Players.Robots is
               (1, 2, 3));
 
       begin
-         for Trial_Index in Coalitions'Range (1) loop
+         for Trial_Index in Current + 1 .. Coalitions'Last (1) loop
             declare
                X : constant Natural := Coalitions (Trial_Index, 1);
                Y : constant Natural := Coalitions (Trial_Index, 2);
                Z : constant Natural := Coalitions (Trial_Index, 3);
             begin
                if Check_Coalition (X, Y, Z) then
-                  return Result : Faction_Vectors.Vector do
-                     Result.Append (This_Faction);
+                  return Result : Coalition_Type do
+                     Result.Index := Trial_Index;
+                     Result.Vector.Append (This_Faction);
 
                      declare
                         procedure Add (Index : Natural);
@@ -478,7 +503,8 @@ package body Agrippa.Players.Robots is
                         procedure Add (Index : Natural) is
                         begin
                            if Index > 0 then
-                              Result.Append (Other_Factions.Element (Index));
+                              Result.Vector.Append
+                                (Other_Factions.Element (Index));
                            end if;
                         end Add;
 
@@ -488,19 +514,20 @@ package body Agrippa.Players.Robots is
                         Add (Z);
                      end;
 
-                     Faction_Sorting.Sort (Result);
+                     Faction_Sorting.Sort (Result.Vector);
                   end return;
                end if;
             end;
          end loop;
       end;
 
-      return Result : Faction_Vectors.Vector do
-         Result.Append (This_Faction);
-         Result.Append (Other_Factions.Element (2));
-         Result.Append (Other_Factions.Element (3));
-         Result.Append (Other_Factions.Element (4));
-         Result.Append (Other_Factions.Element (5));
+      return Result : Coalition_Type do
+         Result.Index := 0;
+         Result.Vector.Append (This_Faction);
+         Result.Vector.Append (Other_Factions.Element (2));
+         Result.Vector.Append (Other_Factions.Element (3));
+         Result.Vector.Append (Other_Factions.Element (4));
+         Result.Vector.Append (Other_Factions.Element (5));
       end return;
    end Create_Coalition;
 
@@ -514,126 +541,279 @@ package body Agrippa.Players.Robots is
       Coalition : Faction_Vectors.Vector)
       return Agrippa.Deals.Deal_Type
    is
+      pragma Unreferenced (Robot);
       use Agrippa.Deals;
       Deal      : Deal_Type;
       Allocated : array (Office_Type) of Boolean := (others => False);
-      Success   : Boolean := True;
+      Success   : Boolean := False;
+
+      type Assignment is array (Office_Type) of Nullable_Senator_Id;
+      package Assignment_Lists is
+        new Ada.Containers.Doubly_Linked_Lists (Assignment);
+
+      Tried_List : Assignment_Lists.List;
+      Current_Try : Assignment := (others => No_Senator);
+
+      function Tried
+        (Current : Deal_Type;
+         Office  : Office_Type;
+         Senator : Senator_Id)
+         return Boolean;
+
+      function Coalition_Member (Faction : Faction_Id) return Boolean
+      is (for some Rec of Coalition => Rec.Faction = Faction);
+
+      -----------
+      -- Tried --
+      -----------
+
+      function Tried
+        (Current : Deal_Type;
+         Office  : Office_Type;
+         Senator : Senator_Id)
+         return Boolean
+      is
+         Found : Boolean := False;
+      begin
+         for Assignment of Tried_List loop
+            if Has_Senator (Assignment (Office))
+              and then To_Senator_Id (Assignment (Office)) = Senator
+            then
+               Found := True;
+
+               declare
+
+                  Checked : array (Office_Type) of Boolean :=
+                              (others => False);
+
+                  procedure Check
+                    (Faction : Faction_Id;
+                     Offer   : Offer_Type);
+
+                  -----------
+                  -- Check --
+                  -----------
+
+                  procedure Check
+                    (Faction : Faction_Id;
+                     Offer   : Offer_Type)
+                  is
+                     pragma Unreferenced (Faction);
+                  begin
+                     if Is_Office_Offer (Offer) then
+                        Checked (Get_Office (Offer)) := True;
+                     end if;
+
+                     if Is_Office_Offer (Offer)
+                       and then Assignment (Get_Office (Offer))
+                         /= To_Nullable_Id (Get_Holder (Offer))
+                     then
+                        Found := False;
+                     end if;
+                  end Check;
+
+               begin
+                  Checked (Office) := True;
+                  Scan (Current, Check'Access);
+
+                  if Found then
+                     for Check_Office in Checked'Range loop
+                        if not Checked (Check_Office)
+                          and then Assignment (Check_Office) /= No_Senator
+                        then
+                           Found := False;
+                           exit;
+                        end if;
+                     end loop;
+                  end if;
+               end;
+            end if;
+            exit when Found;
+         end loop;
+         return Found;
+      end Tried;
+
    begin
 
-      for Rec of Coalition loop
-         if Rec.Faction /= Robot.Faction then
-            Success := False;
-            for Choice of Rec.Desire loop
-               if Is_Office_Offer (Choice) then
-                  declare
-                     Office : constant Office_Type :=
-                                Agrippa.Deals.Get_Office (Choice);
-                     Holder : constant Senator_Id :=
-                                Agrippa.Deals.Get_Holder (Choice);
-                  begin
-                     if not Allocated (Office)
-                       and then State.Senator_Faction (Holder) = Rec.Faction
-                     then
-                        Allocated (Office) := True;
-                        Add (Deal, Rec.Faction, Choice);
-                        State.Log
-                          (Ada.Strings.Unbounded.To_String (Rec.Name)
-                           & " accepts "
-                           & Office'Image);
-                        Success := True;
-                        exit;
-                     end if;
-                  end;
-               end if;
-            end loop;
+      for Retry in Boolean loop
 
-            if not Success then
-               State.Log
-                 (Ada.Strings.Unbounded.To_String (Rec.Name)
-                  & " rejects remaining offices");
-            end if;
-         end if;
+         while not Success loop
 
-         exit when not Success;
-      end loop;
+            State.Log ("negotiating a deal");
 
-      if Success then
-         for Rec of Coalition loop
-            if Rec.Faction = Robot.Faction then
+            Allocated := (others => False);
+            Current_Try := (others => No_Senator);
+
+            Clear (Deal);
+
+            for Rec of Coalition loop
+
+               Success := False;
+
                for Choice of Rec.Desire loop
                   if Is_Office_Offer (Choice) then
                      declare
                         Office : constant Office_Type :=
                                    Agrippa.Deals.Get_Office (Choice);
+                        Holder : constant Senator_Id :=
+                                   Agrippa.Deals.Get_Holder (Choice);
                      begin
-                        if not Allocated (Office) then
+                        if Allocated (Office) then
+                           State.Log
+                             (State.Faction_Name (Rec.Faction)
+                              & ": skipping "
+                              & Office'Image);
+                        elsif not Retry
+                          and then State.Senator_Faction (Holder)
+                          /= Rec.Faction
+                        then
+                           State.Log
+                             (State.Faction_Name (Rec.Faction)
+                              & ": not my office "
+                              & Office'Image);
+                        elsif Retry
+                          and then State.Senator_Faction (Holder)
+                          /= Rec.Faction
+                          and then Coalition_Member
+                            (State.Senator_Faction (Holder))
+                        then
+                           State.Log
+                             (State.Faction_Name (Rec.Faction)
+                              & ": not proposing "
+                              & State.Senator_Name_And_Faction (Holder)
+                              & " for "
+                              & Office'Image
+                              & " because my coalition partner can do it");
+                        elsif Tried (Deal, Office, Holder) then
+                           declare
+                              Report_Deal : Deal_Type := Deal;
+                           begin
+                              Add (Report_Deal, Rec.Faction, Choice);
+                              State.Log
+                                (State.Faction_Name (Rec.Faction)
+                                 & ": already tried "
+                                 & Show (Report_Deal, State));
+                           end;
+                        else
+                           State.Log
+                             ("adding " & Show (Choice, State));
+                        end if;
+
+                        if not Allocated (Office)
+                          and then (Retry
+                                    or else State.Senator_Faction (Holder)
+                                    = Rec.Faction)
+                          and then (not Retry
+                                    or else State.Senator_Faction (Holder)
+                                    = Rec.Faction
+                                    or else not Coalition_Member
+                                      (State.Senator_Faction (Holder)))
+                          and then not Tried (Deal, Office, Holder)
+                        then
                            Allocated (Office) := True;
                            Add (Deal, Rec.Faction, Choice);
+                           State.Log
+                             (Ada.Strings.Unbounded.To_String (Rec.Name)
+                              & " suggests "
+                              & State.Senator_Name_And_Faction (Holder)
+                              & " for "
+                              & Office'Image);
+                           Current_Try (Office) :=
+                             To_Nullable_Id (Holder);
+
+                           Success := True;
                            exit;
                         end if;
                      end;
                   end if;
                end loop;
-               exit;
-            end if;
-         end loop;
-      end if;
 
-      declare
-         Dictator : Senator_Id := Senator_Id'First;
-         MoH      : Senator_Id := Senator_Id'First;
-         Highest  : Attribute_Range := Attribute_Range'First;
-         Wars     : constant War_Id_Array := State.Active_Wars;
-      begin
-         for Sid of Agrippa.Cards.Senators.All_Senators loop
-            if not State.Has_Office (Sid) then
-               declare
-                  This_Score : constant Attribute_Range :=
-                                 State.Military (Sid);
-               begin
-                  if This_Score > Highest then
-                     Highest := This_Score;
-                     MoH      := Dictator;
-                     Dictator := Sid;
-                  elsif Highest > Attribute_Range'First
-                    and then This_Score = Highest
-                  then
-                     declare
-                        Current : Agrippa.State.Senator_State_Interface'Class
-                        renames State.Get_Senator_State (Dictator);
-                        This    : Agrippa.State.Senator_State_Interface'Class
-                        renames State.Get_Senator_State (Sid);
-                     begin
-                        for War of Wars loop
-                           if Current.Voids_DS (War)
-                             and then not This.Voids_DS (War)
-                           then
-                              exit;
-                           elsif This.Voids_DS (War)
-                             and then not Current.Voids_DS (War)
-                           then
-                              MoH      := Dictator;
-                              Dictator := Sid;
-                              exit;
-                           end if;
-                        end loop;
-                     end;
-                  end if;
-               end;
-            end if;
+               if not Success then
+                  State.Log
+                    (Ada.Strings.Unbounded.To_String (Rec.Name)
+                     & " rejects remaining offices");
+                  Tried_List.Append (Current_Try);
+               end if;
+
+               exit when not Success;
+            end loop;
+
+            exit when Is_Empty (Deal);
+
          end loop;
 
-         if Highest > Attribute_Range'First then
-            Add (Deal, State.Senator_Faction (Dictator),
-                 Office (Agrippa.Dictator, Dictator));
-            Add (Deal, State.Senator_Faction (MoH),
-                 Office (Agrippa.Master_Of_Horse, MoH));
+         exit when Success;
+
+         if not Retry then
+            State.Log ("Retrying ....");
          end if;
-      end;
+
+      end loop;
 
       if not Success then
          State.Log
-           ("failed to find a deal: returning best available");
+           ("could not find a deal");
+      end if;
+
+      if State.Crisis then
+         declare
+            Dictator : Senator_Id := Senator_Id'First;
+            MoH      : Senator_Id := Senator_Id'First;
+            Highest  : Attribute_Range := Attribute_Range'First;
+            Wars     : constant War_Id_Array := State.Active_Wars;
+         begin
+            for Sid of Agrippa.Cards.Senators.All_Senators loop
+               if not State.Has_Office (Sid) then
+                  declare
+                     This_Score : constant Attribute_Range :=
+                                    State.Military (Sid);
+                  begin
+                     if This_Score > Highest then
+                        Highest := This_Score;
+                        MoH      := Dictator;
+                        Dictator := Sid;
+                     elsif Highest > Attribute_Range'First
+                       and then This_Score = Highest
+                     then
+                        declare
+                           use Agrippa.State;
+                           Current : Senator_State_Interface'Class
+                           renames State.Get_Senator_State (Dictator);
+                           This    : Senator_State_Interface'Class
+                           renames State.Get_Senator_State (Sid);
+                        begin
+                           for War of Wars loop
+                              if Current.Voids_DS (War)
+                                and then not This.Voids_DS (War)
+                              then
+                                 exit;
+                              elsif This.Voids_DS (War)
+                                and then not Current.Voids_DS (War)
+                              then
+                                 MoH      := Dictator;
+                                 Dictator := Sid;
+                                 exit;
+                              end if;
+                           end loop;
+                        end;
+                     end if;
+                  end;
+               end if;
+            end loop;
+
+            if Highest > Attribute_Range'First then
+               Add (Deal, State.Senator_Faction (Dictator),
+                    Office (Agrippa.Dictator, Dictator));
+               Add (Deal, State.Senator_Faction (MoH),
+                    Office (Agrippa.Master_Of_Horse, MoH));
+            end if;
+         end;
+      end if;
+
+      if not Success then
+         State.Log
+           ("failed to find a deal");
+         Clear (Deal);
       end if;
 
       return Deal;
@@ -739,6 +919,184 @@ package body Agrippa.Players.Robots is
 
    end Create_Proposal;
 
+   ---------------------
+   -- Create_Proposal --
+   ---------------------
+
+   function Create_Proposal
+     (Robot   : Robot_Player_Type'Class;
+      State   : Agrippa.State.State_Interface'Class;
+      Message : Agrippa.Messages.Make_Proposal_Message)
+      return Agrippa.Messages.Make_Proposal_Message
+   is
+      Coalition_Index : Natural := 1;
+
+      function Make_Deal_Proposals
+        (Deal   : Agrippa.Deals.Deal_Type;
+         Filter : Office_Array)
+         return Agrippa.Proposals.Proposal_Container_Type;
+
+      -------------------------
+      -- Make_Deal_Proposals --
+      -------------------------
+
+      function Make_Deal_Proposals
+        (Deal   : Agrippa.Deals.Deal_Type;
+         Filter : Office_Array)
+         return Agrippa.Proposals.Proposal_Container_Type
+      is
+         Result : Agrippa.Proposals.Proposal_Container_Type;
+
+         procedure Add_Offer
+           (Faction : Faction_Id;
+            Offer   : Agrippa.Deals.Offer_Type);
+
+         ---------------
+         -- Add_Offer --
+         ---------------
+
+         procedure Add_Offer
+           (Faction : Faction_Id;
+            Offer   : Agrippa.Deals.Offer_Type)
+         is
+            pragma Unreferenced (Faction);
+         begin
+            if Agrippa.Deals.Is_Office_Offer (Offer)
+              and then (for some Office of Filter =>
+                          Agrippa.Deals.Get_Office (Offer) = Office)
+            then
+               Agrippa.Proposals.Add_Proposal
+                 (Result,
+                  Agrippa.Proposals.Nominate
+                    (Senator => Agrippa.Deals.Get_Holder (Offer),
+                     Office  => Agrippa.Deals.Get_Office (Offer)));
+            end if;
+         end Add_Offer;
+
+      begin
+         Agrippa.Deals.Scan (Deal, Add_Offer'Access);
+         return Result;
+      end Make_Deal_Proposals;
+
+   begin
+      loop
+         declare
+            use Agrippa.Messages;
+            Coalition : Coalition_Type :=
+                          Robot.Create_Coalition (State, Coalition_Index);
+            Proposals : Agrippa.Proposals.Proposal_Container_Type;
+            Offers    : array (Faction_Id) of Agrippa.Deals.Offer_List;
+            Deal      : Agrippa.Deals.Deal_Type;
+         begin
+
+            Coalition_Index := Coalition.Index;
+
+            State.Log
+              (State.Faction_Name (Robot.Faction)
+               & ": trying coalition" & Coalition_Index'Image & ": "
+               & Show (Coalition));
+
+            Coalition.Index := Coalition_Index;
+
+            if Has_Proposal_Office (Message, Rome_Consul) then
+               for Faction in Faction_Id loop
+                  if Faction /= Robot.Faction then
+                     Robot.Handlers (Faction).Senate_Phase_Desire (State);
+                     Robot.Handlers (Faction).Get_Offer_Reply
+                       (Offers (Faction));
+                  else
+                     Offers (Faction) := Robot.Senate_Phase_Desire (State);
+                  end if;
+
+                  State.Log
+                    (State.Faction_Name (Faction)
+                     & " wants "
+                     & Agrippa.Deals.Show (Offers (Faction), State));
+               end loop;
+
+               for Rec of Coalition.Vector loop
+                  for Offer of
+                    Agrippa.Deals.Get_Offers (Offers (Rec.Faction))
+                  loop
+                     Rec.Desire.Append (Offer);
+                  end loop;
+               end loop;
+
+               Deal :=
+                 Create_Election_Deal (Robot, State, Coalition.Vector);
+
+               if not Agrippa.Deals.Is_Empty (Deal) then
+                  State.Log
+                    ("Deal: "
+                     & Agrippa.Deals.Show (Deal, State));
+
+                  declare
+                     Accepted : Boolean := True;
+                  begin
+                     for Rec of Coalition.Vector loop
+                        declare
+                           Agreed : Boolean;
+                        begin
+                           if Rec.Faction /= Robot.Faction then
+                              Robot.Handlers (Rec.Faction).Will_You_Agree_To
+                                (State, Deal);
+                              Robot.Handlers (Rec.Faction).Get_Agreement_Reply
+                                (Agreed);
+                              if not Agreed then
+                                 State.Log
+                                   (State.Faction_Name (Rec.Faction)
+                                    & " vetos deal!");
+                                 Accepted := False;
+                                 exit;
+                              end if;
+                           end if;
+                        end;
+                     end loop;
+
+                     if Accepted then
+                        return Make_Proposal
+                          (Message,
+                           Make_Deal_Proposals
+                             (Deal, (Rome_Consul, Field_Consul)));
+                     end if;
+                  end;
+               end if;
+            elsif Has_Proposal_Category
+              (Message, Agrippa.Proposals.Office_Nomination)
+            then
+               declare
+                  Proposal : constant Message_Type :=
+                               Make_Proposal
+                                 (Message,
+                                  Make_Deal_Proposals
+                                    (Robot.Current_Deal,
+                                     Proposal_Offices (Message)));
+               begin
+                  if Proposal.Content /= Empty_Message then
+                     return Proposal;
+                  end if;
+               end;
+
+            else
+
+               for Category in Agrippa.Proposals.Proposal_Category_Type loop
+                  if Has_Proposal_Category (Message, Category) then
+                     Robot.Create_Proposal
+                       (State, Category, Coalition.Vector, Proposals);
+                  end if;
+               end loop;
+               return Make_Proposal (Message, Proposals);
+            end if;
+         end;
+
+         exit when Coalition_Index = 0;
+
+      end loop;
+
+      return Agrippa.Messages.Empty_Message;
+
+   end Create_Proposal;
+
    -------------------------
    -- Create_Robot_Player --
    -------------------------
@@ -769,7 +1127,6 @@ package body Agrippa.Players.Robots is
       Office : Office_Type)
       return Nullable_Senator_Id
    is
-      pragma Unreferenced (Robot);
       function Score_Candidate
         (Senator : Senator_Id)
          return Natural;
@@ -788,6 +1145,8 @@ package body Agrippa.Players.Robots is
          Inf  : constant Influence_Range := State.Influence (Senator);
          Mil  : constant Attribute_Range := State.Military (Senator);
 
+         Mine : constant Boolean :=
+                  State.Senator_Faction (Senator) = Robot.Faction;
          Fac_Bonus : Integer := 50;
          Pop_Bonus : Integer := 0;
          Inf_Bonus : Integer := 0;
@@ -807,7 +1166,7 @@ package body Agrippa.Players.Robots is
 
          if Office = Rome_Consul then
             if Integer (Pop) < Natural (State.Current_Unrest) then
-               Pop_Bonus := -50;
+               Pop_Bonus := -45;
             else
                Pop_Bonus := 2 * Natural (State.Current_Unrest)
                  + Integer (Pop);
@@ -817,21 +1176,39 @@ package body Agrippa.Players.Robots is
             Fac_Bonus := 1;
          elsif Office = Field_Consul then
             Mil_Bonus := Natural (Mil);
-            Inf_Bonus := -Natural (Inf);
+            Inf_Bonus :=
+              (if Mine
+               then 10 - Natural (Inf)
+               else 3 - Natural (Inf));
+            if State.Active_Wars'Length > 0 then
+               Fac_Bonus := 5;
+            end if;
          end if;
 
          return Integer'Max
-           (Base + Fac_Bonus + Pop_Bonus + Inf_Bonus + Mil_Bonus, 0);
+           (Base + (if Mine then Fac_Bonus else 0)
+            + Pop_Bonus + Inf_Bonus + Mil_Bonus, 0);
       end Score_Candidate;
 
       Highest : Natural := 0;
       Result  : Nullable_Senator_Id := No_Senator;
    begin
+      if False then
+         State.Log (State.Faction_Name (Robot.Faction)
+                    & " for " & Office'Image);
+      end if;
+
       for Sid of State.Senators_In_Rome loop
          declare
             Score : constant Natural :=
                       Score_Candidate (Sid);
          begin
+            if False then
+               State.Log
+                 (State.Senator_Name_And_Faction (Sid)
+                  & " scores" & Score'Image);
+            end if;
+
             if Score > Highest then
                Result := To_Nullable_Id (Sid);
                Highest := Score;
@@ -990,6 +1367,9 @@ package body Agrippa.Players.Robots is
          else
             Spend := 0;
          end if;
+         if Spend = 0 and then Base < 2 then
+            return False;
+         end if;
       end;
 
       return True;
@@ -1128,7 +1508,6 @@ package body Agrippa.Players.Robots is
       end Check_Proposal;
 
    begin
-
       for Proposal of Arr loop
          if not Check_Proposal (Proposal) then
             return False;
@@ -1137,6 +1516,72 @@ package body Agrippa.Players.Robots is
       return True;
 
    end Proposal_Matches_Deal;
+
+   ---------------------
+   -- Score_Proposals --
+   ---------------------
+
+   function Score_Proposals
+     (Faction  : Faction_Id;
+      State    : Agrippa.State.State_Interface'Class;
+      Proposal : Agrippa.Proposals.Proposal_Container_Type)
+      return Integer
+   is
+      Arr      : constant Agrippa.Proposals.Proposal_Array :=
+                   Agrippa.Proposals.Get_Proposals (Proposal);
+
+      Score : Integer := 0;
+
+      function Score_Proposal
+        (P : Agrippa.Proposals.Proposal_Type)
+         return Integer;
+
+      --------------------
+      -- Score_Proposal --
+      --------------------
+
+      function Score_Proposal
+        (P : Agrippa.Proposals.Proposal_Type)
+         return Integer
+      is
+         use all type Agrippa.Proposals.Proposal_Category_Type;
+      begin
+         case P.Category is
+            when No_Proposal =>
+               return 0;
+            when Office_Nomination =>
+               declare
+                  Senator : constant Senator_Id :=
+                              Agrippa.Proposals.Nominee (P);
+                  Office  : constant Office_Type :=
+                              Agrippa.Proposals.Office (P);
+               begin
+                  if State.Senator_Faction (Senator) = Faction then
+                     return 2 * Office_Type'Pos (Office) + 1;
+                  else
+                     return 0;
+                  end if;
+               end;
+
+            when Governor_Nomination =>
+               return 0;
+            when Consul_For_Life =>
+               return 0;
+            when Recruitment =>
+               return 0;
+            when Attack =>
+               return 0;
+         end case;
+      end Score_Proposal;
+
+   begin
+
+      for Proposal of Arr loop
+         Score := Score + Score_Proposal (Proposal);
+      end loop;
+
+      return Score;
+   end Score_Proposals;
 
    -------------------------
    -- Senate_Phase_Desire --
@@ -1184,53 +1629,6 @@ package body Agrippa.Players.Robots is
       return Agrippa.Messages.Message_Type
    is
       use Agrippa.Messages;
-
-      function Make_Deal_Proposals
-        (Deal   : Agrippa.Deals.Deal_Type;
-         Filter : Office_Array)
-         return Agrippa.Proposals.Proposal_Container_Type;
-
-      -------------------------
-      -- Make_Deal_Proposals --
-      -------------------------
-
-      function Make_Deal_Proposals
-        (Deal   : Agrippa.Deals.Deal_Type;
-         Filter : Office_Array)
-         return Agrippa.Proposals.Proposal_Container_Type
-      is
-         Result : Agrippa.Proposals.Proposal_Container_Type;
-
-         procedure Add_Offer
-           (Faction : Faction_Id;
-            Offer   : Agrippa.Deals.Offer_Type);
-
-         ---------------
-         -- Add_Offer --
-         ---------------
-
-         procedure Add_Offer
-           (Faction : Faction_Id;
-            Offer   : Agrippa.Deals.Offer_Type)
-         is
-            pragma Unreferenced (Faction);
-         begin
-            if Agrippa.Deals.Is_Office_Offer (Offer)
-              and then (for some Office of Filter =>
-                          Agrippa.Deals.Get_Office (Offer) = Office)
-            then
-               Agrippa.Proposals.Add_Proposal
-                 (Result,
-                  Agrippa.Proposals.Nominate
-                    (Senator => Agrippa.Deals.Get_Holder (Offer),
-                     Office  => Agrippa.Deals.Get_Office (Offer)));
-            end if;
-         end Add_Offer;
-
-      begin
-         Agrippa.Deals.Scan (Deal, Add_Offer'Access);
-         return Result;
-      end Make_Deal_Proposals;
 
    begin
       case Message.Content is
@@ -1333,103 +1731,8 @@ package body Agrippa.Players.Robots is
             end;
 
          when Make_Proposal =>
-            declare
-               Coalition : Faction_Vectors.Vector :=
-                             Robot.Create_Coalition (State);
-               Proposals : Agrippa.Proposals.Proposal_Container_Type;
-               Offers    : array (Faction_Id) of Agrippa.Deals.Offer_List;
-               Deal      : Agrippa.Deals.Deal_Type;
-            begin
 
-               State.Log
-                 ("Coalition");
-               for Rec of Coalition loop
-                  State.Log
-                    ("    " & State.Faction_Name (Rec.Faction));
-               end loop;
-
-               if Has_Proposal_Office (Message, Rome_Consul) then
-                  for Faction in Faction_Id loop
-                     if Faction /= Robot.Faction then
-                        Robot.Handlers (Faction).Senate_Phase_Desire (State);
-                        Robot.Handlers (Faction).Get_Offer_Reply
-                          (Offers (Faction));
-                     else
-                        Offers (Faction) := Robot.Senate_Phase_Desire (State);
-                     end if;
-
-                     State.Log
-                       (State.Faction_Name (Faction)
-                        & " wants "
-                        & Agrippa.Deals.Show (Offers (Faction), State));
-                  end loop;
-
-                  for Rec of Coalition loop
-                     for Offer of
-                       Agrippa.Deals.Get_Offers (Offers (Rec.Faction))
-                     loop
-                        Rec.Desire.Append (Offer);
-                     end loop;
-                  end loop;
-
-                  Deal := Create_Election_Deal (Robot, State, Coalition);
-
-                  State.Log
-                    ("Deal: "
-                     & Agrippa.Deals.Show (Deal, State));
-
-                  declare
-                     Accepted : Boolean := True;
-                  begin
-                     for Rec of Coalition loop
-                        declare
-                           Agreed : Boolean;
-                        begin
-                           if Rec.Faction /= Robot.Faction then
-                              Robot.Handlers (Rec.Faction).Will_You_Agree_To
-                                (State, Deal);
-                              Robot.Handlers (Rec.Faction).Get_Agreement_Reply
-                                (Agreed);
-                              if not Agreed then
-                                 State.Log
-                                   (State.Faction_Name (Rec.Faction)
-                                    & " vetos deal!");
-                                 Accepted := False;
-                                 exit;
-                              end if;
-                           end if;
-                        end;
-                     end loop;
-
-                     if Accepted then
-                        Robot.Current_Deal := Deal;
-                     end if;
-
-                     return Make_Proposal
-                       (Message,
-                        Make_Deal_Proposals
-                          (Deal, (Rome_Consul, Field_Consul)));
-                  end;
-
-               elsif Has_Proposal_Category
-                 (Message, Agrippa.Proposals.Office_Nomination)
-               then
-                  return Make_Proposal
-                    (Message,
-                     Make_Deal_Proposals
-                       (Robot.Current_Deal,
-                        Proposal_Offices (Message)));
-
-               end if;
-
-               for Category in Agrippa.Proposals.Proposal_Category_Type loop
-                  if Has_Proposal_Category (Message, Category) then
-                     Robot.Create_Proposal
-                       (State, Category, Coalition, Proposals);
-                  end if;
-               end loop;
-               return Make_Proposal (Message, Proposals);
-            end;
+            return Robot.Create_Proposal (State, Message);
 
          when Player_Action =>
 
@@ -1472,6 +1775,23 @@ package body Agrippa.Players.Robots is
       Agrippa.Players.Autohandler.Set_Autoplayer
         (Players (Robot.Faction), Robot);
    end Set_Players;
+
+   ----------
+   -- Show --
+   ----------
+
+   function Show (Coalition : Coalition_Type) return String is
+      use Ada.Strings.Unbounded;
+      Result : Unbounded_String;
+   begin
+      for Rec of Coalition.Vector loop
+         if Result /= "" then
+            Result := Result & ", ";
+         end if;
+         Result := Result & Rec.Name;
+      end loop;
+      return To_String (Result);
+   end Show;
 
    ----------------
    -- Start_Turn --
@@ -1533,13 +1853,16 @@ package body Agrippa.Players.Robots is
    overriding function Vote
      (Player    : Robot_Player_Type;
       State     : Agrippa.State.State_Interface'Class;
+      Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type)
       return Faction_Vote_Type
    is
    begin
       return Votes : Faction_Vote_Type := (others => 0) do
-         if Proposal_Matches_Deal
-           (Player.Faction, State, Player.Current_Deal, Proposals)
+         if State.Senator_Faction (Sponsor) = Player.Faction
+           or else Proposal_Matches_Deal
+             (Player.Faction, State, Player.Current_Deal, Proposals)
+           or else Score_Proposals (Player.Faction, State, Proposals) > 0
          then
             Votes (Aye) := State.Faction_Votes (Player.Faction);
          else
