@@ -508,9 +508,6 @@ package body Agrippa.UI.Text is
                        (Name & " transfers "
                         & Agrippa.Images.Image (Amount)
                         & "t");
-                  else
-                     Ada.Text_IO.Put_Line
-                       (" to faction treasury");
                   end if;
                end Report_Faction_Treasury;
 
@@ -523,13 +520,9 @@ package body Agrippa.UI.Text is
                   Take    : Boolean;
                   Amount  : Talents)
                is
+                  pragma Unreferenced (Amount);
                begin
-                  if Take then
-                     Ada.Text_IO.Put
-                       (State.Senator_Name (Senator) & " transfers "
-                        & Agrippa.Images.Image (Amount)
-                        & "t");
-                  else
+                  if not Take then
                      Ada.Text_IO.Put_Line
                        (" to " & State.Senator_Name (Senator));
                   end if;
