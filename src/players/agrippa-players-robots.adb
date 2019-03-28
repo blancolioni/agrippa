@@ -698,9 +698,6 @@ package body Agrippa.Players.Robots is
                                  & ": already tried "
                                  & Show (Report_Deal, State));
                            end;
-                        else
-                           State.Log
-                             ("adding " & Show (Choice, State));
                         end if;
 
                         if not Allocated (Office)
@@ -1187,9 +1184,33 @@ package body Agrippa.Players.Robots is
               (if Mine
                then 10 - Natural (Inf)
                else 3 - Natural (Inf));
-            if State.Active_Wars'Length > 0 then
-               Fac_Bonus := 5;
-            end if;
+
+            declare
+               Active_Wars   : constant War_Id_Array := State.Active_Wars;
+               Inactive_Wars : constant War_Id_Array := State.Inactive_Wars;
+            begin
+               if Active_Wars'Length = 0 then
+                  if Inactive_Wars'Length > 0 then
+                     Fac_Bonus := 5;
+                  end if;
+
+                  for War of Inactive_Wars loop
+                     if State.Get_Senator_State (Senator).Voids_DS (War) then
+                        Mil_Bonus := Mil_Bonus * 3;
+                        exit;
+                     end if;
+                  end loop;
+               else
+                  Fac_Bonus := 3;
+                  for War of Active_Wars loop
+                     if State.Get_Senator_State (Senator).Voids_DS (War) then
+                        Fac_Bonus := 1;
+                        Mil_Bonus := Mil_Bonus * 5;
+                        exit;
+                     end if;
+                  end loop;
+               end if;
+            end;
          end if;
 
          return Integer'Max
@@ -1200,7 +1221,7 @@ package body Agrippa.Players.Robots is
       Highest : Natural := 0;
       Result  : Nullable_Senator_Id := No_Senator;
    begin
-      if False then
+      if True then
          State.Log (State.Faction_Name (Robot.Faction)
                     & " for " & Office'Image);
       end if;
@@ -1210,7 +1231,7 @@ package body Agrippa.Players.Robots is
             Score : constant Natural :=
                       Score_Candidate (Sid);
          begin
-            if False then
+            if True then
                State.Log
                  (State.Senator_Name_And_Faction (Sid)
                   & " scores" & Score'Image);
