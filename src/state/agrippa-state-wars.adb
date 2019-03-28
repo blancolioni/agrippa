@@ -84,6 +84,7 @@ package body Agrippa.State.Wars is
    is
    begin
       War.Unprosecuted := False;
+      War.Attacked := True;
    end Start_Combat;
 
    ---------

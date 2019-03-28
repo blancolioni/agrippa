@@ -890,12 +890,17 @@ package body Agrippa.Players.Robots is
 
          when Attack =>
             declare
-               Active_Wars    : constant War_Id_Array :=
-                                  State.Active_Wars;
-               Inactive_Wars  : constant War_Id_Array :=
-                                  State.Inactive_Wars;
+               Active_Wars     : constant War_Id_Array :=
+                                   State.Active_Wars;
+               Inactive_Wars   : constant War_Id_Array :=
+                                   State.Inactive_Wars;
+               Prosecuted_Wars : constant War_Id_Array :=
+                                   State.Prosecuted_Wars;
                Attacked       : Boolean := False;
             begin
+
+               State.Log ("prosecuted wars:"
+                          & Natural'Image (Prosecuted_Wars'Length));
 
                State.Log
                  ("active wars:"

@@ -9,6 +9,10 @@ package Agrippa.State.Wars is
      (War : War_State_Type)
       return Boolean;
 
+   overriding function Prosecuted
+     (War : War_State_Type)
+      return Boolean;
+
    function Tag
      (State : War_State_Type'Class)
       return String;
@@ -125,5 +129,10 @@ private
      (War : War_State_Type)
       return Boolean
    is (War.Unprosecuted);
+
+   overriding function Prosecuted
+     (War : War_State_Type)
+      return Boolean
+   is (War.Attacked);
 
 end Agrippa.State.Wars;
