@@ -109,6 +109,15 @@ package Agrippa.State is
       return Boolean
       is abstract;
 
+   function Fleet_Victory
+     (State : War_State_Interface)
+      return Boolean
+      is abstract;
+
+   procedure Set_Fleet_Victory
+     (State : in out War_State_Interface)
+   is abstract;
+
    function Inactive
      (State : War_State_Interface)
       return Boolean

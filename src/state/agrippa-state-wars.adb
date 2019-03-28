@@ -64,6 +64,17 @@ package body Agrippa.State.Wars is
       War.Unprosecuted := False;
    end On_Drawn;
 
+   -----------------------
+   -- Set_Fleet_Victory --
+   -----------------------
+
+   overriding procedure Set_Fleet_Victory
+     (War : in out War_State_Type)
+   is
+   begin
+      War.Fleet_Victory := True;
+   end Set_Fleet_Victory;
+
    ------------------
    -- Start_Combat --
    ------------------
