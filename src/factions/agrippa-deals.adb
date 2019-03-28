@@ -1,6 +1,6 @@
 with Ada.Strings.Unbounded;
 
-with Agrippa.Cards.Senators;
+with Agrippa.Cards;
 
 package body Agrippa.Deals is
 
@@ -78,19 +78,22 @@ package body Agrippa.Deals is
          return True;
       end if;
       for Terms of Deal.Terms loop
-         for Offer of Terms.Terms.List loop
-            if Offer.Category = Agrippa.Deals.Office
-              and then Offer.Offer_Office = Office
-            then
-               declare
-                  Result : constant Boolean :=
-                             Offer.Holder /= Holder
-                                 or else Terms.Faction /= Faction;
-               begin
-                  return Result;
-               end;
-            end if;
-         end loop;
+         if Terms.Faction = Faction then
+            for Offer of Terms.Terms.List loop
+               if Offer.Category = Agrippa.Deals.Office
+                 and then Offer.Offer_Office = Office
+               then
+                  declare
+                     Result : constant Boolean :=
+                                Offer.Holder /= Holder;
+                  begin
+                     if Result then
+                        return Result;
+                     end if;
+                  end;
+               end if;
+            end loop;
+         end if;
       end loop;
       return False;
    end Contradicts;
@@ -210,7 +213,11 @@ package body Agrippa.Deals is
    -- Show --
    ----------
 
-   function Show (Offer : Offer_Type) return String is
+   function Show
+     (Offer        : Offer_Type;
+      Show_Senator : Show_Senator_Interface'Class)
+      return String
+   is
    begin
       case Offer.Category is
          when Nothing =>
@@ -219,7 +226,7 @@ package body Agrippa.Deals is
             if Offer.Any then
                return "any office";
             else
-               return Agrippa.Cards.Senators.Senator (Offer.Holder).Tag
+               return Show_Senator.Senator_Name_And_Faction (Offer.Holder)
                  & " as " & Offer.Offer_Office'Image;
             end if;
          when Province =>
@@ -243,7 +250,11 @@ package body Agrippa.Deals is
    -- Show --
    ----------
 
-   function Show (Offer : Offer_List) return String is
+   function Show
+     (Offer        : Offer_List;
+      Show_Senator : Show_Senator_Interface'Class)
+      return String
+   is
       use Ada.Strings.Unbounded;
       Result : Unbounded_String;
    begin
@@ -251,7 +262,7 @@ package body Agrippa.Deals is
          if Result /= "" then
             Result := Result & ", ";
          end if;
-         Result := Result & Show (Item);
+         Result := Result & Show (Item, Show_Senator);
       end loop;
       return To_String (Result);
    end Show;
@@ -261,9 +272,8 @@ package body Agrippa.Deals is
    ----------
 
    function Show
-     (Deal : Deal_Type;
-      Name : not null access
-        function (Faction : Faction_Id) return String)
+     (Deal         : Deal_Type;
+      Show_Senator : Show_Senator_Interface'Class)
       return String
    is
       use Ada.Strings.Unbounded;
@@ -274,8 +284,8 @@ package body Agrippa.Deals is
             if Result /= "" then
                Result := Result & "; ";
             end if;
-            Result := Result & Name (Term.Faction) & ": "
-              & Show (Term.Terms);
+            Result := Result & Show_Senator.Faction_Name (Term.Faction) & ": "
+              & Show (Term.Terms, Show_Senator);
          end if;
       end loop;
       return To_String (Result);

@@ -16,6 +16,28 @@ package body Agrippa.State is
       return State.Matching_Wars (Test'Access);
    end Active_Wars;
 
+   ------------
+   -- Crisis --
+   ------------
+
+   function Crisis
+     (State : State_Interface'Class)
+      return Boolean
+   is
+      Wars      : constant War_Id_Array := State.Active_Wars;
+      In_Crisis : Boolean := Wars'Length >= 3;
+   begin
+      if not In_Crisis then
+         for War of Wars loop
+            if State.Get_War_State (War).Land_Strength >= 16 then
+               In_Crisis := True;
+               exit;
+            end if;
+         end loop;
+      end if;
+      return In_Crisis;
+   end Crisis;
+
    -------------------
    -- Inactive_Wars --
    -------------------

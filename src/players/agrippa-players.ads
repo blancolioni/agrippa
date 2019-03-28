@@ -69,6 +69,7 @@ package Agrippa.Players is
    procedure Vote_Proposal
      (Player   : in out Player_Handler;
       State    : Agrippa.State.State_Interface'Class;
+      Sponsor  : Senator_Id;
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
    is abstract;
 
@@ -135,6 +136,7 @@ package Agrippa.Players is
    function Vote
      (Player    : Autoplayer_Interface;
       State     : Agrippa.State.State_Interface'Class;
+      Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type)
       return Faction_Vote_Type
       is abstract;

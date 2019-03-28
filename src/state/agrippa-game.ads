@@ -55,6 +55,11 @@ package Agrippa.Game is
       Senator : Senator_Id)
       return String;
 
+   overriding function Senator_Name_And_Faction
+     (Game    : Game_Type;
+      Senator : Senator_Id)
+      return String;
+
    overriding function Has_Faction
      (Game    : Game_Type;
       Senator : Senator_Id)
@@ -75,10 +80,20 @@ package Agrippa.Game is
       Senator : Senator_Id)
       return Vote_Count;
 
+   overriding function Is_Prior_Consul
+     (Game    : Game_Type;
+      Senator : Senator_Id)
+      return Boolean;
+
    overriding function Has_Office
      (Game    : Game_Type;
       Senator : Senator_Id)
       return Boolean;
+
+   overriding function Office
+     (Game    : Game_Type;
+      Senator : Senator_Id)
+      return Office_Type;
 
    overriding function Has_Command
      (Game    : Game_Type;
@@ -167,8 +182,8 @@ package Agrippa.Game is
      (Game         : in out Game_Type'Class;
       New_Treasury : Talents);
 
-   function Current_Unrest
-     (Game : Game_Type'Class)
+   overriding function Current_Unrest
+     (Game : Game_Type)
       return Unrest_Level;
 
    function Faction
@@ -191,6 +206,10 @@ package Agrippa.Game is
       Score : not null access
         function (Faction : Faction_Id) return Integer)
       return Faction_Id;
+
+   overriding function Senators_In_Rome
+     (Game    : Game_Type)
+      return Senator_Id_Array;
 
    overriding function Faction_Senators
      (Game    : Game_Type;
@@ -523,8 +542,8 @@ private
       return Talents
    is (Game.Treasury);
 
-   function Current_Unrest
-     (Game : Game_Type'Class)
+   overriding function Current_Unrest
+     (Game : Game_Type)
       return Unrest_Level
    is (Game.Unrest);
 
@@ -627,6 +646,12 @@ private
       return Boolean
    is (Game.Senator_State (Senator).Has_Office);
 
+   overriding function Office
+     (Game    : Game_Type;
+      Senator : Senator_Id)
+      return Office_Type
+   is (Game.Senator_State (Senator).Office);
+
    overriding function Has_Command
      (Game    : Game_Type;
       Senator : Senator_Id)
@@ -678,5 +703,23 @@ private
       Faction : Faction_Id)
       return Card_Id_Array
    is (Game.Faction (Faction).Cards);
+
+   overriding function Is_Prior_Consul
+     (Game    : Game_Type;
+      Senator : Senator_Id)
+      return Boolean
+   is (Game.Senator_State (Senator).Prior_Consul);
+
+   overriding function Senator_Name_And_Faction
+     (Game    : Game_Type;
+      Senator : Senator_Id)
+      return String
+   is (if Game.Has_Faction (Senator)
+       then Game.Local_Text
+         ("senator-of-faction",
+          Game.Senator_Name (Senator),
+          Game.Faction_Name (Game.Senator_Faction (Senator)))
+       else Game.Local_Text
+         ("unaligned-senator", Game.Senator_Name (Senator)));
 
 end Agrippa.Game;
