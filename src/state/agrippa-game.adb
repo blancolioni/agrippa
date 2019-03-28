@@ -1193,12 +1193,13 @@ package body Agrippa.Game is
                              Total_Attack - War_Strength;
       Final_Roll         : constant Integer :=
                              Roll + Combat_Bonus;
-
+      Voids_DS           : constant Boolean :=
+                             Game.Senator_State (Commander).Voids_DS (War);
    begin
 
       Result :=
         Adjudicate_Combat
-          (War, False, Roll, Attack_Strength, Final_Roll);
+          (War, Voids_DS, Roll, Attack_Strength, Final_Roll);
 
       declare
          Result_Tag         : constant String :=
@@ -1240,6 +1241,19 @@ package body Agrippa.Game is
                     (Losses_Tag,
                      Agrippa.Images.Image (Result.Losses),
                      (if Fleet_Attack then "fleet" else "legion")))));
+         if Voids_DS
+           and then Agrippa.Cards.Wars.War (War).Is_Disaster (Roll)
+         then
+            Game.Notifier.Send_Notification
+              (Game.Local_Text ("disaster-voided"));
+         end if;
+         if Voids_DS
+           and then Agrippa.Cards.Wars.War (War).Is_Standoff (Roll)
+         then
+            Game.Notifier.Send_Notification
+              (Game.Local_Text ("stand-off-voided"));
+         end if;
+
       end;
    end Execute_Attack;
 

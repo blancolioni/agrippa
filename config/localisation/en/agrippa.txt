@@ -101,3 +101,5 @@ senator-gains-inf-and-pop,{1} gains {2} influence and {3} popularity
 unrest-remains-at-zero,Unrest remains at zero
 unrest-drops-by-to,Unrest drops by {1} to {2}
 rome-gains-spoils,Rome gains {1}t of spoils
+disaster-voided,Disaster voided by statesman!
+stand-off-voided,Stand off voided by statesman!
