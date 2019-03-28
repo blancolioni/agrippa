@@ -94,6 +94,7 @@ package body Agrippa.Game is
 
    procedure  Hold_Vote
      (Game      : in out Game_Type'Class;
+      Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type);
 
    procedure Enact_Proposals
@@ -1597,8 +1598,13 @@ package body Agrippa.Game is
       return Result;
    end Highest_Score;
 
+   ---------------
+   -- Hold_Vote --
+   ---------------
+
    procedure  Hold_Vote
      (Game      : in out Game_Type'Class;
+      Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type)
    is
       Result : Faction_Vote_Type := (others => 0);
@@ -1610,7 +1616,7 @@ package body Agrippa.Game is
                            Game.Player_State (Faction.Id).Handler;
                Votes   : Faction_Vote_Type;
             begin
-               Handler.Vote_Proposal (Game, Proposals);
+               Handler.Vote_Proposal (Game, Sponsor, Proposals);
                Handler.Get_Votes (Votes);
                Ada.Text_IO.Put
                  (Faction.Name & ": ");
@@ -1897,6 +1903,26 @@ package body Agrippa.Game is
       return To_Name
         (Agrippa.Cards.Senators.Senator (Senator).Tag);
    end Senator_Name;
+
+   ----------------------
+   -- Senators_In_Rome --
+   ----------------------
+
+   overriding function Senators_In_Rome
+     (Game    : Game_Type)
+      return Senator_Id_Array
+   is
+      Result : Senator_Id_Array (1 .. Max_Senators);
+      Count  : Natural := 0;
+   begin
+      for S of Game.Senator_State loop
+         if S.In_Rome then
+            Count := Count + 1;
+            Result (Count) := S.Id;
+         end if;
+      end loop;
+      return Result (1 .. Count);
+   end Senators_In_Rome;
 
    ------------------
    -- Send_Message --
@@ -2230,7 +2256,8 @@ package body Agrippa.Game is
                   Game.Notifier.Send_Message (Game, Response);
 
                   Game.Hold_Vote
-                    (Agrippa.Messages.Proposals (Response));
+                    (Agrippa.Messages.Get_Senator (Response),
+                     Agrippa.Messages.Proposals (Response));
 
                end if;
             end;
@@ -2360,9 +2387,26 @@ package body Agrippa.Game is
    is
       State : Agrippa.State.Senators.Senator_State_Type renames
                 Game.Senator_State (Senator);
+
+      procedure Clear_Office (Office : Office_Type);
+
+      ------------------
+      -- Clear_Office --
+      ------------------
+
+      procedure Clear_Office (Office : Office_Type) is
+      begin
+         if Game.Has_Holder (Office) then
+            Game.Senator_State (Game.Office_Holder (Office)).Clear_Office;
+         end if;
+      end Clear_Office;
+
    begin
-      if Game.Has_Holder (Office) then
-         Game.Senator_State (Game.Office_Holder (Office)).Clear_Office;
+      Clear_Office (Office);
+
+      if Office = Rome_Consul or else Office = Field_Consul then
+         Clear_Office (Dictator);
+         Clear_Office (Master_Of_Horse);
       end if;
 
       State.Set_Office (Office);
@@ -2377,7 +2421,7 @@ package body Agrippa.Game is
          Game.Notifier.Send_Notification
            (Game.Local_Text
               ("x-is-the-new-office-holder",
-               Game.Full_Name_And_Faction (Senator),
+               Game.Senator_Name_And_Faction (Senator),
                Game.Local_Text (Office'Image)));
       end if;
 

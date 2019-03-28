@@ -308,7 +308,7 @@ private
    function In_Rome
      (Senator : Senator_State_Type'Class)
       return Boolean
-   is (Senator.In_Rome);
+   is (Senator.Has_Faction and then Senator.In_Rome);
 
    function Is_Rebel
      (Senator : Senator_State_Type'Class)

@@ -184,6 +184,7 @@ package body Agrippa.UI.Text is
    is
       use Ada.Text_IO;
    begin
+      New_Line;
       Put ("*** ");
       Put_Faction_Name (Faction);
       Set_Col (18);
@@ -719,9 +720,9 @@ package body Agrippa.UI.Text is
                                     Put_Line
                                       (State.Local_Text
                                          ("nominate-x-and-y-for-consuls",
-                                          State.Full_Name_And_Faction
+                                          State.Senator_Name_And_Faction
                                             (First_Consul),
-                                          State.Full_Name_And_Faction
+                                          State.Senator_Name_And_Faction
                                             (Nominee)));
                                  end if;
                               end;
@@ -731,7 +732,7 @@ package body Agrippa.UI.Text is
                               Put_Line
                                 (State.Local_Text
                                    ("nominate-for-office",
-                                    State.Full_Name_And_Faction
+                                    State.Senator_Name_And_Faction
                                       (Agrippa.Proposals.Nominee (Proposal)),
                                     State.Local_Text (Office'Image)));
                            end if;

@@ -26,7 +26,34 @@ package Agrippa is
 
    No_Card : constant Card_Id;
 
+   type Faction_Id is range 1 .. Max_Factions;
+
+   type Show_Faction_Interface is limited interface;
+
+   function Faction_Name
+     (Show : Show_Faction_Interface;
+      Faction : Faction_Id)
+      return String
+      is abstract;
+
+   type Faction_Id_Array is array (Positive range <>) of Faction_Id;
+
    type Senator_Id is private;
+
+   type Show_Senator_Interface is
+   limited interface and Show_Faction_Interface;
+
+   function Senator_Name
+     (Show    : Show_Senator_Interface;
+      Senator : Senator_Id)
+      return String
+   is abstract;
+
+   function Senator_Name_And_Faction
+     (Show    : Show_Senator_Interface;
+      Senator : Senator_Id)
+      return String
+      is abstract;
 
    type Senator_Id_Array is array (Positive range <>) of Senator_Id;
 
@@ -43,10 +70,6 @@ package Agrippa is
    type Statesman_Id_Array is array (Positive range <>) of Statesman_Id;
 
    type Province_Id is private;
-
-   type Faction_Id is range 1 .. Max_Factions;
-
-   type Faction_Id_Array is array (Positive range <>) of Faction_Id;
 
    type War_Id is private;
 
@@ -72,7 +95,7 @@ package Agrippa is
 
    type Popularity_Range is range -9 .. 9;
 
-   type Influence_Range is range 0 .. 35;
+   type Influence_Range is range 0 .. 55;
 
    type Faction_Influence_Range is range 0 .. 99;
 
