@@ -53,6 +53,7 @@ private
          In_Play        : Boolean := False;
          Imminent       : Boolean := False;
          Active         : Boolean := False;
+         Fleet_Victory  : Boolean := False;
          Drawn          : Boolean := False;
          Discarded      : Boolean := False;
          Unprosecuted   : Boolean := False;
@@ -78,6 +79,14 @@ private
      (War : War_State_Type)
       return Boolean
    is (War.Active);
+
+   overriding function Fleet_Victory
+     (War : War_State_Type)
+      return Boolean
+   is (War.Fleet_Victory);
+
+   overriding procedure Set_Fleet_Victory
+     (War : in out War_State_Type);
 
    overriding function Inactive
      (War : War_State_Type)

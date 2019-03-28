@@ -58,6 +58,13 @@ package body Agrippa.Game is
       return Boolean)
       return Fleet_Count;
 
+   function Get_Fleets
+     (Game    : Game_Type'Class;
+      Test    : not null access
+        function (Legion : Agrippa.State.Fleets.Fleet_State_Type'Class)
+      return Boolean)
+      return Fleet_Index_Array;
+
    function Mortality_Roll return Positive
    is (WL.Random.Random_Number (1, Max_Senators + 6));
 
@@ -129,6 +136,29 @@ package body Agrippa.Game is
    procedure Attack
      (Game : in out Game_Type'Class;
       War  : War_Id);
+
+   procedure Execute_Attack
+     (Game            : in out Game_Type'Class;
+      War             : War_Id;
+      Fleet_Attack    : Boolean;
+      Commander       : Senator_Id;
+      Attack_Strength : Natural;
+      War_Strength    : Natural;
+      Result          : out Combat_Result_Record);
+
+   procedure Fleet_Battle_Result
+     (Game      : in out Game_Type'Class;
+      War       : War_Id;
+      Commander : Senator_Id;
+      Fleets    : Fleet_Index_Array;
+      Result    : Combat_Result_Record);
+
+   procedure Land_Battle_Result
+     (Game      : in out Game_Type'Class;
+      War       : War_Id;
+      Commander : Senator_Id;
+      Legions   : Legion_Index_Array;
+      Result    : Combat_Result_Record);
 
    -----------------
    -- Add_Faction --
@@ -319,225 +349,56 @@ package body Agrippa.Game is
      (Game : in out Game_Type'Class;
       War  : War_Id)
    is
-      Commander          : constant Senator_Id :=
-                             Game.War_Commander (War);
-      function Is_Deployed
+      function Is_Deployed_Legion
         (State : Agrippa.State.Legions.Legion_State_Type'Class)
-            return Boolean
+         return Boolean
       is (State.Deployed and then State.War = War);
 
-      Legion_Ids         : Legion_Index_Array :=
+      function Is_Deployed_Fleet
+        (State : Agrippa.State.Fleets.Fleet_State_Type'Class)
+         return Boolean
+      is (State.Deployed and then State.War = War);
+
+      War_State      : Agrippa.State.Wars.War_State_Type renames
+                         Game.War_State (War);
+      Fleet_Attack : constant Boolean :=
+                         (War_State.Fleet_Strength > 0
+                          and then not War_State.Fleet_Victory);
+      Legion_Ids         : constant Legion_Index_Array :=
                              Game.Get_Legions
-                               (Is_Deployed'Access);
+                               (Is_Deployed_Legion'Access);
       Legion_Strength    : constant Natural :=
                              Game.Deployed_Land_Strength (War);
-      Commander_Strength : constant Natural :=
-                             Natural (Game.Military (Commander));
-      Total_Attack       : constant Natural :=
-                             Legion_Strength + Natural'Min
-                               (Commander_Strength, Legion_Strength);
-      War_Strength       : constant Natural :=
-                             Natural
-                               (Agrippa.Cards.Wars.War (War)
-                                .Land_Strength);
-      Roll               : constant TDR_Range :=
-                             Agrippa.Dice.TDR;
-      Combat_Bonus       : constant Integer :=
-                             Total_Attack - War_Strength;
-      Final_Roll         : constant Integer :=
-                             Roll + Combat_Bonus;
-      Result             : constant Combat_Result_Record :=
-                             Adjudicate_Combat
-                               (War, False, Roll, Legion_Strength, Final_Roll);
-      Result_Tag         : constant String :=
-                             (case Result.Result is
-                                 when Disaster => "disaster",
-                                 when Standoff => "stand-off",
-                                 when Defeat    => "defeat",
-                                 when Stalemate => "stalemate",
-                                 when Victory   => "victory");
-      Losses_Tag         : constant String :=
-                             (if Result.Losses = 0
-                              then "no-losses"
-                              else "legions-lost");
+      Fleet_Ids          : constant Fleet_Index_Array :=
+                             Game.Get_Fleets
+                               (Is_Deployed_Fleet'Access);
+      Fleet_Strength     : constant Natural := Fleet_Ids'Length;
+      Commander          : constant Senator_Id := Game.War_Commander (War);
+      Result             : Combat_Result_Record;
    begin
 
-      Game.War_State (War).Start_Combat;
+      War_State.Start_Combat;
 
-      Game.Notifier.Send_Notification
-        (Game.Local_Text
-           ("senator-has-strength",
-            Game.Senator_Name (Commander),
-            Agrippa.Images.Image (Legion_Strength),
-            Agrippa.Images.Image (Commander_Strength),
-            Agrippa.Images.Image (Total_Attack)));
-      Game.Notifier.Send_Notification
-        (Game.Local_Text
-           ("combat-bonus",
-            Agrippa.Images.Image (Total_Attack),
-            Agrippa.Images.Image (War_Strength),
-            Agrippa.Images.Image (Total_Attack - War_Strength)));
-      Game.Notifier.Send_Notification
-        (Game.Local_Text
-           ("attack-roll",
-            Agrippa.Images.Image (Roll),
-            Agrippa.Images.Image (Combat_Bonus),
-            Agrippa.Images.Image (Final_Roll),
-            Game.Local_Text
-              (Result_Tag,
-               Game.Local_Text
-                 (Losses_Tag,
-                  Agrippa.Images.Image
-                    (Natural'Min
-                         (Result.Losses,
-                          Legion_Strength),
-                     "legion")))));
+      Execute_Attack
+        (Game            => Game,
+         War             => War,
+         Fleet_Attack    => Fleet_Attack,
+         Commander       => Commander,
+         Attack_Strength =>
+           (if Fleet_Attack
+            then Fleet_Strength
+            else Legion_Strength),
+         War_Strength    =>
+           (if Fleet_Attack
+            then Natural (War_State.Fleet_Strength)
+            else Natural (War_State.Land_Strength)),
+         Result          => Result);
 
-      declare
-         use Ada.Strings.Unbounded;
-         Destroyed_Text   : Unbounded_String;
-         Destroyed_Ids    : Legion_Index_Array (1 .. Result.Losses);
-         Remaining_Count  : Natural := Legion_Ids'Length;
-         Commander_Killed : Boolean := Result.Result = Defeat;
-      begin
-
-         if Result.Losses > 0 then
-            for I in 1 .. Result.Losses loop
-               declare
-                  Index : constant Positive :=
-                            WL.Random.Random_Number (1, Remaining_Count);
-               begin
-                  Destroyed_Ids (I) := Legion_Ids (Index);
-                  Destroyed_Text := Destroyed_Text
-                    & (if I = 1 then "" else ", ")
-                    & WL.Numerics.Roman.Roman_Image
-                    (Positive (Destroyed_Ids (I)));
-                  Legion_Ids (Index) := Legion_Ids (Remaining_Count);
-                  Remaining_Count := Remaining_Count - 1;
-               end;
-            end loop;
-            Game.Notifier.Send_Notification
-              (Game.Local_Text
-                 ("legions-destroyed", To_String (Destroyed_Text)));
-
-            if not Commander_Killed then
-               for I in 1 .. Result.Losses loop
-                  declare
-                     Roll : constant Positive := Mortality_Roll;
-                  begin
-                     if Roll = Positive (Commander) then
-                        Commander_Killed := True;
-                        exit;
-                     end if;
-                  end;
-               end loop;
-            end if;
-
-            for Id of Destroyed_Ids loop
-               Game.Legion_State (Id).Destroy;
-            end loop;
-         end if;
-
-         if Commander_Killed then
-            Game.Senator_State (Commander).Kill
-              (Game.Faction_Leader (Game.Senator_Faction (Commander))
-               = Commander);
-            Game.Notifier.Send_Notification
-              (Game.Local_Text
-                 ("commander-killed", Game.Senator_Name (Commander)));
-            Game.Recall_Forces (War);
-         else
-            if Remaining_Count >= 1 then
-               declare
-                  Non_Veteran_Count : Natural := 0;
-                  Non_Veteran       : Legion_Index_Array
-                    (1 .. Remaining_Count);
-               begin
-                  for I in 1 .. Remaining_Count loop
-                     declare
-                        Id : constant Legion_Index := Legion_Ids (I);
-                        State : Agrippa.State.Legions.Legion_State_Type
-                        renames Game.Legion_State (Id);
-                     begin
-                        if not State.Veteran then
-                           Non_Veteran_Count := Non_Veteran_Count + 1;
-                           Non_Veteran (Non_Veteran_Count) := Id;
-                        end if;
-                     end;
-                  end loop;
-
-                  if Non_Veteran_Count > 0 then
-                     declare
-                        Index : constant Positive :=
-                                  WL.Random.Random_Number
-                                    (1, Non_Veteran_Count);
-                        Id    : constant Legion_Index := Non_Veteran (Index);
-                        State : Agrippa.State.Legions.Legion_State_Type
-                        renames Game.Legion_State (Id);
-                     begin
-                        State.Make_Veteran;
-                        State.Set_Loyalty (Commander);
-                        Game.Notifier.Send_Notification
-                          (Game.Local_Text
-                             ("veteran-legion-created",
-                              WL.Numerics.Roman.Roman_Image
-                                (Positive (Legion_Ids (Index))),
-                              Game.Senator_Name (Commander)));
-                     end;
-                  end if;
-               end;
-            end if;
-         end if;
-
-         if Result.Result = Victory then
-            if not Commander_Killed then
-               declare
-                  Pop_Change : constant Popularity_Range :=
-                                 Popularity_Range ((War_Strength + 1) / 2);
-                  Infl_Change : constant Influence_Range :=
-                                  Influence_Range ((War_Strength + 1) / 2);
-               begin
-                  Game.Notifier.Send_Notification
-                    (Game.Local_Text
-                       ("senator-gains-inf-and-pop",
-                        Game.Senator_Name (Commander),
-                        Agrippa.Images.Image (Infl_Change),
-                        Agrippa.Images.Image (Pop_Change)));
-                  Game.Senator_State (Commander).Add_Influence (Infl_Change);
-                  Game.Senator_State (Commander).Change_Popularity
-                    (Pop_Change);
-                  Game.Senator_State (Commander).Set_Victorious;
-               end;
-            end if;
-
-            if Game.Unrest = 0 then
-               Game.Notifier.Send_Notification
-                 ("unrest-remains-at-zero");
-            else
-               Game.Unrest := Game.Unrest - 1;
-               Game.Notifier.Send_Notification
-                 (Game.Local_Text
-                    ("unrest-drops-by-to",
-                     "1",
-                     Agrippa.Images.Image (Natural (Game.Unrest))));
-            end if;
-
-            declare
-               Spoils : constant Talents :=
-                          Agrippa.Cards.Wars.Spoils
-                            (Agrippa.Cards.Wars.War (War));
-            begin
-               Game.Notifier.Send_Notification
-                 (Game.Local_Text
-                    ("rome-gains-spoils",
-                     Agrippa.Images.Image (Spoils)));
-               Game.Treasury := Game.Treasury + Spoils;
-            end;
-
-            Game.War_State (War).Discard;
-
-         end if;
-      end;
+      if Fleet_Attack then
+         Fleet_Battle_Result (Game, War, Commander, Fleet_Ids, Result);
+      else
+         Land_Battle_Result (Game, War, Commander, Legion_Ids, Result);
+      end if;
    end Attack;
 
    ----------------------
@@ -1309,6 +1170,79 @@ package body Agrippa.Game is
       return Event_Tag (Game.Events (Event));
    end Event_Tag;
 
+   --------------------
+   -- Execute_Attack --
+   --------------------
+
+   procedure Execute_Attack
+     (Game            : in out Game_Type'Class;
+      War             : War_Id;
+      Fleet_Attack    : Boolean;
+      Commander       : Senator_Id;
+      Attack_Strength : Natural;
+      War_Strength    : Natural;
+      Result          : out Combat_Result_Record)
+   is
+      Commander_Strength : constant Natural :=
+                             Natural (Game.Military (Commander));
+      Total_Attack       : constant Integer :=
+                             Attack_Strength + Commander_Strength;
+      Roll               : constant TDR_Range :=
+                             Agrippa.Dice.TDR;
+      Combat_Bonus       : constant Integer :=
+                             Total_Attack - War_Strength;
+      Final_Roll         : constant Integer :=
+                             Roll + Combat_Bonus;
+
+   begin
+
+      Result :=
+        Adjudicate_Combat
+          (War, False, Roll, Attack_Strength, Final_Roll);
+
+      declare
+         Result_Tag         : constant String :=
+                                (case Result.Result is
+                                    when Disaster  => "disaster",
+                                    when Standoff  => "stand-off",
+                                    when Defeat    => "defeat",
+                                    when Stalemate => "stalemate",
+                                    when Victory   => "victory");
+         Losses_Tag         : constant String :=
+                                (if Result.Losses = 0
+                                 then "no-losses"
+                                 elsif Fleet_Attack
+                                 then "fleets-lost"
+                                 else "legions-lost");
+      begin
+         Game.Notifier.Send_Notification
+           (Game.Local_Text
+              ("senator-has-strength",
+               Game.Senator_Name (Commander),
+               Agrippa.Images.Image (Attack_Strength),
+               Agrippa.Images.Image (Commander_Strength),
+               Agrippa.Images.Image (Total_Attack)));
+         Game.Notifier.Send_Notification
+           (Game.Local_Text
+              ("combat-bonus",
+               Agrippa.Images.Image (Total_Attack),
+               Agrippa.Images.Image (War_Strength),
+               Agrippa.Images.Image (Total_Attack - War_Strength)));
+         Game.Notifier.Send_Notification
+           (Game.Local_Text
+              ("attack-roll",
+               Agrippa.Images.Image (Roll),
+               Agrippa.Images.Image (Combat_Bonus),
+               Agrippa.Images.Image (Final_Roll),
+               Game.Local_Text
+                 (Result_Tag,
+                  Game.Local_Text
+                    (Losses_Tag,
+                     Agrippa.Images.Image (Result.Losses),
+                     (if Fleet_Attack then "fleet" else "legion")))));
+      end;
+   end Execute_Attack;
+
    -------------------
    -- Execute_Event --
    -------------------
@@ -1455,6 +1389,136 @@ package body Agrippa.Game is
          end loop;
       end return;
    end Faction_Votes;
+
+   -------------------------
+   -- Fleet_Battle_Result --
+   -------------------------
+
+   procedure Fleet_Battle_Result
+     (Game      : in out Game_Type'Class;
+      War       : War_Id;
+      Commander : Senator_Id;
+      Fleets    : Fleet_Index_Array;
+      Result    : Combat_Result_Record)
+   is
+      use Ada.Strings.Unbounded;
+      Destroyed_Text   : Unbounded_String;
+      Destroyed_Ids    : Fleet_Index_Array (1 .. Result.Losses);
+      Remaining_Ids    : Fleet_Index_Array := Fleets;
+      Remaining_Count  : Natural := Fleets'Length;
+      Commander_Killed : Boolean := Result.Result = Defeat;
+   begin
+
+      if Result.Losses > 0 then
+         for I in 1 .. Result.Losses loop
+            declare
+               Index : constant Positive :=
+                         WL.Random.Random_Number (1, Remaining_Count);
+            begin
+               Destroyed_Ids (I) := Remaining_Ids (Index);
+               Destroyed_Text := Destroyed_Text
+                 & (if I = 1 then "" else ", ")
+                 & WL.Numerics.Roman.Roman_Image
+                 (Positive (Destroyed_Ids (I)));
+               Remaining_Ids (Index) := Remaining_Ids (Remaining_Count);
+               Remaining_Count := Remaining_Count - 1;
+            end;
+         end loop;
+         Game.Notifier.Send_Notification
+           (Game.Local_Text
+              ("fleets-destroyed", To_String (Destroyed_Text)));
+
+         if not Commander_Killed then
+            for I in 1 .. Result.Losses loop
+               declare
+                  Roll : constant Positive := Mortality_Roll;
+               begin
+                  if Roll = Positive (Commander) then
+                     Commander_Killed := True;
+                     exit;
+                  end if;
+               end;
+            end loop;
+         end if;
+
+         for Id of Destroyed_Ids loop
+            Game.Fleet_State (Id).Destroy;
+         end loop;
+      end if;
+
+      if Commander_Killed then
+         Game.Senator_State (Commander).Kill
+           (Game.Faction_Leader (Game.Senator_Faction (Commander))
+            = Commander);
+         Game.Notifier.Send_Notification
+           (Game.Local_Text
+              ("commander-killed", Game.Senator_Name (Commander)));
+         Game.Recall_Forces (War);
+      end if;
+
+      if Result.Result = Victory then
+         if not Commander_Killed then
+            declare
+               Strength : constant Fleet_Count :=
+                            Game.Get_War_State (War).Fleet_Strength;
+               Pop_Change  : constant Popularity_Range :=
+                               Popularity_Range ((Strength + 1) / 2);
+               Infl_Change : constant Influence_Range :=
+                               Influence_Range ((Strength + 1) / 2);
+            begin
+               Game.Notifier.Send_Notification
+                 (Game.Local_Text
+                    ("senator-gains-inf-and-pop",
+                     Game.Senator_Name (Commander),
+                     Agrippa.Images.Image (Infl_Change),
+                     Agrippa.Images.Image (Pop_Change)));
+               Game.Senator_State (Commander).Add_Influence (Infl_Change);
+               Game.Senator_State (Commander).Change_Popularity
+                 (Pop_Change);
+               Game.Senator_State (Commander).Return_To_Rome;
+            end;
+         end if;
+
+         Game.Recall_Forces (War);
+         Game.War_State (War).Set_Fleet_Victory;
+
+         if Game.Unrest = 0 then
+            Game.Notifier.Send_Notification
+              ("unrest-remains-at-zero");
+         else
+            Game.Unrest := Game.Unrest - 1;
+            Game.Notifier.Send_Notification
+              (Game.Local_Text
+                 ("unrest-drops-by-to",
+                  "1",
+                  Agrippa.Images.Image (Natural (Game.Unrest))));
+         end if;
+
+      end if;
+   end Fleet_Battle_Result;
+
+   ----------------
+   -- Get_Fleets --
+   ----------------
+
+   function Get_Fleets
+     (Game    : Game_Type'Class;
+      Test    : not null access
+        function (Legion : Agrippa.State.Fleets.Fleet_State_Type'Class)
+      return Boolean)
+      return Fleet_Index_Array
+   is
+      Result : Fleet_Index_Array (1 .. Max_Fleets);
+      Count  : Natural := 0;
+   begin
+      for I in Game.Fleet_State'Range loop
+         if Test (Game.Fleet_State (I)) then
+            Count := Count + 1;
+            Result (Count) := I;
+         end if;
+      end loop;
+      return Result (1 .. Count);
+   end Get_Fleets;
 
    -----------------
    -- Get_Legions --
@@ -1654,6 +1718,161 @@ package body Agrippa.Game is
    begin
       null;
    end Initialize;
+
+   procedure Land_Battle_Result
+     (Game      : in out Game_Type'Class;
+      War       : War_Id;
+      Commander : Senator_Id;
+      Legions   : Legion_Index_Array;
+      Result    : Combat_Result_Record)
+   is
+      use Ada.Strings.Unbounded;
+      Destroyed_Text   : Unbounded_String;
+      Destroyed_Ids    : Legion_Index_Array (1 .. Result.Losses);
+      Remaining_Ids    : Legion_Index_Array := Legions;
+      Remaining_Count  : Natural := Remaining_Ids'Length;
+      Commander_Killed : Boolean := Result.Result = Defeat;
+   begin
+
+      if Result.Losses > 0 then
+         for I in 1 .. Result.Losses loop
+            declare
+               Index : constant Positive :=
+                         WL.Random.Random_Number (1, Remaining_Count);
+            begin
+               Destroyed_Ids (I) := Remaining_Ids (Index);
+               Destroyed_Text := Destroyed_Text
+                 & (if I = 1 then "" else ", ")
+                 & WL.Numerics.Roman.Roman_Image
+                 (Positive (Destroyed_Ids (I)));
+               Remaining_Ids (Index) := Remaining_Ids (Remaining_Count);
+               Remaining_Count := Remaining_Count - 1;
+            end;
+         end loop;
+         Game.Notifier.Send_Notification
+           (Game.Local_Text
+              ("legions-destroyed", To_String (Destroyed_Text)));
+
+         if not Commander_Killed then
+            for I in 1 .. Result.Losses loop
+               declare
+                  Roll : constant Positive := Mortality_Roll;
+               begin
+                  if Roll = Positive (Commander) then
+                     Commander_Killed := True;
+                     exit;
+                  end if;
+               end;
+            end loop;
+         end if;
+
+         for Id of Destroyed_Ids loop
+            Game.Legion_State (Id).Destroy;
+         end loop;
+      end if;
+
+      if Commander_Killed then
+         Game.Senator_State (Commander).Kill
+           (Game.Faction_Leader (Game.Senator_Faction (Commander))
+            = Commander);
+         Game.Notifier.Send_Notification
+           (Game.Local_Text
+              ("commander-killed", Game.Senator_Name (Commander)));
+         Game.Recall_Forces (War);
+      else
+         if Remaining_Count >= 1 then
+            declare
+               Non_Veteran_Count : Natural := 0;
+               Non_Veteran       : Legion_Index_Array
+                 (1 .. Remaining_Count);
+            begin
+               for I in 1 .. Remaining_Count loop
+                  declare
+                     Id    : constant Legion_Index := Remaining_Ids (I);
+                     State : Agrippa.State.Legions.Legion_State_Type
+                     renames Game.Legion_State (Id);
+                  begin
+                     if not State.Veteran then
+                        Non_Veteran_Count := Non_Veteran_Count + 1;
+                        Non_Veteran (Non_Veteran_Count) := Id;
+                     end if;
+                  end;
+               end loop;
+
+               if Non_Veteran_Count > 0 then
+                  declare
+                     Index : constant Positive :=
+                               WL.Random.Random_Number
+                                 (1, Non_Veteran_Count);
+                     Id    : constant Legion_Index := Non_Veteran (Index);
+                     State : Agrippa.State.Legions.Legion_State_Type
+                     renames Game.Legion_State (Id);
+                  begin
+                     State.Make_Veteran;
+                     State.Set_Loyalty (Commander);
+                     Game.Notifier.Send_Notification
+                       (Game.Local_Text
+                          ("veteran-legion-created",
+                           WL.Numerics.Roman.Roman_Image
+                             (Positive (Remaining_Ids (Index))),
+                           Game.Senator_Name (Commander)));
+                  end;
+               end if;
+            end;
+         end if;
+      end if;
+
+      if Result.Result = Victory then
+         if not Commander_Killed then
+            declare
+               Strength : constant Legion_Count :=
+                            Game.Get_War_State (War).Land_Strength;
+               Pop_Change  : constant Popularity_Range :=
+                               Popularity_Range ((Strength + 1) / 2);
+               Infl_Change : constant Influence_Range :=
+                               Influence_Range ((Strength + 1) / 2);
+            begin
+               Game.Notifier.Send_Notification
+                 (Game.Local_Text
+                    ("senator-gains-inf-and-pop",
+                     Game.Senator_Name (Commander),
+                     Agrippa.Images.Image (Infl_Change),
+                     Agrippa.Images.Image (Pop_Change)));
+               Game.Senator_State (Commander).Add_Influence (Infl_Change);
+               Game.Senator_State (Commander).Change_Popularity
+                 (Pop_Change);
+               Game.Senator_State (Commander).Set_Victorious;
+            end;
+         end if;
+
+         if Game.Unrest = 0 then
+            Game.Notifier.Send_Notification
+              ("unrest-remains-at-zero");
+         else
+            Game.Unrest := Game.Unrest - 1;
+            Game.Notifier.Send_Notification
+              (Game.Local_Text
+                 ("unrest-drops-by-to",
+                  "1",
+                  Agrippa.Images.Image (Natural (Game.Unrest))));
+         end if;
+
+         declare
+            Spoils : constant Talents :=
+                       Agrippa.Cards.Wars.Spoils
+                         (Agrippa.Cards.Wars.War (War));
+         begin
+            Game.Notifier.Send_Notification
+              (Game.Local_Text
+                 ("rome-gains-spoils",
+                  Agrippa.Images.Image (Spoils)));
+            Game.Treasury := Game.Treasury + Spoils;
+         end;
+
+         Game.War_State (War).Discard;
+
+      end if;
+   end Land_Battle_Result;
 
    -------------------
    -- Matching_Wars --

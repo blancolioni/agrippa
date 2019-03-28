@@ -111,9 +111,13 @@ package Agrippa is
    subtype Legion_Index is Legion_Count range 1 .. Legion_Count'Last;
 
    type Legion_Index_Array is array (Positive range <>) of Legion_Index;
+   No_Legions : constant Legion_Index_Array (1 .. 0) := (others => <>);
 
    type Fleet_Count is range 0 .. Max_Fleets;
    subtype Fleet_Index is Fleet_Count range 1 .. Fleet_Count'Last;
+
+   type Fleet_Index_Array is array (Positive range <>) of Fleet_Index;
+   No_Fleets : constant Fleet_Index_Array (1 .. 0) := (others => <>);
 
    type Office_Type is
      (Dictator, Rome_Consul, Field_Consul, Censor,

@@ -234,12 +234,15 @@ package body Agrippa.Players.Robots is
                              State.Get_War_State (War);
       Fleet_Strength     : constant Fleet_Count := War_State.Fleet_Strength;
       Fleet_Support      : constant Fleet_Count := War_State.Fleet_Support;
+      Fleet_Attack       : constant Boolean :=
+                             Fleet_Strength > 0 and then
+                                 not War_State.Fleet_Victory;
       Required_Fleets    : constant Fleet_Count :=
-                             (if Fleet_Strength = 0
-                              then Fleet_Support
-                              else Fleet_Count'Max
-                                (Fleet_Strength + 2, Fleet_Support));
-      Land_Strength      : constant Legion_Count := War_State.Land_Strength;
+                             (if Fleet_Attack
+                              then Fleet_Strength + 3
+                              else Fleet_Support);
+      Land_Strength      : constant Legion_Count :=
+                             War_State.Land_Strength;
       Required_Strength  : constant Legion_Count :=
                              Legion_Count'Max
                                ((if Overwhelm
@@ -249,12 +252,14 @@ package body Agrippa.Players.Robots is
                                 else Land_Strength + 3),
                                 (if Minimal then Land_Strength else 10));
       Veteran_Legions    : constant Legion_Index_Array :=
-                             State.Available_Veteran_Legions;
+                             (if Fleet_Attack then No_Legions
+                              else State.Available_Veteran_Legions);
       Available_Strength : constant Legion_Count :=
                              State.Available_Regular_Legions
                                + 2 * Veteran_Legions'Length;
       Recruit_Legions    : constant Legion_Count :=
-                             (if Available_Strength >= Required_Strength
+                             (if Fleet_Attack
+                              or else Available_Strength >= Required_Strength
                               then 0
                               else Required_Strength - Available_Strength);
       Available_Fleets   : constant Fleet_Count :=
@@ -285,26 +290,42 @@ package body Agrippa.Players.Robots is
       Final_Strength        : constant Legion_Count :=
                                 Available_Strength
                                   + Final_Recruit_Legions;
+      Final_Fleets          : constant Fleet_Count :=
+                                Available_Fleets + Final_Recruit_Fleets;
       Commander          : constant Senator_Id :=
-                             (if State.Has_Holder (Field_Consul)
-                              and then not State.Has_Command
-                                (State.Office_Holder (Field_Consul))
-                              then State.Office_Holder (Field_Consul)
-                              elsif State.Has_Holder (Rome_Consul)
-                              and then not State.Has_Command
-                                (State.Office_Holder (Rome_Consul))
-                              then State.Office_Holder (Rome_Consul)
-                              else raise Constraint_Error with
-                                "no available commander");
+                                (if State.Has_Holder (Dictator)
+                                 and then not State.Has_Command
+                                   (State.Office_Holder (Dictator))
+                                 then State.Office_Holder (Dictator)
+                                 elsif State.Has_Holder (Field_Consul)
+                                 and then not State.Has_Command
+                                   (State.Office_Holder (Field_Consul))
+                                 then State.Office_Holder (Field_Consul)
+                                 elsif State.Has_Holder (Rome_Consul)
+                                 and then not State.Has_Command
+                                   (State.Office_Holder (Rome_Consul))
+                                 then State.Office_Holder (Rome_Consul)
+                                 else raise Constraint_Error with
+                                   "no available commander");
    begin
-      State.Log
-        ("attacking " & Agrippa.Cards.Wars.War (War).Tag
-         & ": land strength" & Land_Strength'Image
-         & "; required strength" & Required_Strength'Image
-         & "; Available_Strength" & Available_Strength'Image
-         & "; required recruitment" & Recruit_Legions'Image
-         & "; max recruitment" & Max_Recuitment'Image
-         & "; canceled recruitment" & Canceled_Recuitment'Image);
+      if Fleet_Attack then
+         State.Log
+           ("attacking " & Agrippa.Cards.Wars.War (War).Tag
+            & ": fleet strength" & Fleet_Strength'Image
+            & "; required fleets" & Required_Fleets'Image
+            & "; available fleets" & Available_Fleets'Image
+            & "; required recruitment" & Recruit_Fleets'Image
+            & "; max recruitment" & Max_Recuitment'Image);
+      else
+         State.Log
+           ("attacking " & Agrippa.Cards.Wars.War (War).Tag
+            & ": land strength" & Land_Strength'Image
+            & "; required strength" & Required_Strength'Image
+            & "; Available_Strength" & Available_Strength'Image
+            & "; required recruitment" & Recruit_Legions'Image
+            & "; max recruitment" & Max_Recuitment'Image
+            & "; canceled recruitment" & Canceled_Recuitment'Image);
+      end if;
 
       if Canceled_Recuitment > 0 then
          State.Log
@@ -314,13 +335,24 @@ package body Agrippa.Players.Robots is
          return False;
       end if;
 
-      if Final_Strength < Required_Strength then
-         State.Log
-           ("Canceling attack because final strength is"
-            & Final_Strength'Image
-            & " but we need"
-            & Required_Strength'Image);
-         return False;
+      if Fleet_Attack then
+         if Final_Fleets < Required_Fleets then
+            State.Log
+              ("Canceling attack because final fleet count is"
+               & Final_Fleets'Image
+               & " but we need"
+               & Required_Fleets'Image);
+            return False;
+         end if;
+      else
+         if Final_Strength < Required_Strength then
+            State.Log
+              ("Canceling attack because final strength is"
+               & Final_Strength'Image
+               & " but we need"
+               & Required_Strength'Image);
+            return False;
+         end if;
       end if;
 
       if Final_Recruit_Legions > 0
@@ -340,7 +372,8 @@ package body Agrippa.Players.Robots is
              (War             => War,
               Commander       => Commander,
               Regular_Legions =>
-                State.Available_Regular_Legions + Final_Recruit_Legions,
+                (if Fleet_Attack then 0
+                 else State.Available_Regular_Legions + Final_Recruit_Legions),
               Veteran_Legions => Veteran_Legions,
               Fleets          => Required_Fleets));
 
@@ -1221,7 +1254,7 @@ package body Agrippa.Players.Robots is
       Highest : Natural := 0;
       Result  : Nullable_Senator_Id := No_Senator;
    begin
-      if True then
+      if False then
          State.Log (State.Faction_Name (Robot.Faction)
                     & " for " & Office'Image);
       end if;
@@ -1231,7 +1264,7 @@ package body Agrippa.Players.Robots is
             Score : constant Natural :=
                       Score_Candidate (Sid);
          begin
-            if True then
+            if False then
                State.Log
                  (State.Senator_Name_And_Faction (Sid)
                   & " scores" & Score'Image);
