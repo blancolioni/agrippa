@@ -706,7 +706,7 @@ package body Agrippa.Game is
    begin
       for Fleet of Game.Fleet_State loop
          exit when Remaining = 0;
-         if not Fleet.Deployed then
+         if Fleet.Created and then not Fleet.Deployed then
             Fleet.Deploy (War);
             Remaining := Remaining - 1;
          end if;

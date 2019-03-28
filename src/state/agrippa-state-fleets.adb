@@ -34,6 +34,7 @@ package body Agrippa.State.Fleets is
    is
    begin
       Fleet.Created := False;
+      Fleet.Deployed := False;
    end Destroy;
 
    ------------
