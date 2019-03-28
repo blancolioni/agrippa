@@ -352,11 +352,9 @@ package body Agrippa.UI.Text is
             end if;
             Put (Image (State.Influence));
             Put (" ");
-            if State.Popularity < 10 then
-               Put (" ");
-            end if;
             if State.Popularity /= 0 then
-               Put (Image (State.Popularity));
+               Put (Popularity_Range'Image (State.Popularity));
+               Put (" ");
             else
                Put ("   ");
             end if;
