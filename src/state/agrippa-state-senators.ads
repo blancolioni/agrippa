@@ -32,8 +32,8 @@ package Agrippa.State.Senators is
      (Senator : Senator_State_Type'Class)
       return Boolean;
 
-   function Is_Statesman_Only
-     (Senator : Senator_State_Type'Class)
+   overriding function Is_Statesman_Only
+     (Senator : Senator_State_Type)
       return Boolean;
 
    procedure Clear_Statesman_Only
@@ -380,8 +380,8 @@ private
       return Statesman_Id
    is (Senator.Statesman);
 
-   function Is_Statesman_Only
-     (Senator : Senator_State_Type'Class)
+   overriding function Is_Statesman_Only
+     (Senator : Senator_State_Type)
       return Boolean
    is (Senator.Is_Statesman_Only);
 

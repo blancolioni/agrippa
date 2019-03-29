@@ -93,6 +93,11 @@ package Agrippa.State is
    is abstract
      with Pre'Class => Senator.Has_Statesman;
 
+   function Is_Statesman_Only
+     (Senator : Senator_State_Interface)
+      return Boolean
+      is abstract;
+
    procedure Assign_Statesman
      (Senator    : in out Senator_State_Interface;
       Statesman  : Statesman_Id)
