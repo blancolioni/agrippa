@@ -172,7 +172,7 @@ package Agrippa.State is
 
    function Land_Strength
      (State : War_State_Interface)
-      return Legion_Count
+      return Combat_Strength
       is abstract;
 
    function Fleet_Support
@@ -480,7 +480,7 @@ package Agrippa.State is
    function Legion_Strength
      (State : State_Interface'Class;
       Legions : Legion_Index_Array)
-      return Legion_Count;
+      return Combat_Strength;
 
    function Is_Available
      (State  : State_Interface;

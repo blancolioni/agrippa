@@ -243,10 +243,10 @@ package body Agrippa.Players.Robots is
                               else Fleet_Support);
       Deployed_Fleets    : constant Fleet_Index_Array :=
                              State.Deployed_Fleets (War);
-      Land_Strength      : constant Legion_Count :=
+      Land_Strength      : constant Combat_Strength :=
                              War_State.Land_Strength;
-      Required_Strength  : constant Legion_Count :=
-                             Legion_Count'Max
+      Required_Strength  : constant Combat_Strength :=
+                             Combat_Strength'Max
                                ((if Overwhelm
                                 then Land_Strength + 5
                                 elsif Minimal
@@ -258,15 +258,17 @@ package body Agrippa.Players.Robots is
                               else State.Available_Veteran_Legions);
       Deployed_Legions   : constant Legion_Index_Array :=
                              State.Deployed_Legions (War);
-      Available_Strength : constant Legion_Count :=
+      Available_Strength : constant Combat_Strength :=
                              State.Legion_Strength (Deployed_Legions)
-                             + State.Available_Regular_Legions
-                             + 2 * Veteran_Legions'Length;
+                             + State.Legion_Strength (Veteran_Legions)
+                             + Combat_Strength
+                               (State.Available_Regular_Legions);
       Recruit_Legions    : constant Legion_Count :=
                              (if Fleet_Attack
                               or else Available_Strength >= Required_Strength
                               then 0
-                              else Required_Strength - Available_Strength);
+                              else Legion_Count
+                                (Required_Strength - Available_Strength));
       Available_Fleets   : constant Fleet_Count :=
                              State.Available_Fleets + Deployed_Fleets'Length;
       Recruit_Fleets     : constant Fleet_Count :=
@@ -292,9 +294,9 @@ package body Agrippa.Players.Robots is
                                 - Legion_Count (Canceled_Recuitment)
                                 else 0);
       Final_Recruit_Fleets  : constant Fleet_Count := Recruit_Fleets;
-      Final_Strength        : constant Legion_Count :=
+      Final_Strength        : constant Combat_Strength :=
                                 Available_Strength
-                                  + Final_Recruit_Legions;
+                                  + Combat_Strength (Final_Recruit_Legions);
       Final_Fleets          : constant Fleet_Count :=
                                 Available_Fleets + Final_Recruit_Fleets;
       Reinforce             : constant Boolean := State.Has_Commander (War);

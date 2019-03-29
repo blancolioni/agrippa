@@ -13,7 +13,7 @@ package Agrippa.Cards.Wars is
    function All_Wars
      return War_Id_Array;
 
-   function Land_Strength (Card : War_Card_Type'Class) return Legion_Count;
+   function Land_Strength (Card : War_Card_Type'Class) return Combat_Strength;
    function Fleet_Strength (Card : War_Card_Type'Class) return Fleet_Count;
    function Fleet_Support (Card : War_Card_Type'Class) return Fleet_Count;
 
@@ -39,7 +39,7 @@ private
      new Card_Type with
       record
          W_Id           : War_Id;
-         Land_Strength  : Legion_Count;
+         Land_Strength  : Combat_Strength;
          Fleet_Support  : Fleet_Count;
          Fleet_Strength : Fleet_Count;
          Disaster       : access constant Roll_Array;
@@ -55,7 +55,7 @@ private
    function War (Card : War_Card_Type'Class) return War_Id
    is (Card.W_Id);
 
-   function Land_Strength (Card : War_Card_Type'Class) return Legion_Count
+   function Land_Strength (Card : War_Card_Type'Class) return Combat_Strength
    is (Card.Land_Strength);
 
    function Fleet_Strength (Card : War_Card_Type'Class) return Fleet_Count

@@ -1852,7 +1852,7 @@ package body Agrippa.Game is
       if Result.Result = Victory then
          if not Commander_Killed then
             declare
-               Strength : constant Legion_Count :=
+               Strength : constant Combat_Strength :=
                             Game.Get_War_State (War).Land_Strength;
                Pop_Change  : constant Popularity_Range :=
                                Popularity_Range ((Strength + 1) / 2);

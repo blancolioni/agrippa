@@ -124,6 +124,8 @@ package Agrippa is
    type Fleet_Index_Array is array (Positive range <>) of Fleet_Index;
    No_Fleets : constant Fleet_Index_Array (1 .. 0) := (others => <>);
 
+   type Combat_Strength is range 0 .. 99;
+
    type Office_Type is
      (Dictator, Rome_Consul, Field_Consul, Censor,
       Master_Of_Horse, Pontifex_Maximus);

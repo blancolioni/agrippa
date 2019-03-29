@@ -16,6 +16,11 @@ package body Agrippa.Cards.Wars.Configure is
          return Military_Unit_Count
       is (Military_Unit_Count (Natural'(Config.Get (Name, 0))));
 
+      function Get
+        (Name : String)
+         return Combat_Strength
+      is (Combat_Strength (Natural'(Config.Get (Name, 0))));
+
       -------------
       -- Numbers --
       -------------

@@ -107,7 +107,7 @@ private
 
    overriding function Land_Strength
      (State : War_State_Type)
-      return Legion_Count
+      return Combat_Strength
    is (Agrippa.Cards.Wars.War (State.Id).Land_Strength);
 
    overriding function Fleet_Support

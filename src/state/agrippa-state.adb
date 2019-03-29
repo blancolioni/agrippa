@@ -136,10 +136,10 @@ package body Agrippa.State is
    function Legion_Strength
      (State   : State_Interface'Class;
       Legions : Legion_Index_Array)
-      return Legion_Count
+      return Combat_Strength
    is
    begin
-      return Strength : Legion_Count := Legions'Length do
+      return Strength : Combat_Strength := Legions'Length do
          for Index of Legions loop
             if State.Is_Veteran (Index) then
                Strength := Strength + 1;
