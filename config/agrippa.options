@@ -1,0 +1,6 @@
+package Agrippa.Options is
+
+   Randomise   : Boolean;
+   Random_Seed : Natural;
+   
+end Agrippa.Options;

@@ -8,3 +8,6 @@ config/provinces.csv
 turn-1.txt
 turns.txt
 src/driver/agrippa-paths.ads
+test-results/*
+src/driver/agrippa-options.ad[bs]
+options.txt
