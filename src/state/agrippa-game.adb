@@ -903,6 +903,12 @@ package body Agrippa.Game is
 
             when Attack =>
 
+               if Game.Highest_Ranking_Available_Officer
+                 = Commander (Proposal)
+               then
+                  Game.Senate_Adjourned := True;
+               end if;
+
                Game.War_State (War (Proposal)).Attack;
                Game.Deploy_Fleets (Fleets (Proposal), War (Proposal));
                Game.Deploy_Regular_Legions
