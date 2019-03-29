@@ -2058,7 +2058,7 @@ package body Agrippa.Game is
                   Game.Notifier.Send_Notification
                     (Game.Senator_Name (State.Id)
                      & " joins statesman in faction "
-                     & Game.Faction_Name (State.Faction));
+                     & Game.Faction_Name (Faction));
                   State.Clear_Statesman_Only;
                else
                   State.Set_In_Forum;
