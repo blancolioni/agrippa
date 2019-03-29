@@ -166,14 +166,12 @@ package Agrippa.State is
    function Unprosecuted
      (State : War_State_Interface)
       return Boolean
-      is abstract
-     with Post'Class => not (Unprosecuted'Result and then State.Prosecuted);
+      is abstract;
 
    function Prosecuted
      (State : War_State_Interface)
       return Boolean
-      is abstract
-     with Post'Class => not (Prosecuted'Result and then State.Unprosecuted);
+      is abstract;
 
    function Land_Strength
      (State : War_State_Interface)
