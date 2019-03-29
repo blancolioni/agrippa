@@ -451,10 +451,14 @@ package body Agrippa.UI.Text is
                              (State.Local_Text
                                 ("faction-leader-of-faction-dies",
                                  Name, State.Faction_Name (Faction)));
-                           Set_Col (Left);
-                           Ada.Text_IO.Put_Line
-                             (State.Local_Text
-                                ("succeeded-by-son", Name));
+                           if not State.Get_Senator_State (Senator)
+                             .Is_Statesman_Only
+                           then
+                              Set_Col (Left);
+                              Ada.Text_IO.Put_Line
+                                (State.Local_Text
+                                   ("succeeded-by-son", Name));
+                           end if;
                         else
                            Ada.Text_IO.Put_Line
                              (State.Local_Text
