@@ -151,7 +151,7 @@ package body Agrippa.Players.Robots is
      (Robot   : Robot_Player_Type'Class;
       State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Make_Proposal_Message)
-      return Agrippa.Messages.Make_Proposal_Message;
+      return Agrippa.Messages.Message_Type;
 
    function Make_Persuasion_Attempt
      (Robot     : Robot_Player_Type'Class;
@@ -997,7 +997,7 @@ package body Agrippa.Players.Robots is
      (Robot   : Robot_Player_Type'Class;
       State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Make_Proposal_Message)
-      return Agrippa.Messages.Make_Proposal_Message
+      return Agrippa.Messages.Message_Type
    is
       Coalition_Index : Natural := 1;
 

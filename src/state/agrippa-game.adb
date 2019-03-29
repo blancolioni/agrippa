@@ -2489,7 +2489,14 @@ package body Agrippa.Game is
                             To_Player (Message);
             begin
 
-               if Agrippa.Proposals.Is_Empty
+               if Response.Content = Empty_Message then
+                  Game.Send_Text_Notification
+                    (Game.Local_Text
+                       ("x-unable-to-find-agreement",
+                        Game.Senator_Name
+                          (Game.Highest_Ranking_Available_Officer)));
+                  Game.Senate_Adjourned := True;
+               elsif Agrippa.Proposals.Is_Empty
                  (Agrippa.Messages.Proposals (Response))
                then
                   Game.Send_Text_Notification
