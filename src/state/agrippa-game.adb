@@ -26,14 +26,14 @@ package body Agrippa.Game is
    type Combat_Result_Record is
       record
          Result : Combat_Result;
-         Losses : Natural;
+         Losses : Military_Unit_Count;
       end record;
 
    function Adjudicate_Combat
      (War       : War_Id;
       DS_Voided : Boolean;
       TDR       : TDR_Range;
-      Forces    : Positive;
+      Units     : Military_Unit_Count;
       Result    : Integer)
       return Combat_Result_Record;
 
@@ -138,13 +138,14 @@ package body Agrippa.Game is
       War  : War_Id);
 
    procedure Execute_Attack
-     (Game            : in out Game_Type'Class;
-      War             : War_Id;
-      Fleet_Attack    : Boolean;
-      Commander       : Senator_Id;
-      Attack_Strength : Natural;
-      War_Strength    : Natural;
-      Result          : out Combat_Result_Record);
+     (Game              : in out Game_Type'Class;
+      War               : War_Id;
+      Fleet_Attack      : Boolean;
+      Commander         : Senator_Id;
+      Attack_Unit_Count : Military_Unit_Count;
+      Attack_Strength   : Natural;
+      War_Strength      : Natural;
+      Result            : out Combat_Result_Record);
 
    procedure Fleet_Battle_Result
      (Game      : in out Game_Type'Class;
@@ -183,7 +184,7 @@ package body Agrippa.Game is
      (War       : War_Id;
       DS_Voided : Boolean;
       TDR       : TDR_Range;
-      Forces    : Positive;
+      Units     : Military_Unit_Count;
       Result    : Integer)
       return Combat_Result_Record
    is
@@ -208,15 +209,15 @@ package body Agrippa.Game is
                                18 => (Victory, 0));
    begin
       if not DS_Voided and then Card.Is_Disaster (TDR) then
-         return (Disaster, (Forces + 1) / 2);
+         return (Disaster, (Units + 1) / 2);
       elsif not DS_Voided and then Card.Is_Standoff (TDR) then
-         return (Standoff, (Forces + 3) / 4);
+         return (Standoff, (Units + 3) / 4);
       else
          return CR : Combat_Result_Record :=
            Combat_Result_Table
              (Integer'Max (3, Integer'Min (18, Result)))
          do
-            CR.Losses := Natural'Min (CR.Losses, Forces);
+            CR.Losses := Military_Unit_Count'Min (CR.Losses, Units);
          end return;
       end if;
    end Adjudicate_Combat;
@@ -384,6 +385,10 @@ package body Agrippa.Game is
          War             => War,
          Fleet_Attack    => Fleet_Attack,
          Commander       => Commander,
+         Attack_Unit_Count =>
+           (if Fleet_Attack
+            then Fleet_Ids'Length
+            else Legion_Ids'Length),
          Attack_Strength =>
            (if Fleet_Attack
             then Fleet_Strength
@@ -1188,13 +1193,14 @@ package body Agrippa.Game is
    --------------------
 
    procedure Execute_Attack
-     (Game            : in out Game_Type'Class;
-      War             : War_Id;
-      Fleet_Attack    : Boolean;
-      Commander       : Senator_Id;
-      Attack_Strength : Natural;
-      War_Strength    : Natural;
-      Result          : out Combat_Result_Record)
+     (Game              : in out Game_Type'Class;
+      War               : War_Id;
+      Fleet_Attack      : Boolean;
+      Commander         : Senator_Id;
+      Attack_Unit_Count : Military_Unit_Count;
+      Attack_Strength   : Natural;
+      War_Strength      : Natural;
+      Result            : out Combat_Result_Record)
    is
       Commander_Strength : constant Natural :=
                              Natural (Game.Military (Commander));
@@ -1212,7 +1218,7 @@ package body Agrippa.Game is
 
       Result :=
         Adjudicate_Combat
-          (War, Voids_DS, Roll, Attack_Strength, Final_Roll);
+          (War, Voids_DS, Roll, Attack_Unit_Count, Final_Roll);
 
       declare
          Result_Tag         : constant String :=
@@ -1430,14 +1436,14 @@ package body Agrippa.Game is
    is
       use Ada.Strings.Unbounded;
       Destroyed_Text   : Unbounded_String;
-      Destroyed_Ids    : Fleet_Index_Array (1 .. Result.Losses);
+      Destroyed_Ids    : Fleet_Index_Array (1 .. Natural (Result.Losses));
       Remaining_Ids    : Fleet_Index_Array := Fleets;
       Remaining_Count  : Natural := Fleets'Length;
       Commander_Killed : Boolean := Result.Result = Defeat;
    begin
 
       if Result.Losses > 0 then
-         for I in 1 .. Result.Losses loop
+         for I in 1 .. Natural (Result.Losses) loop
             declare
                Index : constant Positive :=
                          WL.Random.Random_Number (1, Remaining_Count);
@@ -1746,6 +1752,10 @@ package body Agrippa.Game is
       null;
    end Initialize;
 
+   ------------------------
+   -- Land_Battle_Result --
+   ------------------------
+
    procedure Land_Battle_Result
      (Game      : in out Game_Type'Class;
       War       : War_Id;
@@ -1755,14 +1765,14 @@ package body Agrippa.Game is
    is
       use Ada.Strings.Unbounded;
       Destroyed_Text   : Unbounded_String;
-      Destroyed_Ids    : Legion_Index_Array (1 .. Result.Losses);
+      Destroyed_Ids    : Legion_Index_Array (1 .. Natural (Result.Losses));
       Remaining_Ids    : Legion_Index_Array := Legions;
       Remaining_Count  : Natural := Remaining_Ids'Length;
       Commander_Killed : Boolean := Result.Result = Defeat;
    begin
 
       if Result.Losses > 0 then
-         for I in 1 .. Result.Losses loop
+         for I in 1 .. Natural (Result.Losses) loop
             declare
                Index : constant Positive :=
                          WL.Random.Random_Number (1, Remaining_Count);
@@ -2034,6 +2044,10 @@ package body Agrippa.Game is
                            (Agrippa.Cards.Senators
                             .Senator_Card_Type'Class (Card).Senator);
             begin
+               Game.Log (Game.Faction_Name (Faction)
+                         & " draws "
+                         & Game.Senator_Name (State.Id));
+
                if State.Is_Statesman_Only then
                   Game.Notifier.Send_Notification
                     (Game.Senator_Name (State.Id)
