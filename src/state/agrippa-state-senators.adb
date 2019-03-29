@@ -150,7 +150,7 @@ package body Agrippa.State.Senators is
       Senator :=
         (Id          => Senator.Id,
          In_Play     => True,
-         Has_Faction => Leader,
+         Has_Faction => Leader and then not Senator.Is_Statesman_Only,
          Faction     => Senator.Faction,
          others      => <>);
    end Kill;

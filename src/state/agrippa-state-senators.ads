@@ -237,7 +237,6 @@ package Agrippa.State.Senators is
       Leader  : Boolean)
      with Pre => Senator.In_Play,
      Post => Senator.In_Play
-     and then (Leader = Senator.Has_Faction)
      and then not Senator.Has_Statesman
      and then Senator.Treasury = 0
      and then Senator.Popularity = 0
@@ -303,7 +302,7 @@ private
    function In_Play
      (Senator : Senator_State_Type'Class)
       return Boolean
-   is (Senator.In_Play);
+   is (Senator.In_Play or else Senator.Is_Statesman_Only);
 
    function In_Rome
      (Senator : Senator_State_Type'Class)
