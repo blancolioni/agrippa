@@ -701,6 +701,8 @@ package body Agrippa.Players.Robots is
 
       for Retry in Boolean loop
 
+         Tried_List.Clear;
+
          while not Success loop
 
             State.Log ("negotiating a deal");
