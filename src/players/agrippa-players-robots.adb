@@ -825,28 +825,29 @@ package body Agrippa.Players.Robots is
       if State.Crisis then
          declare
             Dictator : Senator_Id := Senator_Id'First;
-            MoH      : Senator_Id := Senator_Id'First;
             Highest  : Attribute_Range := Attribute_Range'First;
             Wars     : constant War_Id_Array := State.Active_Wars;
+            First    : Boolean := False;
          begin
             for Sid of Agrippa.Cards.Senators.All_Senators loop
-               if not Nominated (Sid) then
+               if State.Has_Faction (Sid)
+                 and then not Nominated (Sid)
+               then
                   declare
                      This_Score : constant Attribute_Range :=
                                     State.Military (Sid);
                   begin
-                     if This_Score > Highest then
-                        Highest := This_Score;
-                        MoH      := Dictator;
+                     if First or else This_Score > Highest then
+                        Highest  := This_Score;
                         Dictator := Sid;
                      elsif Highest > Attribute_Range'First
                        and then This_Score = Highest
                      then
                         declare
                            use Agrippa.State;
-                           Current : Senator_State_Interface'Class
+                           Current  : Senator_State_Interface'Class
                            renames State.Get_Senator_State (Dictator);
-                           This    : Senator_State_Interface'Class
+                           This     : Senator_State_Interface'Class
                            renames State.Get_Senator_State (Sid);
                         begin
                            for War of Wars loop
@@ -857,7 +858,6 @@ package body Agrippa.Players.Robots is
                               elsif This.Voids_DS (War)
                                 and then not Current.Voids_DS (War)
                               then
-                                 MoH      := Dictator;
                                  Dictator := Sid;
                                  exit;
                               end if;
@@ -865,14 +865,13 @@ package body Agrippa.Players.Robots is
                         end;
                      end if;
                   end;
+                  First := False;
                end if;
             end loop;
 
             if Highest > Attribute_Range'First then
                Add (Deal, State.Senator_Faction (Dictator),
                     Office (Agrippa.Dictator, Dictator));
-               Add (Deal, State.Senator_Faction (MoH),
-                    Office (Agrippa.Master_Of_Horse, MoH));
             end if;
          end;
       end if;
