@@ -24,6 +24,31 @@ package Agrippa.State is
 
    type State_Revenue_Array is array (Positive range <>) of State_Revenue_Item;
 
+   type Unit_Type is (Legion, Fleet);
+
+   type Military_Type is abstract tagged private;
+
+   function Created
+     (Military : Military_Type'Class)
+      return Boolean;
+
+   function Deployed
+     (Military : Military_Type'Class)
+      return Boolean;
+
+   function Veteran
+     (Military : Military_Type'Class)
+      return Boolean;
+
+   function Regular
+     (Military : Military_Type'Class)
+      return Boolean;
+
+   function War
+     (Military : Military_Type'Class)
+      return War_Id
+     with Pre => Military.Deployed;
+
    type Senator_State_Interface is interface;
 
    function Id
@@ -401,6 +426,13 @@ package Agrippa.State is
       return Boolean
       is abstract;
 
+   function Count_Units
+     (State : State_Interface'Class;
+      Unit  : Unit_Type;
+      Test  : not null access
+        function (State : Military_Type'Class) return Boolean)
+      return Military_Unit_Count;
+
    function Available_Regular_Legions
      (State : State_Interface)
       return Legion_Count
@@ -411,12 +443,52 @@ package Agrippa.State is
       return Legion_Index_Array
       is abstract;
 
+   function Military_Unit_State
+     (State : State_Interface;
+      Unit  : Unit_Type;
+      Index : Military_Unit_Index)
+      return Military_Type'Class
+      is abstract;
+
+   function Get_Fleet_State
+     (State : State_Interface'Class;
+      Index : Fleet_Index)
+      return Military_Type'Class
+   is (State.Military_Unit_State (Fleet, Index));
+
+   function Get_Legion_State
+     (State : State_Interface'Class;
+      Index : Legion_Index)
+      return Military_Type'Class
+   is (State.Military_Unit_State (Legion, Index));
+
    function Available_Fleets
      (State : State_Interface)
       return Fleet_Count
       is abstract;
 
+   function Deployed_Fleets
+     (State : State_Interface'Class;
+      War   : War_Id)
+      return Fleet_Index_Array;
+
+   function Deployed_Legions
+     (State : State_Interface'Class;
+      War   : War_Id)
+      return Legion_Index_Array;
+
+   function Legion_Strength
+     (State : State_Interface'Class;
+      Legions : Legion_Index_Array)
+      return Legion_Count;
+
    function Is_Available
+     (State  : State_Interface;
+      Legion : Legion_Index)
+      return Boolean
+      is abstract;
+
+   function Is_Veteran
      (State  : State_Interface;
       Legion : Legion_Index)
       return Boolean
@@ -477,6 +549,13 @@ package Agrippa.State is
       War  : War_Id)
       return Boolean
       is abstract;
+
+   function Commander
+     (State : State_Interface;
+      War   : War_Id)
+      return Senator_Id
+      is abstract
+     with Pre'Class => State.Has_Commander (War);
 
    function Matching_Wars
      (State : State_Interface;
@@ -603,5 +682,38 @@ private
    is (Senator.Has_Statesman
        and then Agrippa.Cards.Statesmen.Statesman (Senator.Statesman)
        .Voids_DS (War));
+
+   type Military_Type is abstract tagged
+      record
+         Created  : Boolean := False;
+         Deployed : Boolean := False;
+         Veteran  : Boolean := False;
+         War      : War_Id;
+      end record;
+
+   function Created
+     (Military : Military_Type'Class)
+      return Boolean
+   is (Military.Created);
+
+   function Deployed
+     (Military : Military_Type'Class)
+      return Boolean
+   is (Military.Deployed);
+
+   function Veteran
+     (Military : Military_Type'Class)
+      return Boolean
+   is (Military.Veteran);
+
+   function Regular
+     (Military : Military_Type'Class)
+      return Boolean
+   is (not Military.Veteran);
+
+   function War
+     (Military : Military_Type'Class)
+      return War_Id
+   is (Military.War);
 
 end Agrippa.State;

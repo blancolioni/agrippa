@@ -7,8 +7,7 @@ package Agrippa.Images is
    function Image (Influence : Influence_Range) return String;
    function Image (Popularity : Popularity_Range) return String;
    function Image (Votes : Vote_Count) return String;
-   function Image (Count : Legion_Count) return String;
-   function Image (Count : Fleet_Count) return String;
+   function Image (Count : Military_Unit_Count) return String;
    function Image (Value : Integer) return String;
 
    function Image (Value    : Integer;
@@ -41,10 +40,7 @@ private
    function Image (Cash : Talents) return String
    is (Trim (Cash'Image));
 
-   function Image (Count : Legion_Count) return String
-   is (Trim (Count'Image));
-
-   function Image (Count : Fleet_Count) return String
+   function Image (Count : Military_Unit_Count) return String
    is (Trim (Count'Image));
 
    function Image (Value : Integer) return String

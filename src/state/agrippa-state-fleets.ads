@@ -1,14 +1,7 @@
 package Agrippa.State.Fleets is
 
-   type Fleet_State_Type is tagged private;
-
-   function Created (Fleet : Fleet_State_Type'Class) return Boolean;
-   function Deployed (Fleet : Fleet_State_Type'Class) return Boolean;
-
-   function War
-     (Fleet : Fleet_State_Type'Class)
-      return War_Id
-     with Pre => Fleet.Deployed;
+   type Fleet_State_Type is
+     new Military_Type with private;
 
    procedure Create (Fleet : in out Fleet_State_Type'Class)
      with Pre => not Fleet.Created,
@@ -32,22 +25,10 @@ package Agrippa.State.Fleets is
 
 private
 
-   type Fleet_State_Type is tagged
+   type Fleet_State_Type is
+     new Military_Type with
       record
-         Created  : Boolean := False;
-         Deployed : Boolean := False;
-         War      : War_Id;
+         null;
       end record;
-
-   function Created (Fleet : Fleet_State_Type'Class) return Boolean
-   is (Fleet.Created);
-
-   function Deployed (Fleet : Fleet_State_Type'Class) return Boolean
-   is (Fleet.Deployed);
-
-   function War
-     (Fleet : Fleet_State_Type'Class)
-      return War_Id
-   is (Fleet.War);
 
 end Agrippa.State.Fleets;

@@ -1,21 +1,14 @@
 package Agrippa.State.Legions is
 
-   type Legion_State_Type is tagged private;
+   type Legion_State_Type is
+     new Military_Type with private;
 
-   function Created (Legion : Legion_State_Type'Class) return Boolean;
-   function Deployed (Legion : Legion_State_Type'Class) return Boolean;
-   function Veteran (Legion : Legion_State_Type'Class) return Boolean;
    function Loyal (Legion : Legion_State_Type'Class) return Boolean;
 
    function Loyalty
      (Legion : Legion_State_Type'Class)
       return Senator_Id
      with Pre => Legion.Loyal;
-
-   function War
-     (Legion : Legion_State_Type'Class)
-      return War_Id
-     with Pre => Legion.Deployed;
 
    procedure Create (Legion : in out Legion_State_Type'Class)
      with Pre => not Legion.Created,
@@ -51,24 +44,12 @@ package Agrippa.State.Legions is
 
 private
 
-   type Legion_State_Type is tagged
+   type Legion_State_Type is
+     new Military_Type with
       record
-         Created  : Boolean := False;
-         Deployed : Boolean := False;
-         Veteran  : Boolean := False;
          Loyal    : Boolean := False;
          Loyalty  : Senator_Id;
-         War      : War_Id;
       end record;
-
-   function Created (Legion : Legion_State_Type'Class) return Boolean
-   is (Legion.Created);
-
-   function Deployed (Legion : Legion_State_Type'Class) return Boolean
-   is (Legion.Deployed);
-
-   function Veteran (Legion : Legion_State_Type'Class) return Boolean
-   is (Legion.Veteran);
 
    function Loyal (Legion : Legion_State_Type'Class) return Boolean
    is (Legion.Loyal);
@@ -77,10 +58,5 @@ private
      (Legion : Legion_State_Type'Class)
       return Senator_Id
    is (Legion.Loyalty);
-
-   function War
-     (Legion : Legion_State_Type'Class)
-      return War_Id
-   is (Legion.War);
 
 end Agrippa.State.Legions;

@@ -241,6 +241,8 @@ package body Agrippa.Players.Robots is
                              (if Fleet_Attack
                               then Fleet_Strength + 3
                               else Fleet_Support);
+      Deployed_Fleets    : constant Fleet_Index_Array :=
+                             State.Deployed_Fleets (War);
       Land_Strength      : constant Legion_Count :=
                              War_State.Land_Strength;
       Required_Strength  : constant Legion_Count :=
@@ -254,16 +256,19 @@ package body Agrippa.Players.Robots is
       Veteran_Legions    : constant Legion_Index_Array :=
                              (if Fleet_Attack then No_Legions
                               else State.Available_Veteran_Legions);
+      Deployed_Legions   : constant Legion_Index_Array :=
+                             State.Deployed_Legions (War);
       Available_Strength : constant Legion_Count :=
-                             State.Available_Regular_Legions
-                               + 2 * Veteran_Legions'Length;
+                             State.Legion_Strength (Deployed_Legions)
+                             + State.Available_Regular_Legions
+                             + 2 * Veteran_Legions'Length;
       Recruit_Legions    : constant Legion_Count :=
                              (if Fleet_Attack
                               or else Available_Strength >= Required_Strength
                               then 0
                               else Required_Strength - Available_Strength);
       Available_Fleets   : constant Fleet_Count :=
-                             State.Available_Fleets;
+                             State.Available_Fleets + Deployed_Fleets'Length;
       Recruit_Fleets     : constant Fleet_Count :=
                              (if Available_Fleets >= Required_Fleets
                               then 0
@@ -292,8 +297,11 @@ package body Agrippa.Players.Robots is
                                   + Final_Recruit_Legions;
       Final_Fleets          : constant Fleet_Count :=
                                 Available_Fleets + Final_Recruit_Fleets;
-      Commander          : constant Senator_Id :=
-                                (if State.Has_Holder (Dictator)
+      Reinforce             : constant Boolean := State.Has_Commander (War);
+      Commander             : constant Senator_Id :=
+                                (if State.Has_Commander (War)
+                                 then State.Commander (War)
+                                 elsif State.Has_Holder (Dictator)
                                  and then not State.Has_Command
                                    (State.Office_Holder (Dictator))
                                  then State.Office_Holder (Dictator)
@@ -336,7 +344,9 @@ package body Agrippa.Players.Robots is
       end if;
 
       if Fleet_Attack then
-         if Final_Fleets < Required_Fleets then
+         if Final_Fleets < Required_Fleets
+           and then not Reinforce
+         then
             State.Log
               ("Canceling attack because final fleet count is"
                & Final_Fleets'Image
@@ -345,7 +355,9 @@ package body Agrippa.Players.Robots is
             return False;
          end if;
       else
-         if Final_Strength < Required_Strength then
+         if Final_Strength < Required_Strength
+           and then not Reinforce
+         then
             State.Log
               ("Canceling attack because final strength is"
                & Final_Strength'Image
@@ -365,18 +377,32 @@ package body Agrippa.Players.Robots is
                Fleets  => Final_Recruit_Fleets));
       end if;
 
-      Agrippa.Proposals.Add_Proposal
-        (Container => Container,
-         Proposal  =>
-           Agrippa.Proposals.Attack
-             (War             => War,
-              Commander       => Commander,
-              Regular_Legions =>
-                (if Fleet_Attack then 0
-                 else State.Available_Regular_Legions + Final_Recruit_Legions),
-              Veteran_Legions => Veteran_Legions,
-              Fleets          => Required_Fleets));
-
+      if Reinforce then
+         Agrippa.Proposals.Add_Proposal
+           (Container => Container,
+            Proposal  =>
+              Agrippa.Proposals.Reinforce
+                (War             => War,
+                 Regular_Legions =>
+                   (if Fleet_Attack then 0
+                    else State.Available_Regular_Legions
+                    + Final_Recruit_Legions),
+                 Veteran_Legions => Veteran_Legions,
+                 Fleets          => Required_Fleets));
+      else
+         Agrippa.Proposals.Add_Proposal
+           (Container => Container,
+            Proposal  =>
+              Agrippa.Proposals.Attack
+                (War             => War,
+                 Commander       => Commander,
+                 Regular_Legions =>
+                   (if Fleet_Attack then 0
+                    else State.Available_Regular_Legions
+                    + Final_Recruit_Legions),
+                 Veteran_Legions => Veteran_Legions,
+                 Fleets          => Required_Fleets));
+      end if;
       return True;
 
    end Attack_War;

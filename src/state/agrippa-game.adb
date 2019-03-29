@@ -500,6 +500,19 @@ package body Agrippa.Game is
       end loop;
    end Clear_Status;
 
+   ---------------
+   -- Commander --
+   ---------------
+
+   overriding function Commander
+     (Game : Game_Type;
+      War  : War_Id)
+      return Senator_Id
+   is
+   begin
+      return Game.War_Commander (War);
+   end Commander;
+
    ------------------
    -- Count_Fleets --
    ------------------
@@ -2998,8 +3011,8 @@ package body Agrippa.Game is
       return Legion_Count
    is
    begin
-      return Game.Count_Legions
-        (Agrippa.State.Legions.Created'Access);
+      return Game.Count_Units
+        (Agrippa.State.Legion, Agrippa.State.Created'Access);
    end Total_Legion_Count;
 
    --------------------------
@@ -3011,8 +3024,8 @@ package body Agrippa.Game is
       return Legion_Count
    is
    begin
-      return Game.Count_Legions
-        (Agrippa.State.Legions.Veteran'Access);
+      return Game.Count_Units
+        (Agrippa.State.Legion, Agrippa.State.Veteran'Access);
    end Veteran_Legion_Count;
 
    -------------------

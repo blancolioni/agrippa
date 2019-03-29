@@ -13,13 +13,8 @@ package body Agrippa.Cards.Wars.Configure is
 
       function Get
         (Name : String)
-         return Legion_Count
-      is (Legion_Count (Natural'(Config.Get (Name, 0))));
-
-      function Get
-        (Name : String)
-         return Fleet_Count
-      is (Fleet_Count (Natural'(Config.Get (Name, 0))));
+         return Military_Unit_Count
+      is (Military_Unit_Count (Natural'(Config.Get (Name, 0))));
 
       -------------
       -- Numbers --

@@ -2,13 +2,14 @@ package Agrippa is
 
    pragma Pure (Agrippa);
 
-   Max_Legions    : constant := 25;
-   Max_Fleets     : constant := 25;
-   Max_Turns      : constant := 30;
-   Max_Senators   : constant := 30;
-   Max_Leaders    : constant := 20;
-   Max_Statesmen  : constant := 30;
-   Max_Factions   : constant := 6;
+   Max_Military_Units : constant := 25;
+   Max_Legions        : constant := Max_Military_Units;
+   Max_Fleets         : constant := Max_Military_Units;
+   Max_Turns          : constant := 30;
+   Max_Senators       : constant := 30;
+   Max_Leaders        : constant := 20;
+   Max_Statesmen      : constant := 30;
+   Max_Factions       : constant := 6;
 
    subtype Die_Range is Integer range 1 .. 6;
 
@@ -107,14 +108,18 @@ package Agrippa is
 
    type Talents is range 0 .. 999;
 
-   type Legion_Count is range 0 .. Max_Legions;
-   subtype Legion_Index is Legion_Count range 1 .. Legion_Count'Last;
+   type Military_Unit_Count is range 0 .. Max_Military_Units;
+   subtype Military_Unit_Index is
+     Military_Unit_Count range 1 .. Military_Unit_Count'Last;
+
+   subtype Legion_Count is Military_Unit_Count;
+   subtype Legion_Index is Military_Unit_Index;
 
    type Legion_Index_Array is array (Positive range <>) of Legion_Index;
    No_Legions : constant Legion_Index_Array (1 .. 0) := (others => <>);
 
-   type Fleet_Count is range 0 .. Max_Fleets;
-   subtype Fleet_Index is Fleet_Count range 1 .. Fleet_Count'Last;
+   subtype Fleet_Count is Military_Unit_Count;
+   subtype Fleet_Index is Military_Unit_Index;
 
    type Fleet_Index_Array is array (Positive range <>) of Fleet_Index;
    No_Fleets : constant Fleet_Index_Array (1 .. 0) := (others => <>);

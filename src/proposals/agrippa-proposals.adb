@@ -30,6 +30,7 @@ package body Agrippa.Proposals is
          Proposal.Fleets := Fleets;
          Proposal.Legions := Regular_Legions;
          Proposal.War := War;
+         Proposal.Reinforcement := False;
          for Legion of Veteran_Legions loop
             Proposal.Veteran_Legions.Append (Legion);
          end loop;
@@ -127,6 +128,29 @@ package body Agrippa.Proposals is
          Proposal.Fleets := Fleets;
       end return;
    end Recruit;
+
+   ---------------
+   -- Reinforce --
+   ---------------
+
+   function Reinforce
+     (War             : War_Id;
+      Regular_Legions : Legion_Count;
+      Veteran_Legions : Legion_Index_Array;
+      Fleets          : Fleet_Count)
+      return Proposal_Type
+   is
+   begin
+      return Proposal : Proposal_Type (Attack) do
+         Proposal.Fleets := Fleets;
+         Proposal.Legions := Regular_Legions;
+         Proposal.War := War;
+         for Legion of Veteran_Legions loop
+            Proposal.Veteran_Legions.Append (Legion);
+         end loop;
+         Proposal.Reinforcement := True;
+      end return;
+   end Reinforce;
 
    --------------------
    -- Scan_Proposals --

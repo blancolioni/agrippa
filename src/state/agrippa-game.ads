@@ -110,6 +110,11 @@ package Agrippa.Game is
       War  : War_Id)
       return Boolean;
 
+   overriding function Commander
+     (Game : Game_Type;
+      War  : War_Id)
+      return Senator_Id;
+
    overriding function Has_Faction_Leader
      (Game    : Game_Type;
       Faction : Faction_Id)
@@ -276,9 +281,20 @@ package Agrippa.Game is
       Legion : Legion_Index)
       return Boolean;
 
+   overriding function Is_Veteran
+     (Game   : Game_Type;
+      Legion : Legion_Index)
+      return Boolean;
+
    overriding function Available_Veteran_Legions
      (Game : Game_Type)
       return Legion_Index_Array;
+
+   overriding function Military_Unit_State
+     (Game  : Game_Type;
+      Unit  : Agrippa.State.Unit_Type;
+      Index : Military_Unit_Index)
+      return Agrippa.State.Military_Type'Class;
 
    overriding function Available_Fleets
      (Game : Game_Type)
@@ -678,6 +694,13 @@ private
    is (Game.Legion_State (Legion).Created
        and then not Game.Legion_State (Legion).Deployed);
 
+   overriding function Is_Veteran
+     (Game   : Game_Type;
+      Legion : Legion_Index)
+      return Boolean
+   is (Game.Legion_State (Legion).Created
+       and then Game.Legion_State (Legion).Veteran);
+
    function Forum_Deck
      (Game : Game_Type'Class)
       return Agrippa.Cards.Decks.Deck_Type'Class
@@ -721,5 +744,16 @@ private
           Game.Faction_Name (Game.Senator_Faction (Senator)))
        else Game.Local_Text
          ("unaligned-senator", Game.Senator_Name (Senator)));
+
+   overriding function Military_Unit_State
+     (Game  : Game_Type;
+      Unit  : Agrippa.State.Unit_Type;
+      Index : Military_Unit_Index)
+      return Agrippa.State.Military_Type'Class
+   is (case Unit is
+          when Agrippa.State.Legion =>
+             Game.Legion_State (Index),
+          when Agrippa.State.Fleet  =>
+             Game.Fleet_State (Index));
 
 end Agrippa.Game;

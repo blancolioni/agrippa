@@ -24,8 +24,12 @@ package Agrippa.Proposals is
    function Office (Proposal : Proposal_Type) return Office_Type
      with Pre => Proposal.Category in Nomination;
 
-   function Commander (Proposal : Proposal_Type) return Senator_Id
+   function Is_Reinforcement (Proposal : Proposal_Type) return Boolean
      with Pre => Proposal.Category = Attack;
+
+   function Commander (Proposal : Proposal_Type) return Senator_Id
+     with Pre => Proposal.Category = Attack
+     and then not Is_Reinforcement (Proposal);
 
    function Fleets (Proposal : Proposal_Type) return Fleet_Count
      with Pre => Proposal.Category in Recruitment | Attack;
@@ -69,6 +73,13 @@ package Agrippa.Proposals is
    function Attack
      (War             : War_Id;
       Commander       : Senator_Id;
+      Regular_Legions : Legion_Count;
+      Veteran_Legions : Legion_Index_Array;
+      Fleets          : Fleet_Count)
+      return Proposal_Type;
+
+   function Reinforce
+     (War             : War_Id;
       Regular_Legions : Legion_Count;
       Veteran_Legions : Legion_Index_Array;
       Fleets          : Fleet_Count)
@@ -132,8 +143,9 @@ private
             when Recruitment =>
                null;
             when Attack =>
-               Veteran_Legions : Legion_Lists.List;
-               War             : War_Id;
+               Veteran_Legions    : Legion_Lists.List;
+               War                : War_Id;
+               Reinforcement      : Boolean;
          end case;
       end record;
 
@@ -180,5 +192,8 @@ private
         function (Proposal : Proposal_Type) return Boolean)
       return Boolean
    is (for some Proposal of Container.List => Test (Proposal));
+
+   function Is_Reinforcement (Proposal : Proposal_Type) return Boolean
+   is (Proposal.Reinforcement);
 
 end Agrippa.Proposals;
