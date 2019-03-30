@@ -148,7 +148,7 @@ package body Agrippa.Players.Robots is
       return Agrippa.Deals.Offer_List;
 
    function Create_Proposal
-     (Robot   : Robot_Player_Type'Class;
+     (Robot   : in out Robot_Player_Type'Class;
       State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Make_Proposal_Message)
       return Agrippa.Messages.Message_Type;
@@ -869,7 +869,7 @@ package body Agrippa.Players.Robots is
                end if;
             end loop;
 
-            if Highest > Attribute_Range'First then
+            if not First then
                Add (Deal, State.Senator_Faction (Dictator),
                     Office (Agrippa.Dictator, Dictator));
             end if;
@@ -995,7 +995,7 @@ package body Agrippa.Players.Robots is
    ---------------------
 
    function Create_Proposal
-     (Robot   : Robot_Player_Type'Class;
+     (Robot   : in out Robot_Player_Type'Class;
       State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Make_Proposal_Message)
       return Agrippa.Messages.Message_Type
@@ -1125,6 +1125,7 @@ package body Agrippa.Players.Robots is
                      end loop;
 
                      if Accepted then
+                        Robot.Current_Deal := Deal;
                         return Make_Proposal
                           (Message,
                            Make_Deal_Proposals
