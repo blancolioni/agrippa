@@ -1224,18 +1224,6 @@ package body Agrippa.Players.Robots is
          Inf_Bonus : Integer := 0;
          Mil_Bonus : Integer := 0;
       begin
-         if State.Has_Office (Senator) then
-            if Office in Consular_Office
-              and then State.Office (Senator) in Consular_Office
-            then
-               return 0;
-            end if;
-         end if;
-
-         if Office = Censor and then not State.Is_Prior_Consul (Senator) then
-            return 0;
-         end if;
-
          if Office = Rome_Consul then
             if Integer (Pop) < Natural (State.Current_Unrest) then
                Pop_Bonus := -45;
@@ -1246,6 +1234,8 @@ package body Agrippa.Players.Robots is
          elsif Office = Dictator or else Office = Master_Of_Horse then
             Mil_Bonus := Natural (Mil);
             Fac_Bonus := 1;
+         elsif Office = Censor then
+            Inf_Bonus := 10 - Integer (Inf);
          elsif Office = Field_Consul then
             Mil_Bonus := Natural (Mil);
             Inf_Bonus :=
@@ -1288,13 +1278,15 @@ package body Agrippa.Players.Robots is
 
       Highest : Natural := 0;
       Result  : Nullable_Senator_Id := No_Senator;
+      Sids    : constant Senator_Id_Array :=
+                  State.Qualifying_Senators (Office);
    begin
       if False then
          State.Log (State.Faction_Name (Robot.Faction)
                     & " for " & Office'Image);
       end if;
 
-      for Sid of State.Senators_In_Rome loop
+      for Sid of Sids loop
          declare
             Score : constant Natural :=
                       Score_Candidate (Sid);
