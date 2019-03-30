@@ -245,6 +245,12 @@ package Agrippa.State is
       return Talents
       is abstract;
 
+   function Qualifying_Senators
+     (State   : State_Interface;
+      Office  : Office_Type)
+      return Senator_Id_Array
+      is abstract;
+
    function Faction_Senators
      (State   : State_Interface;
       Faction : Faction_Id)

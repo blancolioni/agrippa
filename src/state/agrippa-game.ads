@@ -216,6 +216,11 @@ package Agrippa.Game is
      (Game    : Game_Type)
       return Senator_Id_Array;
 
+   overriding function Qualifying_Senators
+     (Game    : Game_Type;
+      Office  : Office_Type)
+      return Senator_Id_Array;
+
    overriding function Faction_Senators
      (Game    : Game_Type;
       Faction : Faction_Id)

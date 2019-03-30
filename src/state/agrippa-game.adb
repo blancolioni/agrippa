@@ -2102,6 +2102,38 @@ package body Agrippa.Game is
       State.Set_Statesman (Faction, Statesman);
    end Play_Statesman;
 
+   -------------------------
+   -- Qualifying_Senators --
+   -------------------------
+
+   overriding function Qualifying_Senators
+     (Game    : Game_Type;
+      Office  : Office_Type)
+      return Senator_Id_Array
+   is
+      In_Rome : constant Senator_Id_Array := Game.Senators_In_Rome;
+      Result  : Senator_Id_Array (In_Rome'Range);
+      Count   : Natural := 0;
+   begin
+      for Sid of In_Rome loop
+         if (Office /= Censor
+             or else Game.Senator_State (Sid).Prior_Consul)
+           and then (not Game.Has_Office (Sid)
+                     or else Game.Office (Sid) not in Consular_Office
+                     or else Office not in Consular_Office)
+         then
+            Count := Count + 1;
+            Result (Count) := Sid;
+         end if;
+      end loop;
+      if Count = 0 then
+         return In_Rome;
+      else
+         return Result (1 .. Count);
+      end if;
+
+   end Qualifying_Senators;
+
    -------------------
    -- Recall_Forces --
    -------------------
