@@ -263,7 +263,17 @@ package body Agrippa.Players.Robots is
                              + State.Legion_Strength (Veteran_Legions)
                              + Combat_Strength
                                (State.Available_Regular_Legions);
-      Recruit_Legions    : constant Legion_Count :=
+      Max_Recuitment      : constant Natural :=
+                              Natural'Min
+                                (Natural
+                                   (State.Current_Treasury
+                                    / State.Current_Legion_Cost),
+                                 Natural (Military_Unit_Count'Last));
+      Max_Legion_Recruit  : constant Legion_Count :=
+                              Max_Legions - State.Total_Legion_Count;
+      Max_Fleet_Recruit   : constant Fleet_Count :=
+                              Max_Fleets - State.Total_Fleet_Count;
+      Recruit_Legions     : constant Legion_Count :=
                              (if Fleet_Attack
                               or else Available_Strength >= Required_Strength
                               then 0
@@ -278,13 +288,18 @@ package body Agrippa.Players.Robots is
       Total_Recruitment   : constant Natural :=
                               Natural (Recruit_Legions)
                               + Natural (Recruit_Fleets);
-      Max_Recuitment      : constant Natural :=
-                              Natural (State.Current_Treasury
-                                       / State.Current_Legion_Cost);
       Canceled_Recuitment : constant Natural :=
                               (if Total_Recruitment > Max_Recuitment
                                then Total_Recruitment - Max_Recuitment
-                               else 0);
+                               else 0)
+                              + Natural
+                                (if Recruit_Legions > Max_Legion_Recruit
+                                 then Recruit_Legions - Max_Legion_Recruit
+                                 else 0)
+                              + Natural
+                                (if Recruit_Fleets > Max_Fleet_Recruit
+                                 then Recruit_Fleets - Max_Fleet_Recruit
+                                 else 0);
       Final_Recruit_Legions : constant Legion_Count :=
                                (if Canceled_Recuitment = 0
                                 then Recruit_Legions
