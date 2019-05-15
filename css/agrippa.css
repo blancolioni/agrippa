@@ -1,8 +1,4 @@
 body {
-    /*
-    background-image: url("/img/stars.png");
-    background-position: center; 
-    background-repeat: repeat; */
     font-family: OpenSans;
     font-size: 14pt;
 }
@@ -28,7 +24,7 @@ body {
     width: 100%;
     background: #222;
     color: #bbb;
-    z-index: 4;}
+}
 
 #login-form {
     font-family: "Copperplate Gothic";

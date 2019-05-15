@@ -1,6 +1,3 @@
-with Agrippa.Factions;
-with Agrippa.State.Senate;
-
 package body Agrippa.UI.Gnoga_UI.Gadgets.Voting_Charts is
 
    procedure Create_Series
@@ -13,7 +10,7 @@ package body Agrippa.UI.Gnoga_UI.Gadgets.Voting_Charts is
    procedure Create
      (Gadget  : in out Voting_Chart_Gadget_Type;
       Parent  : in out Gnoga.Gui.Base.Base_Type'Class;
-      State   : Agrippa.State.Agrippa_State)
+      State   : not null access Agrippa.State.State_Interface'Class)
    is
    begin
       Gadget.State := State;
@@ -32,16 +29,11 @@ package body Agrippa.UI.Gnoga_UI.Gadgets.Voting_Charts is
    begin
       Gadget.Clear;
 
-      for I in 1 .. Gadget.State.Factions.Count loop
-         declare
-            Faction : constant Agrippa.Factions.Agrippa_Faction :=
-                        Gadget.State.Factions.Get (I);
-         begin
-            Gadget.Append
-              (Faction.Colour,
-               Agrippa.State.Senate.Vote_Count
-                 (Gadget.State, Faction));
-         end;
+      for Faction in Faction_Id loop
+         Gadget.Append
+           (Gadget.State.Get_Faction_State (Faction).Color,
+            Natural
+              (Gadget.State.Faction_Votes (Faction)));
       end loop;
    end Create_Series;
 

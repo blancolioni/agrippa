@@ -2,6 +2,7 @@ private with Ada.Strings.Unbounded;
 
 with WL.Localisation;
 
+with Agrippa.Colors;
 with Agrippa.Events;
 
 with Agrippa.Messages;
@@ -65,6 +66,11 @@ package Agrippa.State is
    function Votes
      (Faction : Faction_State_Interface)
       return Vote_Count
+      is abstract;
+
+   function Color
+     (Faction : Faction_State_Interface)
+      return Agrippa.Colors.Agrippa_Color
       is abstract;
 
    type Senator_State_Interface is interface;

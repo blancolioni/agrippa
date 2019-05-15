@@ -3,7 +3,7 @@ private with Ada.Containers.Doubly_Linked_Lists;
 with Gnoga.Gui.Base;
 with Gnoga.Gui.Element.Canvas.Context_2D;
 
-with Agrippa.Colours;
+with Agrippa.Colors;
 
 package Agrippa.UI.Gnoga_UI.Gadgets.Charts is
 
@@ -11,11 +11,11 @@ package Agrippa.UI.Gnoga_UI.Gadgets.Charts is
 
    function Color
      (Series : Chart_Series'Class)
-      return Agrippa.Colours.Agrippa_Colour;
+      return Agrippa.Colors.Agrippa_Color;
 
    procedure Set_Color
      (Series : in out Chart_Series'Class;
-      Color  : Agrippa.Colours.Agrippa_Colour);
+      Color  : Agrippa.Colors.Agrippa_Color);
 
    procedure Append
      (Series : in out Chart_Series'Class;
@@ -77,13 +77,13 @@ private
 
    type Chart_Series is tagged
       record
-         Color : Agrippa.Colours.Agrippa_Colour;
+         Color : Agrippa.Colors.Agrippa_Color;
          Data  : Data_Lists.List;
       end record;
 
    function Color
      (Series : Chart_Series'Class)
-      return Agrippa.Colours.Agrippa_Colour
+      return Agrippa.Colors.Agrippa_Color
    is (Series.Color);
 
    package Series_Lists is

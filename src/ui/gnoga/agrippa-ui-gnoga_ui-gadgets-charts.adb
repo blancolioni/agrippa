@@ -127,7 +127,7 @@ package body Agrippa.UI.Gnoga_UI.Gadgets.Charts is
 
    procedure Set_Color
      (Series : in out Chart_Series'Class;
-      Color  : Agrippa.Colours.Agrippa_Colour)
+      Color  : Agrippa.Colors.Agrippa_Color)
    is
    begin
       Series.Color := Color;

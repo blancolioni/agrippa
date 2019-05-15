@@ -2,6 +2,10 @@ with Ada.Unchecked_Deallocation;
 
 with WL.Localisation;
 
+with Gnoga.Gui.Base;
+
+with Agrippa.Images;
+
 with Agrippa.Game;
 with Agrippa.Scenarios;
 
@@ -57,6 +61,9 @@ package body Agrippa.Sessions is
       Notifier : not null access constant
         Agrippa.State.Notifications.Change_Handler_Interface'Class);
 
+   procedure On_End_Phase_Click
+     (Object : in out Gnoga.Gui.Base.Base_Type'Class);
+
    -------------------
    -- Close_Session --
    -------------------
@@ -69,43 +76,6 @@ package body Agrippa.Sessions is
       Free (Session);
       Session := null;
    end Close_Session;
-
---     -------------
---     -- Connect --
---     -------------
---
---     procedure Connect
---       (Session     : not null access Root_Agrippa_Session'Class;
---        Main_Window : Gnoga.Gui.Window.Pointer_To_Window_Class)
---     is
---     begin
---        Session.Main_Window := Main_Window;
---     end Connect;
-
-   ----------------------
-   -- Create_Info_Pane --
-   ----------------------
-
---     procedure Create_Info_Pane
---       (Session : in out Root_Agrippa_Session'Class)
---     is
---     begin
---        Session.Info_Pane.Create (App.Main_View);
---        Session.Info_Pane.Class_Name ("left-pane");
---        Session.Phase_Name.Create (App.Info_Pane);
---        Session.Phase_Name.Class_Name ("info-phase-name");
---        Session.Treasury.Create (App.Info_Pane);
---        Session.Treasury.Class_Name ("info-treasury");
---        Session.Form.Create (App.Info_Pane);
---        Session.End_Phase.Create
---          (App.Form, App.UI.State.Local_Text ("end-phase"));
---        Session.End_Phase.Class_Name ("info-end-phase");
---        Session.End_Phase.On_Click_Handler (On_End_Phase_Click'Access);
---
---        Session.Votes_Gadget.Create
---          (Session.Info_Pane, Session.State);
---
---     end Create_Info_Pane;
 
    -----------------
    -- Information --
@@ -162,6 +132,14 @@ package body Agrippa.Sessions is
          Session.Main_Window := Main_Window;
          Session.Main_View.Create
            (Session.Main_Window.all);
+         Session.Info_Pane.Create (Session.Main_View);
+         Session.Info_Pane.Class_Name ("left-pane");
+         Session.Phase_Name.Create (Session.Info_Pane);
+         Session.Phase_Name.Class_Name ("info-phase-name");
+         Session.Treasury.Create (Session.Info_Pane);
+         Session.Treasury.Class_Name ("info-treasury");
+         Session.Form.Create (Session.Info_Pane);
+
          Session.Dashboard.Create
            (Session.Main_View, "", "agrippa-dashboard");
          Session.Header.Create
@@ -178,6 +156,15 @@ package body Agrippa.Sessions is
              (Session => Session);
          New_Game (Game, Scenario, Session.Notifier);
          Session.State := Game;
+
+         Session.End_Phase.Create
+           (Session.Form, Session.State.Local_Text ("end-phase"));
+         Session.End_Phase.Class_Name ("info-end-phase");
+         Session.End_Phase.On_Click_Handler (On_End_Phase_Click'Access);
+
+         Session.Votes_Gadget.Create
+           (Session.Info_Pane, Session.State);
+
          for Faction in Faction_Id loop
             Session.Factions (Faction).Faction_View.Create
               (Session.Header, "faction" & Integer'Image (-Integer (Faction)),
@@ -188,6 +175,24 @@ package body Agrippa.Sessions is
 
       end return;
    end New_Session;
+
+   ------------------------
+   -- On_End_Phase_Click --
+   ------------------------
+
+   procedure On_End_Phase_Click
+     (Object : in out Gnoga.Gui.Base.Base_Type'Class)
+   is
+      Session : constant Agrippa_Session :=
+                  Agrippa_Session (Object.Connection_Data);
+   begin
+      Session.Phase_Name.Text
+        (Session.State.Current_Activity);
+      Session.Treasury.Text
+        (Session.State.Local_Text
+           ("treasury",
+            Agrippa.Images.Image (Session.State.Current_Treasury)));
+   end On_End_Phase_Click;
 
    -------------------------------
    -- On_Faction_Leader_Changed --

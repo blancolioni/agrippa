@@ -4,6 +4,7 @@ private with Ada.Finalization;
 
 with WL.Localisation;
 
+with Agrippa.Colors;
 with Agrippa.Events;
 with Agrippa.Scenarios;
 
@@ -423,6 +424,7 @@ private
          Faction   : Agrippa.Factions.Faction_Type;
          Votes     : Vote_Count;
          Influence : Faction_Influence_Range;
+         Color     : Agrippa.Colors.Agrippa_Color;
       end record;
 
    overriding function Name
@@ -444,6 +446,11 @@ private
      (Faction : Faction_State)
       return Vote_Count
    is (Faction.Votes);
+
+   overriding function Color
+     (Faction : Faction_State)
+      return Agrippa.Colors.Agrippa_Color
+   is (Faction.Color);
 
    type Game_Type is limited
      new Ada.Finalization.Limited_Controlled

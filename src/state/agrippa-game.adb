@@ -21,6 +21,15 @@ with Agrippa.Cards.Vectors;
 
 package body Agrippa.Game is
 
+   Faction_Colors : constant array (Faction_Id)
+     of Agrippa.Colors.Agrippa_Color
+       := ((189, 21, 80, 255),
+           (233, 127, 2, 255),
+           (73, 10, 61, 255),
+           (248, 202, 0, 255),
+           (138, 155, 15, 255),
+           (84, 121, 128, 255));
+
    type Combat_Result is (Disaster, Standoff, Defeat, Stalemate, Victory);
 
    type Combat_Result_Record is
@@ -1549,7 +1558,8 @@ package body Agrippa.Game is
       return Faction_State'
         (Faction   => Game.Faction_State (Faction),
          Votes     => Game.Faction_Votes (Faction),
-         Influence => Game.Faction_Influence (Faction));
+         Influence => Game.Faction_Influence (Faction),
+         Color     => Faction_Colors (Faction));
    end Get_Faction_State;
 
    ----------------

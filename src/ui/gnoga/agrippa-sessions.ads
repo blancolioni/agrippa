@@ -4,12 +4,15 @@ with Gnoga.Types;
 with Gnoga.Gui.Window;
 
 private with Gnoga.Gui.Element.Common;
+private with Gnoga.Gui.Element.Form;
 private with Gnoga.Gui.View;
 
 with Agrippa.State;
 private with Agrippa.State.Notifications;
 
 with Agrippa.UI.Gnoga_UI.Views;
+
+private with Agrippa.UI.Gnoga_UI.Gadgets.Voting_Charts;
 
 package Agrippa.Sessions is
 
@@ -44,6 +47,10 @@ private
          Info_Pane    : Gnoga.Gui.Element.Common.DIV_Type;
          Phase_Name   : Gnoga.Gui.Element.Common.Span_Type;
          Treasury     : Gnoga.Gui.Element.Common.Span_Type;
+         Form         : Gnoga.Gui.Element.Form.Form_Type;
+         End_Phase    : Gnoga.Gui.Element.Form.Input_Button_Type;
+         Votes_Gadget : Agrippa.UI.Gnoga_UI.Gadgets.Voting_Charts
+           .Voting_Chart_Gadget_Type;
          Header       : Gnoga.Gui.Element.Common.DIV_Type;
          Main         : Gnoga.Gui.Element.Common.DIV_Type;
          Footer       : Gnoga.Gui.Element.Common.DIV_Type;

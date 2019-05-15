@@ -3,7 +3,7 @@ with Gnoga.Gui.Element.Canvas.Context_2D;
 
 with Agrippa.UI.Gnoga_UI.Gadgets.Charts;
 
-with Agrippa.Colours;
+with Agrippa.Colors;
 
 package Agrippa.UI.Gnoga_UI.Gadgets.Pie_Charts is
 
@@ -23,12 +23,12 @@ package Agrippa.UI.Gnoga_UI.Gadgets.Pie_Charts is
 
    procedure Append
      (Pie_Chart : in out Pie_Chart_Gadget_Type'Class;
-      Color     : Agrippa.Colours.Agrippa_Colour;
+      Color     : Agrippa.Colors.Agrippa_Color;
       Value     : Float);
 
    procedure Append
      (Pie_Chart : in out Pie_Chart_Gadget_Type'Class;
-      Color     : Agrippa.Colours.Agrippa_Colour;
+      Color     : Agrippa.Colors.Agrippa_Color;
       Value     : Integer);
 
 private

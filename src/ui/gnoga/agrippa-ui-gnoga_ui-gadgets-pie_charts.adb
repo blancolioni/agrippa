@@ -6,7 +6,7 @@ package body Agrippa.UI.Gnoga_UI.Gadgets.Pie_Charts is
 
    procedure Append
      (Pie_Chart : in out Pie_Chart_Gadget_Type'Class;
-      Color     : Agrippa.Colours.Agrippa_Colour;
+      Color     : Agrippa.Colors.Agrippa_Color;
       Value     : Float)
    is
       Series : Charts.Chart_Series;
@@ -22,7 +22,7 @@ package body Agrippa.UI.Gnoga_UI.Gadgets.Pie_Charts is
 
    procedure Append
      (Pie_Chart : in out Pie_Chart_Gadget_Type'Class;
-      Color     : Agrippa.Colours.Agrippa_Colour;
+      Color     : Agrippa.Colors.Agrippa_Color;
       Value     : Integer)
    is
    begin
@@ -113,7 +113,7 @@ package body Agrippa.UI.Gnoga_UI.Gadgets.Pie_Charts is
          begin
 
             Context.Fill_Color
-              (Agrippa.Colours.To_Html_Colour_String
+              (Agrippa.Colors.To_Html_Color_String
                  (Series.Color));
 
             Context.Begin_Path;
