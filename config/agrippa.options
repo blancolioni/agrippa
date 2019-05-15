@@ -2,5 +2,7 @@ package Agrippa.Options is
 
    Randomise   : Boolean;
    Random_Seed : Natural;
+   Gnoga_UI    : Boolean;
+   Text_UI     : Boolean;
    
 end Agrippa.Options;

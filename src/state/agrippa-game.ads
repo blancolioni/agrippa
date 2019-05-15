@@ -417,6 +417,34 @@ private
    type Player_Array is
      array (Faction_Id) of Player_Record;
 
+   type Faction_State is
+     new Agrippa.State.Faction_State_Interface with
+      record
+         Faction   : Agrippa.Factions.Faction_Type;
+         Votes     : Vote_Count;
+         Influence : Faction_Influence_Range;
+      end record;
+
+   overriding function Name
+     (Faction : Faction_State)
+      return String
+   is (Faction.Faction.Name);
+
+   overriding function Treasury
+     (Faction : Faction_State)
+      return Talents
+   is (Faction.Faction.Treasury);
+
+   overriding function Influence
+     (Faction : Faction_State)
+      return Faction_Influence_Range
+   is (Faction.Influence);
+
+   overriding function Votes
+     (Faction : Faction_State)
+      return Vote_Count
+   is (Faction.Votes);
+
    type Game_Type is limited
      new Ada.Finalization.Limited_Controlled
      and Agrippa.State.State_Interface with
@@ -530,6 +558,11 @@ private
      (Game    : Game_Type;
       Senator : Senator_Id)
       return Agrippa.State.Senator_State_Interface'Class;
+
+   overriding function Get_Faction_State
+     (Game    : Game_Type;
+      Faction : Faction_Id)
+      return Agrippa.State.Faction_State_Interface'Class;
 
    overriding function Get_War_State
      (Game       : Game_Type;

@@ -1,0 +1,40 @@
+$ppcolor: #333;
+$pphoverColor: lighten($color, 10%);
+$ppwidth: 100px;
+$pptransitionSpeed: 200ms;
+
+.playpause {
+  width: $ppwidth;
+  height: $ppwidth;
+  box-sizing: border-box;
+  transition: border $pptransitionSpeed;
+  
+  border-top: 0 solid transparent;
+  border-right: 0 solid transparent;
+  border-bottom: 0 solid transparent;
+  border-left: 0 solid transparent;
+}
+
+.playpause.play {
+  border-top: $ppwidth/2 solid transparent;
+  border-right: 0 solid transparent;
+  border-bottom: $ppwidth/2 solid transparent;
+  border-left: $ppwidth solid $ppcolor;
+  
+  &:hover {
+    border-left: $ppwidth solid $pphoverColor;
+  }
+}
+
+.playpause.pause {
+  border-top: 0 solid transparent;
+  border-right: $ppwidth/3 solid $ppcolor;
+  border-bottom: 0 solid transparent;
+  border-left: $ppwidth/3 solid $ppcolor;
+  
+  &:hover {
+    border-right: $ppwidth/3 solid $pphoverColor;
+    border-left: $ppwidth/3 solid $pphoverColor;
+  }
+}
+

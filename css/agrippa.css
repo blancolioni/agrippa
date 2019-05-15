@@ -1,0 +1,357 @@
+body {
+    /*
+    background-image: url("/img/stars.png");
+    background-position: center; 
+    background-repeat: repeat; */
+    font-family: OpenSans;
+    font-size: 14pt;
+}
+
+#agrippa-dashboard {
+    display: inline;
+}
+
+#agrippa-header {
+    width: 100%;
+    height: 250px;
+}
+
+#agrippa-main {
+    background: #ddd;
+    height: calc(100% - 350px);
+}
+
+#agrippa-footer {
+    position: fixed;
+    bottom: 0px;
+    height: 100px;
+    width: 100%;
+    background: #222;
+    color: #bbb;
+    z-index: 4;}
+
+#login-form {
+    font-family: "Copperplate Gothic";
+    font-size: 16pt;
+    background-color: #ccc;
+    color: #000;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    border-radius: 10px;
+}
+
+.left-pane {
+    top: 0px;
+    left: 0px;
+    width: 200px;
+    height: 100%;
+    background-color: #444;
+    float: left;
+    color: white;
+}
+
+.info-phase-name {
+    display: block;
+  font-size: 2em;
+  margin-top: 0.67em;
+  margin-bottom: 0.67em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+}
+
+.info-treasury {
+    display: block;
+}
+
+.info-end-phase {
+    display: block;
+    color: white;
+}
+
+#top-toolbar {
+    background-color: rgba(42,127,189,120);
+    min-height: 40px;
+    display: flex;
+}
+
+#login-text, #password-text {
+  width: 95%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+#login-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.table-view {
+    overflow-y: auto;
+    height: 100%;
+}
+
+table.darkTable {
+  font-family: Tahoma, Geneva, sans-serif;
+  border: 2px solid #000000;
+  background-color: #4A4A4A;
+  width: 100%;
+  height: 200px;
+  text-align: center;
+  border-collapse: collapse;
+}
+table.darkTable td, table.darkTable th {
+  border: 1px solid #4A4A4A;
+  padding: 3px 2px;
+}
+table.darkTable tbody td {
+  font-size: 13px;
+  color: #E6E6E6;
+}
+table.darkTable tr:nth-child(even) {
+  background: #888888;
+}
+table.darkTable thead {
+  background: #000000;
+  border-bottom: 3px solid #000000;
+}
+table.darkTable thead th {
+  font-size: 15px;
+  font-weight: bold;
+  color: #E6E6E6;
+  text-align: center;
+  border-left: 2px solid #4A4A4A;
+}
+table.darkTable thead th:first-child {
+  border-left: none;
+}
+
+table.darkTable tfoot {
+  font-size: 12px;
+  font-weight: bold;
+  color: #E6E6E6;
+  background: #000000;
+  background: -moz-linear-gradient(top, #404040 0%, #191919 66%, #000000 100%);
+  background: -webkit-linear-gradient(top, #404040 0%, #191919 66%, #000000 100%);
+  background: linear-gradient(to bottom, #404040 0%, #191919 66%, #000000 100%);
+  border-top: 1px solid #4A4A4A;
+}
+table.darkTable tfoot td {
+  font-size: 12px;
+}
+
+.dashboard-cell-container {
+    display: grid;
+    background-color: black;
+    height:100%;
+}
+
+.dashboard-cell-title {
+    background-color: blue;
+    color: white;
+    height: 24px;
+}
+
+.dashboard-cell-contents {
+    border: 2px solid #aaa;
+    background-color: black;
+}
+
+.dashboard-active-cell {
+    border: 2px solid #FFEC8B;
+}
+
+.title-bar-button {
+    background-color: blue;
+    color: white;
+    float: right;
+}
+
+#galaxy-canvas {
+    border: 1px solid white;
+}
+
+.button-container {
+    background-color: #aaa;
+    border-radius: 3px;
+    border: 2px solid black;
+}
+
+.console-form {
+    height: calc(100% - 40px);
+}
+
+.console-output {
+    background-color: black;
+    font: 14pt "Courier New";
+    color: #bbb;
+    height: 100%;
+    overflow: auto;
+}
+
+.console-prompt {
+    background-color: black;
+    font: 14pt "Courier New";
+    color: #bbb;
+}
+
+.console-command {
+    width: 200px;
+}
+
+.console-command-text {
+    color: white;
+    font-weight: bold;
+}
+
+.console-prompt-text {
+    color: green;
+}
+
+.console-error-text {
+    color: red;
+    font-weight: bold;
+}
+    
+:root {
+    --color: #333;
+    --hover-color: lighten(var(--color), 10%);
+    --width: 36px;
+    --pause-width: 12px;
+    --half-width: 18px;
+    --transition-speed: 200ms;
+}
+
+.playpause {
+  width: var(--width);
+  height: var(--width);
+  box-sizing: border-box;
+  transition: border 200ms;
+  
+  border-top: 0 solid transparent;
+  border-right: 0 solid transparent;
+  border-bottom: 0 solid transparent;
+  border-left: 0 solid transparent;
+}
+
+.playpause.play {
+  border-top-width: var(--half-width);
+  border-top-color: transparent;
+  border-right: 0 solid transparent;
+  border-bottom-width: var(--half-width);
+  border-bottom-color: transparent;
+  border-left-width: var(--width);
+  border-left-color: var(--color);
+}
+
+
+.playpause.play:hover {
+    border-left-color: var(--hover-color);
+}
+
+.playpause.pause {
+  border-top: 0 solid transparent;
+  border-right-width: var(--pause-width);
+  border-right-color:  var(--color);
+  border-bottom: 0 solid transparent;
+  border-left-width: var(--pause-width);
+  border-left-color: var(--color);
+}
+
+.playpause.pause:hover {
+    border-right-color: var(--hover-color);    
+    border-left-color: var(--hover-color);
+}
+
+.revenue-table {
+  border: 1px solid black;
+  margin: 20px;
+  float: left;
+  width: 280px;
+  padding: 0.5rem;
+}
+.revenue-table table {
+  border-collapse: collapse;
+}
+
+.revenue-table, .revenue-table--small, .revenue-table--grid {
+  width: 400px;
+}
+.revenue-table thead tr th, .revenue-table--small thead tr th, .revenue-table--grid thead tr th, .revenue-table thead tr td, .revenue-table--small thead tr td, .revenue-table--grid thead tr td {
+  border: 0;
+}
+.revenue-table th, .revenue-table--small th, .revenue-table--grid th, .revenue-table td, .revenue-table--small td, .revenue-table--grid td {
+  font-weight: normal;
+  text-align: left;
+  padding: 0.25rem 0;
+  border-top: 1px solid black;
+  white-space: nowrap;
+}
+.revenue-table td:last-child, .revenue-table--small td:last-child, .revenue-table--grid td:last-child {
+  text-align: right;
+}
+.revenue-table .blank-cell, .revenue-table--small .blank-cell, .revenue-table--grid .blank-cell {
+  width: 1rem;
+  border-top: 0;
+}
+.revenue-table .thick-row th, .revenue-table--small .thick-row th, .revenue-table--grid .thick-row th, .revenue-table .thick-row td, .revenue-table--small .thick-row td, .revenue-table--grid .thick-row td {
+  border-top-width: 5px;
+}
+
+.small-info {
+  font-size: 0.7rem;
+}
+
+.revenue-table--small {
+  border-bottom: 1px solid #999;
+  margin: 0 0 0.5rem 0;
+}
+.revenue-table--small thead tr {
+  border-bottom: 1px solid black;
+}
+.revenue-table--small td:last-child {
+  text-align: left;
+}
+.revenue-table--small th, .revenue-table--small td {
+  border: 0;
+  padding: 0;
+}
+
+.revenue-table--grid {
+  margin: 0 0 0.5rem 0;
+}
+.revenue-table--grid td:last-child {
+  text-align: left;
+}
+.revenue-table--grid td:last-child::before {
+  content: "•";
+  font-weight: bold;
+  margin: 0 0.25rem 0 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.thick-end {
+  border-bottom: 10px solid black;
+}
+
+.thin-end {
+  border-bottom: 1px solid black;
+}
+
+.faction-view {
+    float: left;
+    margin: 5px;
+}

@@ -1536,6 +1536,22 @@ package body Agrippa.Game is
       end if;
    end Fleet_Battle_Result;
 
+   -----------------------
+   -- Get_Faction_State --
+   -----------------------
+
+   overriding function Get_Faction_State
+     (Game    : Game_Type;
+      Faction : Faction_Id)
+      return Agrippa.State.Faction_State_Interface'Class
+   is
+   begin
+      return Faction_State'
+        (Faction   => Game.Faction_State (Faction),
+         Votes     => Game.Faction_Votes (Faction),
+         Influence => Game.Faction_Influence (Faction));
+   end Get_Faction_State;
+
    ----------------
    -- Get_Fleets --
    ----------------
@@ -2810,6 +2826,8 @@ package body Agrippa.Game is
       Game.Language := Language;
       Game.Notifier := Notify;
 
+      Notify.Send_Notification ("Initializing new game ...");
+
       declare
          use all type Agrippa.Events.Event_Type;
       begin
@@ -2945,6 +2963,8 @@ package body Agrippa.Game is
       end loop;
 
       Game.Current_Turn := 0;
+
+      Notify.Send_Notification ("Ready.");
 
    end Start;
 

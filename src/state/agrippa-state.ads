@@ -49,6 +49,24 @@ package Agrippa.State is
       return War_Id
      with Pre => Military.Deployed;
 
+   type Faction_State_Interface is interface;
+
+   function Name (Faction : Faction_State_Interface) return String
+                  is abstract;
+
+   function Treasury (Faction : Faction_State_Interface) return Talents
+                      is abstract;
+
+   function Influence
+     (Faction : Faction_State_Interface)
+      return Faction_Influence_Range
+      is abstract;
+
+   function Votes
+     (Faction : Faction_State_Interface)
+      return Vote_Count
+      is abstract;
+
    type Senator_State_Interface is interface;
 
    function Id
@@ -423,6 +441,12 @@ package Agrippa.State is
      (State : State_Interface;
       Senator : Senator_Id)
       return Senator_State_Interface'Class
+      is abstract;
+
+   function Get_Faction_State
+     (State   : State_Interface;
+      Faction : Faction_Id)
+      return Faction_State_Interface'Class
       is abstract;
 
    function Highest_Ranking_Available_Officer

@@ -7,13 +7,13 @@ with WL.Random;
 with Agrippa.Cards.Configure;
 with Agrippa.Scenarios.Configure;
 
+with Agrippa.UI.Gnoga_UI;
 with Agrippa.UI.Text;
 
 with Agrippa.Options;
 with Agrippa.Paths;
 
 procedure Agrippa.Driver is
-   UI : Agrippa.UI.Text.Text_UI_Type;
 begin
 
    if not Ada.Directories.Exists ("options.txt") then
@@ -35,5 +35,19 @@ begin
 
    Agrippa.Scenarios.Configure.Configure_Scenarios;
    Agrippa.Cards.Configure.Configure_Cards;
-   UI.Start; --   (Scenario => Agrippa.Scenarios.Get ("early-republic"));
+
+   if Agrippa.Options.Text_UI then
+      declare
+         UI : Agrippa.UI.Text.Text_UI_Type;
+      begin
+         UI.Start; --   (Scenario => Agrippa.Scenarios.Get ("early-republic"));
+      end;
+   elsif Agrippa.Options.Gnoga_UI then
+      declare
+         UI : Agrippa.UI.Gnoga_UI.Gnoga_UI_Type;
+      begin
+         UI.Start;
+      end;
+   end if;
+
 end Agrippa.Driver;
