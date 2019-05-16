@@ -4,26 +4,49 @@ body {
 }
 
 #agrippa-dashboard {
-    display: inline;
+    display: grid;
+    height: 100%;
+    grid-template-rows: 220px 1fr 100px;
 }
 
 #agrippa-header {
-    width: 100%;
-    height: 250px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
 #agrippa-main {
     background: #ddd;
-    height: calc(100% - 350px);
 }
 
 #agrippa-footer {
-    position: fixed;
-    bottom: 0px;
-    height: 100px;
-    width: 100%;
     background: #222;
     color: #bbb;
+}
+
+.faction-view {
+    margin: 2px;
+}
+
+.faction-header {
+    color: white;
+    display: grid;
+    grid-template-columns: 1fr 20px 40px 20px 40px;
+}
+
+.coins {
+    width: 16px;
+    height: 16px;
+    background-image: url("/img/icons/coins.png");
+    background-size: 100%;
+    margin-top: 4px;
+}
+
+.votes {
+    width: 16px;
+    height: 16px;
+    background-image: url("/img/icons/votes.png");
+    background-size: 100%;
+    margin-top: 4px;
 }
 
 #login-form {
@@ -345,9 +368,4 @@ table.darkTable tfoot td {
 
 .thin-end {
   border-bottom: 1px solid black;
-}
-
-.faction-view {
-    float: left;
-    margin: 5px;
 }

@@ -31,7 +31,14 @@ private
 
    type Faction_Status_Record is
       record
-         Faction_View : Agrippa.UI.Gnoga_UI.Views.Agrippa_View_Type;
+         Holder    : Gnoga.Gui.Element.Common.DIV_Type;
+         Header    : Gnoga.Gui.Element.Common.DIV_Type;
+         Name      : Gnoga.Gui.Element.Common.Span_Type;
+         Coins     : Gnoga.Gui.Element.Common.DIV_Type;
+         Treasury  : Gnoga.Gui.Element.Common.Span_Type;
+         Vote_Icon : Gnoga.Gui.Element.Common.DIV_Type;
+         Votes     : Gnoga.Gui.Element.Common.Span_Type;
+         View      : Agrippa.UI.Gnoga_UI.Views.Agrippa_View_Type;
       end record;
 
    type Faction_Status_Array is

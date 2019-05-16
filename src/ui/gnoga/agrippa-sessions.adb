@@ -4,6 +4,7 @@ with WL.Localisation;
 
 with Gnoga.Gui.Base;
 
+with Agrippa.Colors;
 with Agrippa.Images;
 
 with Agrippa.Game;
@@ -166,11 +167,40 @@ package body Agrippa.Sessions is
            (Session.Info_Pane, Session.State);
 
          for Faction in Faction_Id loop
-            Session.Factions (Faction).Faction_View.Create
-              (Session.Header, "faction" & Integer'Image (-Integer (Faction)),
-               Agrippa.Models.Factions.Faction_Model (Game, Faction));
-            Session.Factions (Faction).Faction_View.Class_Name
-              ("faction-view");
+            declare
+               Status : Faction_Status_Record renames
+                          Session.Factions (Faction);
+               Id     : constant String :=
+                          Integer'Image (-Integer (Faction));
+            begin
+               Status.Holder.Create (Session.Header);
+               Status.Holder.Class_Name ("faction-view");
+               Status.Holder.Background_Color
+                 (Agrippa.Colors.To_Html_Color_String
+                    (Game.Get_Faction_State (Faction).Color));
+               Status.Header.Create (Status.Holder);
+               Status.Header.Class_Name ("faction-header");
+               Status.Name.Create
+                 (Status.Header, Game.Faction_Name (Faction),
+                  "faction-name" & Id);
+               Status.Name.Class_Name ("faction-name");
+               Status.Coins.Create (Status.Header);
+               Status.Coins.Class_Name ("coins");
+               Status.Treasury.Create
+                 (Status.Header,
+                  Agrippa.Images.Image (Game.Faction_Treasury (Faction)),
+                  "faction-treasury" & Id);
+               Status.Vote_Icon.Create (Status.Header);
+               Status.Vote_Icon.Class_Name ("votes");
+               Status.Votes.Create
+                 (Status.Header,
+                  Agrippa.Images.Image (Game.Faction_Votes (Faction)),
+                  "faction-votes" & Id);
+               Status.View.Create
+                 (Status.Holder,
+                  "faction" & Integer'Image (-Integer (Faction)),
+                  Agrippa.Models.Factions.Faction_Model (Game, Faction));
+            end;
          end loop;
 
       end return;
