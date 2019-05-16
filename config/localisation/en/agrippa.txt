@@ -40,6 +40,7 @@ x-is-now-presiding,{1} is now the Presiding Magistrate
 x-is-the-new-office-holder,{1} is the new {2}
 x-selects-office,{1} selects {2} (gains 5 influence and a PC marker)
 x-adjourns-the-senate,{1} adjourns the Senate
+senator-now-leads-faction,{1} now leads {2}
 rome_consul,Rome Consul
 field_consul,Field Consul
 dictator,Dictator
@@ -49,6 +50,9 @@ hrao-is-x-of-y,HRAO is {1} of {2}
 hrao-popularity,HRAO Popularity
 x-at-y-each,{1} @ {2} ea
 current-unrest-level,Current Unrest Level
+report-unrest-level,Unrest: {1}
+legion-count,Legions: {1}, {2} vet
+fleet-count,Fleets: {1}
 population-roll,Population Roll
 final-balance,Final Balance
 active-wars,Active Wars

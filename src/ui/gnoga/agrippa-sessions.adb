@@ -7,6 +7,7 @@ with Gnoga.Gui.Base;
 with Agrippa.Colors;
 with Agrippa.Images;
 
+with Agrippa.Cards.Wars;
 with Agrippa.Game;
 with Agrippa.Scenarios;
 
@@ -89,6 +90,7 @@ package body Agrippa.Sessions is
    is
    begin
       Session.Log.Put_Line ("[" & Class & "] " & Message);
+      Session.Log.Scroll_Top (1e5);
    end Information;
 
    --------------
@@ -139,6 +141,21 @@ package body Agrippa.Sessions is
          Session.Phase_Name.Class_Name ("info-phase-name");
          Session.Treasury.Create (Session.Info_Pane);
          Session.Treasury.Class_Name ("info-treasury");
+         Session.Unrest.Create (Session.Info_Pane);
+         Session.Unrest.Class_Name ("info-unrest");
+         Session.Legions.Create (Session.Info_Pane);
+         Session.Legions.Class_Name ("info-legions");
+         Session.Fleets.Create (Session.Info_Pane);
+         Session.Fleets.Class_Name ("info-fleets");
+         Session.Active_Wars.Create (Session.Info_Pane);
+         Session.Active_Wars.Class_Name ("info-wars");
+         Session.Inactive_Wars.Create (Session.Info_Pane);
+         Session.Inactive_Wars.Class_Name ("info-wars");
+         Session.Deck_State.Create (Session.Info_Pane);
+         Session.Deck_State.Class_Name ("info-deck");
+         Session.HRAO.Create (Session.Info_Pane);
+         Session.HRAO.Class_Name ("info-hrao");
+
          Session.Form.Create (Session.Info_Pane);
 
          Session.Dashboard.Create
@@ -156,6 +173,8 @@ package body Agrippa.Sessions is
            new Gnoga_Notifier_Type'
              (Session => Session);
          New_Game (Game, Scenario, Session.Notifier);
+         Game.Start_Turn;
+
          Session.State := Game;
 
          Session.End_Phase.Create
@@ -202,6 +221,8 @@ package body Agrippa.Sessions is
                   Agrippa.Models.Factions.Faction_Model (Game, Faction));
             end;
          end loop;
+
+         Session.Update;
 
       end return;
    end New_Session;
@@ -257,5 +278,113 @@ package body Agrippa.Sessions is
    begin
       Handler.Session.Information ("general", Text);
    end Send_Notification;
+
+   ------------
+   -- Update --
+   ------------
+
+   procedure Update (Session : in out Root_Agrippa_Session'Class) is
+
+      use Agrippa.Images;
+
+      function Is_Active (War : War_Id) return Boolean
+      is (Session.State.Get_War_State (War).Active);
+
+      function Is_Inactive (War : War_Id) return Boolean
+      is (Session.State.Get_War_State (War).Inactive);
+
+      procedure Show_Wars
+        (Element : in out Gnoga.Gui.Element.Common.Span_Type'Class;
+         Label   : String;
+         Test    : not null access
+           function (War : War_Id) return Boolean);
+
+      ---------------
+      -- Show_Wars --
+      ---------------
+
+      procedure Show_Wars
+        (Element : in out Gnoga.Gui.Element.Common.Span_Type'Class;
+         Label   : String;
+         Test    : not null access
+           function (War : War_Id) return Boolean)
+      is
+         Match : constant War_Id_Array :=
+                   Session.State.Matching_Wars (Test);
+      begin
+         Element.Inner_HTML ("");
+         Element.Put_HTML ("<b>" & Label & "</b><br>");
+         for I in Match'Range loop
+            declare
+               use Agrippa.Cards.Wars;
+               War        : constant War_Card_Type'Class :=
+                              Agrippa.Cards.Wars.War (Match (I));
+            begin
+               Element.Put_Line
+                 (Session.State.Local_Text (War.Tag)
+                  & " "
+                  & Image (War.Land_Strength)
+                  & "/"
+                  & Image (War.Fleet_Support)
+                  & "/"
+                  & Image (War.Fleet_Strength));
+            end;
+         end loop;
+      end Show_Wars;
+
+   begin
+      Session.Phase_Name.Text
+        (Session.State.Current_Activity);
+      Session.Treasury.Text
+        (Session.State.Local_Text
+           ("treasury",
+            Agrippa.Images.Image (Session.State.Current_Treasury)));
+      Session.Unrest.Text
+        (Session.State.Local_Text
+           ("report-unrest-level",
+            Agrippa.Images.Image (Natural (Session.State.Current_Unrest))));
+      Session.Legions.Text
+        (Session.State.Local_Text
+           ("legion-count",
+            Agrippa.Images.Image (Session.State.Total_Legion_Count),
+            Agrippa.Images.Image (Session.State.Veteran_Legion_Count)));
+      Session.Fleets.Text
+        (Session.State.Local_Text
+           ("fleet-count",
+            Agrippa.Images.Image (Session.State.Total_Fleet_Count)));
+
+      Show_Wars (Element => Session.Active_Wars,
+                 Label   => Session.State.Local_Text ("active-wars"),
+                 Test    => Is_Active'Access);
+
+      Show_Wars (Element => Session.Inactive_Wars,
+                 Label   => Session.State.Local_Text ("inactive-wars"),
+                 Test    => Is_Inactive'Access);
+
+      Session.Deck_State.Text
+        (Session.State.Local_Text
+           ("cards-in-deck")
+         & ": "
+         & Image (Session.State.Remaining_Cards)
+         & "/"
+         & Image
+           (Session.State.Remaining_Cards
+            + Session.State.Drawn_Cards));
+
+      declare
+         HRAO : constant Senator_Id :=
+                  Session.State.Highest_Ranking_Available_Officer;
+      begin
+         Session.HRAO.Text
+           (Session.State.Local_Text ("hrao")
+            & ": "
+            & Session.State.Local_Text
+              ("senator-of-faction",
+               Session.State.Senator_Name (HRAO),
+               Session.State.Faction_Name
+                 (Session.State.Senator_Faction (HRAO))));
+      end;
+
+   end Update;
 
 end Agrippa.Sessions;

@@ -47,24 +47,31 @@ private
    type Root_Agrippa_Session is
      new Gnoga.Types.Connection_Data_Type with
       record
-         Id           : WL.Guids.Guid;
-         Main_Window  : Gnoga.Gui.Window.Pointer_To_Window_Class;
-         Main_View    : Gnoga.Gui.View.View_Type;
-         Dashboard    : Gnoga.Gui.Element.Common.DIV_Type;
-         Info_Pane    : Gnoga.Gui.Element.Common.DIV_Type;
-         Phase_Name   : Gnoga.Gui.Element.Common.Span_Type;
-         Treasury     : Gnoga.Gui.Element.Common.Span_Type;
-         Form         : Gnoga.Gui.Element.Form.Form_Type;
-         End_Phase    : Gnoga.Gui.Element.Form.Input_Button_Type;
-         Votes_Gadget : Agrippa.UI.Gnoga_UI.Gadgets.Voting_Charts
+         Id            : WL.Guids.Guid;
+         Main_Window   : Gnoga.Gui.Window.Pointer_To_Window_Class;
+         Main_View     : Gnoga.Gui.View.View_Type;
+         Dashboard     : Gnoga.Gui.Element.Common.DIV_Type;
+         Info_Pane     : Gnoga.Gui.Element.Common.DIV_Type;
+         Phase_Name    : Gnoga.Gui.Element.Common.Span_Type;
+         Treasury      : Gnoga.Gui.Element.Common.Span_Type;
+         Unrest        : Gnoga.Gui.Element.Common.Span_Type;
+         Legions       : Gnoga.Gui.Element.Common.Span_Type;
+         Fleets        : Gnoga.Gui.Element.Common.Span_Type;
+         Active_Wars   : Gnoga.Gui.Element.Common.Span_Type;
+         Inactive_Wars : Gnoga.Gui.Element.Common.Span_Type;
+         Deck_State    : Gnoga.Gui.Element.Common.Span_Type;
+         HRAO          : Gnoga.Gui.Element.Common.Span_Type;
+         Form          : Gnoga.Gui.Element.Form.Form_Type;
+         End_Phase     : Gnoga.Gui.Element.Form.Input_Button_Type;
+         Votes_Gadget  : Agrippa.UI.Gnoga_UI.Gadgets.Voting_Charts
            .Voting_Chart_Gadget_Type;
-         Header       : Gnoga.Gui.Element.Common.DIV_Type;
-         Main         : Gnoga.Gui.Element.Common.DIV_Type;
-         Footer       : Gnoga.Gui.Element.Common.DIV_Type;
-         Factions     : Faction_Status_Array;
-         Log          : Gnoga.Gui.Element.Common.DIV_Type;
-         State        : access Agrippa.State.State_Interface'Class;
-         Notifier     : access Agrippa.State.Notifications
+         Header        : Gnoga.Gui.Element.Common.DIV_Type;
+         Main          : Gnoga.Gui.Element.Common.DIV_Type;
+         Footer        : Gnoga.Gui.Element.Common.DIV_Type;
+         Factions      : Faction_Status_Array;
+         Log           : Gnoga.Gui.Element.Common.DIV_Type;
+         State         : access Agrippa.State.State_Interface'Class;
+         Notifier      : access Agrippa.State.Notifications
            .Change_Handler_Interface'Class;
       end record;
 
@@ -72,5 +79,7 @@ private
      (Session : in out Root_Agrippa_Session'Class;
       Class   : String;
       Message : String);
+
+   procedure Update (Session : in out Root_Agrippa_Session'Class);
 
 end Agrippa.Sessions;

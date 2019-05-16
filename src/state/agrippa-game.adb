@@ -3108,8 +3108,8 @@ package body Agrippa.Game is
    -- Veteran_Legion_Count --
    --------------------------
 
-   function Veteran_Legion_Count
-     (Game : Game_Type'Class)
+   overriding function Veteran_Legion_Count
+     (Game : Game_Type)
       return Legion_Count
    is
    begin

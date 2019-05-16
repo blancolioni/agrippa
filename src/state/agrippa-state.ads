@@ -286,6 +286,16 @@ package Agrippa.State is
       return Senator_Id_Array
       is abstract;
 
+   function Drawn_Cards
+     (State : State_Interface)
+      return Natural
+      is abstract;
+
+   function Remaining_Cards
+     (State : State_Interface)
+      return Natural
+      is abstract;
+
    function Faction_Cards
      (State   : State_Interface;
       Faction : Faction_Id)
@@ -563,6 +573,11 @@ package Agrippa.State is
          State.Available_Fleets = State.Available_Fleets'Old - Count;
 
    function Total_Legion_Count
+     (State : State_Interface)
+      return Legion_Count
+      is abstract;
+
+   function Veteran_Legion_Count
      (State : State_Interface)
       return Legion_Count
       is abstract;

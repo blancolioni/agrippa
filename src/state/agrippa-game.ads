@@ -274,8 +274,8 @@ package Agrippa.Game is
      (Game : Game_Type'Class)
       return Legion_Count;
 
-   function Veteran_Legion_Count
-     (Game : Game_Type'Class)
+   overriding function Veteran_Legion_Count
+     (Game : Game_Type)
       return Legion_Count;
 
    overriding function Available_Regular_Legions
@@ -328,6 +328,14 @@ package Agrippa.Game is
    function Forum_Deck
      (Game : Game_Type'Class)
       return Agrippa.Cards.Decks.Deck_Type'Class;
+
+   overriding function Drawn_Cards
+     (Game : Game_Type)
+      return Natural;
+
+   overriding function Remaining_Cards
+     (Game : Game_Type)
+      return Natural;
 
    procedure Add_Faction
      (Game   : in out Game_Type'Class;
@@ -800,5 +808,15 @@ private
              Game.Legion_State (Index),
           when Agrippa.State.Fleet  =>
              Game.Fleet_State (Index));
+
+   overriding function Drawn_Cards
+     (Game : Game_Type)
+      return Natural
+   is (Game.Forum_Deck.Drawn);
+
+   overriding function Remaining_Cards
+     (Game : Game_Type)
+      return Natural
+   is (Game.Forum_Deck.Remaining);
 
 end Agrippa.Game;

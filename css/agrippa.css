@@ -21,6 +21,7 @@ body {
 #agrippa-footer {
     background: #222;
     color: #bbb;
+    overflow-y: auto;
 }
 
 .faction-view {
@@ -69,6 +70,8 @@ body {
     background-color: #444;
     float: left;
     color: white;
+    display: grid;
+    grid-template-columns: 1fr;
 }
 
 .info-phase-name {
