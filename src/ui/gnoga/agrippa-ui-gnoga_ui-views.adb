@@ -39,7 +39,7 @@ package body Agrippa.UI.Gnoga_UI.Views is
       Tbody       : Table_Body_Type;
    begin
       Table.Create (View);
-      Table.Class_Name ("darkTable");
+      Table.Class_Name ("agrippaTable");
 
       declare
          Heading_Row : Table_Row_Type;

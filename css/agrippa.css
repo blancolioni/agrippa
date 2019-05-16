@@ -16,7 +16,7 @@ body {
 
 #agrippa-main {
     background: #ddd;
-    background-image: url("/img/map.png");
+    background-image: url("/img/map2.png");
     background-repeat: no-repeat;
     background-size: contain;
 }
@@ -124,6 +124,21 @@ body {
 .table-view {
     overflow-y: auto;
     height: 100%;
+}
+
+table.agrippaTable {
+    background-color: #eee;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.agrippaTable th {
+    text-align: left;
+}
+
+table.agrippaTable td, table.agrippaTable th {
+  border: 1px solid #4A4A4A;
+  padding: 3px 2px;
 }
 
 table.darkTable {
@@ -246,57 +261,7 @@ table.darkTable tfoot td {
 .console-error-text {
     color: red;
     font-weight: bold;
-}
-    
-:root {
-    --color: #333;
-    --hover-color: lighten(var(--color), 10%);
-    --width: 36px;
-    --pause-width: 12px;
-    --half-width: 18px;
-    --transition-speed: 200ms;
-}
-
-.playpause {
-  width: var(--width);
-  height: var(--width);
-  box-sizing: border-box;
-  transition: border 200ms;
-  
-  border-top: 0 solid transparent;
-  border-right: 0 solid transparent;
-  border-bottom: 0 solid transparent;
-  border-left: 0 solid transparent;
-}
-
-.playpause.play {
-  border-top-width: var(--half-width);
-  border-top-color: transparent;
-  border-right: 0 solid transparent;
-  border-bottom-width: var(--half-width);
-  border-bottom-color: transparent;
-  border-left-width: var(--width);
-  border-left-color: var(--color);
-}
-
-
-.playpause.play:hover {
-    border-left-color: var(--hover-color);
-}
-
-.playpause.pause {
-  border-top: 0 solid transparent;
-  border-right-width: var(--pause-width);
-  border-right-color:  var(--color);
-  border-bottom: 0 solid transparent;
-  border-left-width: var(--pause-width);
-  border-left-color: var(--color);
-}
-
-.playpause.pause:hover {
-    border-right-color: var(--hover-color);    
-    border-left-color: var(--hover-color);
-}
+}   
 
 .revenue-table {
   border: 1px solid black;

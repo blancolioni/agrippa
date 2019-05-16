@@ -45,10 +45,10 @@ package body Agrippa.Models.Factions is
       Model.Set_State (State);
       Model.Add_Column ("Name");
       Model.Add_Column ("M");
-      Model.Add_Column ("I");
       Model.Add_Column ("O");
       Model.Add_Column ("L");
-      Model.Add_Column ("Votes");
+      Model.Add_Column ("I");
+      Model.Add_Column ("P");
 
       for Senator of Senators loop
          declare
@@ -57,11 +57,10 @@ package body Agrippa.Models.Factions is
          begin
             Model.Set_Cell (Row, 1, State.Senator_Name (Senator));
             Model.Set_Cell (Row, 2, Natural (State.Military (Senator)));
-            Model.Set_Cell (Row, 3, Natural (State.Influence (Senator)));
-            Model.Set_Cell (Row, 4, Natural (State.Oratory (Senator)));
-            Model.Set_Cell (Row, 5, Natural (State.Loyalty (Senator)));
-            Model.Set_Cell (Row, 6,
-                            Natural (State.Senator_Votes (Senator)));
+            Model.Set_Cell (Row, 3, Natural (State.Oratory (Senator)));
+            Model.Set_Cell (Row, 4, Natural (State.Loyalty (Senator)));
+            Model.Set_Cell (Row, 5, Natural (State.Influence (Senator)));
+            Model.Set_Cell (Row, 6, Integer (State.Popularity (Senator)));
          end;
       end loop;
 
