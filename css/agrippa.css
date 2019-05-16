@@ -16,6 +16,9 @@ body {
 
 #agrippa-main {
     background: #ddd;
+    background-image: url("/img/map.png");
+    background-repeat: no-repeat;
+    background-size: contain;
 }
 
 #agrippa-footer {
