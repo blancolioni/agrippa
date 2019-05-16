@@ -33,8 +33,7 @@ package body Agrippa.Sessions is
    overriding procedure Send_Message
      (Handler : Gnoga_Notifier_Type;
       State   : Agrippa.State.State_Interface'Class;
-      Message : Agrippa.Messages.Message_Type)
-   is null;
+      Message : Agrippa.Messages.Message_Type);
 
    overriding procedure Send_Notification
      (Handler : Gnoga_Notifier_Type;
@@ -62,6 +61,9 @@ package body Agrippa.Sessions is
       Scenario : Agrippa.Scenarios.Scenario_Type;
       Notifier : not null access constant
         Agrippa.State.Notifications.Change_Handler_Interface'Class);
+
+   procedure On_Start_Phase_Click
+     (Object : in out Gnoga.Gui.Base.Base_Type'Class);
 
    procedure On_End_Phase_Click
      (Object : in out Gnoga.Gui.Base.Base_Type'Class);
@@ -177,6 +179,11 @@ package body Agrippa.Sessions is
 
          Session.State := Game;
 
+         Session.Start_Phase.Create
+           (Session.Form, Session.State.Local_Text ("start-phase"));
+         Session.Start_Phase.Class_Name ("info-start-phase");
+         Session.Start_Phase.On_Click_Handler (On_Start_Phase_Click'Access);
+
          Session.End_Phase.Create
            (Session.Form, Session.State.Local_Text ("end-phase"));
          Session.End_Phase.Class_Name ("info-end-phase");
@@ -222,6 +229,13 @@ package body Agrippa.Sessions is
             end;
          end loop;
 
+         Session.Phase_Number :=
+           Agrippa.Phases.Sequence.First_Phase;
+         Session.Step_Number := 0;
+
+--           Session.State.Set_Current_Activity
+--             (Session.Phase_Number, Session.Step_Number);
+
          Session.Update;
 
       end return;
@@ -234,15 +248,8 @@ package body Agrippa.Sessions is
    procedure On_End_Phase_Click
      (Object : in out Gnoga.Gui.Base.Base_Type'Class)
    is
-      Session : constant Agrippa_Session :=
-                  Agrippa_Session (Object.Connection_Data);
    begin
-      Session.Phase_Name.Text
-        (Session.State.Current_Activity);
-      Session.Treasury.Text
-        (Session.State.Local_Text
-           ("treasury",
-            Agrippa.Images.Image (Session.State.Current_Treasury)));
+      null;
    end On_End_Phase_Click;
 
    -------------------------------
@@ -266,6 +273,41 @@ package body Agrippa.Sessions is
       end if;
 
    end On_Faction_Leader_Changed;
+
+   --------------------------
+   -- On_Start_Phase_Click --
+   --------------------------
+
+   procedure On_Start_Phase_Click
+     (Object : in out Gnoga.Gui.Base.Base_Type'Class)
+   is
+      Session     : constant Agrippa_Session :=
+                      Agrippa_Session (Object.Connection_Data);
+      Phase       : constant Agrippa.Phases.Phase_Interface'Class :=
+                      Agrippa.Phases.Sequence.Phase (Session.Phase_Number);
+      State       : Agrippa.Phases.Phase_State_Type'Class :=
+                      Phase.Start (Session.State.all);
+   begin
+      Session.Step_Number := 1;
+      Phase.Step (State, Session.State.all);
+      Session.Phase_State.Replace_Element (State);
+      Session.Update;
+   end On_Start_Phase_Click;
+
+   ------------------
+   -- Send_Message --
+   ------------------
+
+   overriding procedure Send_Message
+     (Handler : Gnoga_Notifier_Type;
+      State   : Agrippa.State.State_Interface'Class;
+      Message : Agrippa.Messages.Message_Type)
+   is
+      pragma Unreferenced (State);
+   begin
+      Handler.Session.Information
+        ("message", Message.Content'Image);
+   end Send_Message;
 
    -----------------------
    -- Send_Notification --
@@ -334,7 +376,9 @@ package body Agrippa.Sessions is
 
    begin
       Session.Phase_Name.Text
-        (Session.State.Current_Activity);
+        (Session.State.Local_Text
+           (Agrippa.Phases.Sequence.Phase (Session.Phase_Number).Name));
+
       Session.Treasury.Text
         (Session.State.Local_Text
            ("treasury",

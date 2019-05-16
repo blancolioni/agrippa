@@ -2683,8 +2683,8 @@ package body Agrippa.Game is
    -- Set_Current_Activity --
    --------------------------
 
-   procedure Set_Current_Activity
-     (Game  : in out Game_Type'Class;
+   overriding procedure Set_Current_Activity
+     (Game  : in out Game_Type;
       Phase : Natural;
       Step  : Natural)
    is

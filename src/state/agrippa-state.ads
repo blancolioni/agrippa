@@ -241,6 +241,12 @@ package Agrippa.State is
       return String
       is abstract;
 
+   procedure Set_Current_Activity
+     (State  : in out State_Interface;
+      Phase  : Natural;
+      Step   : Natural)
+   is abstract;
+
    procedure Log
      (State   : State_Interface'Class;
       Message : String);

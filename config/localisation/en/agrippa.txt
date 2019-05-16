@@ -59,6 +59,7 @@ active-wars,Active Wars
 inactive-wars,Inactive Wars
 province-income,Province Income
 starting-balance,Starting Balance
+start-phase,Start Phase
 end-phase,End Phase
 treasury,Treasury: {1}t
 treasury-heading,Treasury

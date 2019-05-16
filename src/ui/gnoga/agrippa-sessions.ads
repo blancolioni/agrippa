@@ -1,3 +1,4 @@
+private with Ada.Containers.Indefinite_Holders;
 private with WL.Guids;
 
 with Gnoga.Types;
@@ -9,6 +10,7 @@ private with Gnoga.Gui.View;
 
 with Agrippa.State;
 private with Agrippa.State.Notifications;
+private with Agrippa.Phases.Sequence;
 
 with Agrippa.UI.Gnoga_UI.Views;
 
@@ -44,6 +46,11 @@ private
    type Faction_Status_Array is
      array (Faction_Id) of Faction_Status_Record;
 
+   package Phase_State_Holders is
+     new Ada.Containers.Indefinite_Holders
+       (Agrippa.Phases.Phase_State_Type'Class,
+        Agrippa.Phases."=");
+
    type Root_Agrippa_Session is
      new Gnoga.Types.Connection_Data_Type with
       record
@@ -62,6 +69,7 @@ private
          Deck_State    : Gnoga.Gui.Element.Common.Span_Type;
          HRAO          : Gnoga.Gui.Element.Common.Span_Type;
          Form          : Gnoga.Gui.Element.Form.Form_Type;
+         Start_Phase   : Gnoga.Gui.Element.Form.Input_Button_Type;
          End_Phase     : Gnoga.Gui.Element.Form.Input_Button_Type;
          Votes_Gadget  : Agrippa.UI.Gnoga_UI.Gadgets.Voting_Charts
            .Voting_Chart_Gadget_Type;
@@ -73,6 +81,9 @@ private
          State         : access Agrippa.State.State_Interface'Class;
          Notifier      : access Agrippa.State.Notifications
            .Change_Handler_Interface'Class;
+         Phase_Number  : Agrippa.Phases.Sequence.Phase_Id;
+         Step_Number   : Natural;
+         Phase_State   : Phase_State_Holders.Holder;
       end record;
 
    procedure Information

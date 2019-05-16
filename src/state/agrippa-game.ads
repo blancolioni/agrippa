@@ -38,8 +38,8 @@ package Agrippa.Game is
      (Game : Game_Type)
       return String;
 
-   procedure Set_Current_Activity
-     (Game  : in out Game_Type'Class;
+   overriding procedure Set_Current_Activity
+     (Game  : in out Game_Type;
       Phase : Natural;
       Step  : Natural);
 
