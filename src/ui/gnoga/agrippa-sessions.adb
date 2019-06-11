@@ -92,7 +92,7 @@ package body Agrippa.Sessions is
    is
    begin
       Session.Log.Put_Line ("[" & Class & "] " & Message);
-      Session.Log.Scroll_Top (1e5);
+      Session.Footer.Scroll_Top (1e5);
    end Information;
 
    --------------
