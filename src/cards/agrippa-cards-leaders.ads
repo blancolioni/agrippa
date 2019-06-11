@@ -33,7 +33,7 @@ private
          Strength       : Natural;
          Disaster       : TDR_Range;
          Stand_Off      : TDR_Range;
-         Matching_Wars  : access constant War_Id_Array;
+         Matching_Wars  : War_Id_Array_Access;
       end record;
 
    function Leader (Card : Leader_Card_Type'Class) return Leader_Id

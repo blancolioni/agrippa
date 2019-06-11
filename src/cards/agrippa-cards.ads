@@ -32,10 +32,12 @@ package Agrippa.Cards is
 
 private
 
+   type Card_Tag is access constant String;
+
    type Card_Type is abstract tagged
       record
          Id       : Card_Id;
-         Tag      : access constant String;
+         Tag      : Card_Tag;
          Scenario : Agrippa.Scenarios.Scenario_Type;
          Class    : Card_Class;
          Keep     : Boolean;
@@ -62,5 +64,7 @@ private
 
    procedure New_Card
      (Card : in out Card_Type'Class);
+
+   type War_Id_Array_Access is access constant War_Id_Array;
 
 end Agrippa.Cards;

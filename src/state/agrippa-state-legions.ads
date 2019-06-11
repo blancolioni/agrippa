@@ -8,12 +8,12 @@ package Agrippa.State.Legions is
    function Loyalty
      (Legion : Legion_State_Type'Class)
       return Senator_Id
-     with Pre => Legion.Loyal;
+     with Pre => Loyal (Legion);
 
    procedure Create (Legion : in out Legion_State_Type'Class)
      with Pre => not Legion.Created,
-     Post => Legion.Created and then not Legion.Deployed
-     and then not Legion.Veteran and then not Legion.Loyal;
+     Post => Created (Legion) and then not Deployed (Legion)
+     and then not Veteran (Legion) and then not Loyal (Legion);
 
    procedure Destroy (Legion : in out Legion_State_Type'Class)
      with Pre => Legion.Created,
