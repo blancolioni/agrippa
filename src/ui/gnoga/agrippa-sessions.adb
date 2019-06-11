@@ -11,48 +11,13 @@ with Agrippa.Cards.Wars;
 with Agrippa.Game;
 with Agrippa.Scenarios;
 
-with Agrippa.Messages;
-
 with Agrippa.Models.Factions;
 
 with Agrippa.Players.Robots.Configure;
 
+with Agrippa.Sessions.Messages;
+
 package body Agrippa.Sessions is
-
-   type Gnoga_Notifier_Type is
-     new Agrippa.State.Notifications.Change_Handler_Interface with
-      record
-         Session : Agrippa_Session;
-      end record;
-
-   overriding procedure On_Faction_Leader_Changed
-     (Handler : Gnoga_Notifier_Type;
-      State   : Agrippa.State.State_Interface'Class;
-      Faction : Faction_Id);
-
-   overriding procedure Send_Message
-     (Handler : Gnoga_Notifier_Type;
-      State   : Agrippa.State.State_Interface'Class;
-      Message : Agrippa.Messages.Message_Type);
-
-   overriding procedure Send_Notification
-     (Handler : Gnoga_Notifier_Type;
-      Text    : String);
-
-   overriding procedure On_Faction_Revenue
-     (Handler   : Gnoga_Notifier_Type;
-      State     : Agrippa.State.State_Interface'Class;
-      Faction   : Faction_Id;
-      Old_Value : Talents;
-      Income    : Talents;
-      Provinces : Talents;
-      New_Value : Talents)
-   is null;
-
-   overriding procedure On_State_Revenue
-     (Handler   : Gnoga_Notifier_Type;
-      Items     : Agrippa.State.State_Revenue_Array)
-   is null;
 
    type Game_Access is access all Agrippa.Game.Game_Type'Class;
 
@@ -303,10 +268,8 @@ package body Agrippa.Sessions is
       State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Message_Type)
    is
-      pragma Unreferenced (State);
    begin
-      Handler.Session.Information
-        ("message", Message.Content'Image);
+      Agrippa.Sessions.Messages.Handle_Message (State, Message, Handler);
    end Send_Message;
 
    -----------------------
