@@ -27,6 +27,9 @@ body {
     overflow-y: auto;
 }
 
+#agrippa-log {
+}
+
 .faction-view {
     margin: 2px;
 }
