@@ -51,7 +51,7 @@ private
          Oratory   : Attribute_Range;
          Loyalty   : Attribute_Range;
          Influence : Attribute_Range;
-         Voids_DS  : access constant War_Id_Array;
+         Voids_DS  : War_Id_Array_Access;
       end record;
 
    function Statesman

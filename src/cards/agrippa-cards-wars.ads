@@ -32,8 +32,10 @@ package Agrippa.Cards.Wars is
 private
 
    type Roll_Array is array (Positive range <>) of Positive;
+   type Roll_Array_Access is access constant Roll_Array;
 
    type Attack_Array is array (Positive range <>) of Province_Id;
+   type Attack_Array_Access is access constant Attack_Array;
 
    type War_Card_Type is
      new Card_Type with
@@ -42,11 +44,11 @@ private
          Land_Strength  : Combat_Strength;
          Fleet_Support  : Fleet_Count;
          Fleet_Strength : Fleet_Count;
-         Disaster       : access constant Roll_Array;
-         Stand_Off      : access constant Roll_Array;
+         Disaster       : Roll_Array_Access;
+         Stand_Off      : Roll_Array_Access;
          Spoils         : Talents;
          Active         : Boolean;
-         Attacks        : access constant Attack_Array;
+         Attacks        : Attack_Array_Access;
       end record;
 
    function Active (Card : War_Card_Type'Class) return Boolean

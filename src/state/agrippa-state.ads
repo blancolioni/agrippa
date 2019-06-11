@@ -48,7 +48,7 @@ package Agrippa.State is
    function War
      (Military : Military_Type'Class)
       return War_Id
-     with Pre => Military.Deployed;
+     with Pre => Deployed (Military);
 
    type Faction_State_Interface is interface;
 

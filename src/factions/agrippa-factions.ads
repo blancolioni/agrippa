@@ -12,13 +12,13 @@ package Agrippa.Factions is
       return Boolean;
 
    function Id (Faction : Faction_Type'Class) return Faction_Id
-     with Pre => Faction.Active;
+     with Pre => Active (Faction);
 
    function Name (Faction : Faction_Type'Class) return String
-     with Pre => Faction.Active;
+     with Pre => Active (Faction);
 
    function Treasury (Faction : Faction_Type'Class) return Talents
-     with Pre => Faction.Active;
+     with Pre => Active (Faction);
 
    procedure Set_Treasury
      (Faction : in out Faction_Type'Class;
@@ -28,8 +28,8 @@ package Agrippa.Factions is
      (Faction : in out Faction_Type'Class;
       Id      : Faction_Id;
       Name    : String)
-     with Pre => not Faction.Active,
-     Post => Faction.Active
+     with Pre => not Active (Faction),
+     Post => Active (Faction)
      and then Faction.Id = Id
      and then Faction.Name = Name;
 
@@ -40,13 +40,13 @@ package Agrippa.Factions is
    function Leader
      (Faction : Faction_Type'Class)
       return Senator_Id
-     with Pre => Faction.Has_Leader;
+     with Pre => Has_Leader (Faction);
 
    procedure Set_Leader
      (Faction : in out Faction_Type'Class;
       Leader  : Senator_Id)
-     with Post => Faction.Has_Leader
-     and then Faction.Leader = Leader;
+     with Post => Has_Leader (Faction)
+     and then Agrippa.Factions.Leader (Faction) = Leader;
 
    function Card_Count
      (Faction : Faction_Type'Class)

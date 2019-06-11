@@ -25,13 +25,15 @@ package Agrippa.Cards.Concessions is
 
 private
 
+   type Card_Id_Array_Access is access constant Card_Id_Array;
+
    type Concession_Card_Type is
      new Card_Type with
       record
          C_Id                  : Concession_Id;
          Income                : Talents;
          Source                : Concession_Income_Source;
-         Destroyed_By_Card     : access constant Card_Id_Array;
+         Destroyed_By_Card     : Card_Id_Array_Access;
          Destroyed_By_Disaster : Boolean;
          Destroy_Die_Roll      : Positive;
       end record;

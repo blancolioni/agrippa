@@ -56,7 +56,7 @@ package Agrippa.State.Senators is
    function Office
      (Senator : Senator_State_Type'Class)
       return Office_Type
-     with Pre => Senator.Has_Office;
+     with Pre => Has_Office (Senator);
 
    function Has_Command
      (Senator : Senator_State_Type'Class)
@@ -65,7 +65,7 @@ package Agrippa.State.Senators is
    function Command
      (Senator : Senator_State_Type'Class)
       return War_Id
-     with Pre => Senator.Has_Command;
+     with Pre => Has_Command (Senator);
 
    overriding function Has_Faction
      (Senator : Senator_State_Type)

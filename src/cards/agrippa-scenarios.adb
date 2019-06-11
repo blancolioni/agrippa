@@ -3,9 +3,11 @@ with WL.String_Sets;
 
 package body Agrippa.Scenarios is
 
+   type Scenario_Name is access constant String;
+
    type Scenario_Record is
       record
-         Name     : access constant String;
+         Name     : Scenario_Name;
          Includes : WL.String_Sets.Set;
       end record;
 
