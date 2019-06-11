@@ -51,6 +51,9 @@ private
        (Agrippa.Phases.Phase_State_Type'Class,
         Agrippa.Phases."=");
 
+   type Change_Handler_Access is
+     access all Agrippa.State.Notifications.Change_Handler_Interface'Class;
+
    type Root_Agrippa_Session is
      new Gnoga.Types.Connection_Data_Type with
       record
@@ -79,8 +82,7 @@ private
          Factions      : Faction_Status_Array;
          Log           : Gnoga.Gui.Element.Common.DIV_Type;
          State         : access Agrippa.State.State_Interface'Class;
-         Notifier      : access Agrippa.State.Notifications
-           .Change_Handler_Interface'Class;
+         Notifier      : Change_Handler_Access;
          Phase_Number  : Agrippa.Phases.Sequence.Phase_Id;
          Step_Number   : Natural;
          Phase_State   : Phase_State_Holders.Holder;
