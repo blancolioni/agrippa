@@ -2,6 +2,7 @@ private with Ada.Strings.Unbounded;
 
 with WL.Localisation;
 
+with Agrippa.Colors;
 with Agrippa.Events;
 
 with Agrippa.Messages;
@@ -48,6 +49,29 @@ package Agrippa.State is
      (Military : Military_Type'Class)
       return War_Id
      with Pre => Deployed (Military);
+
+   type Faction_State_Interface is interface;
+
+   function Name (Faction : Faction_State_Interface) return String
+                  is abstract;
+
+   function Treasury (Faction : Faction_State_Interface) return Talents
+                      is abstract;
+
+   function Influence
+     (Faction : Faction_State_Interface)
+      return Faction_Influence_Range
+      is abstract;
+
+   function Votes
+     (Faction : Faction_State_Interface)
+      return Vote_Count
+      is abstract;
+
+   function Color
+     (Faction : Faction_State_Interface)
+      return Agrippa.Colors.Agrippa_Color
+      is abstract;
 
    type Senator_State_Interface is interface;
 
@@ -217,6 +241,12 @@ package Agrippa.State is
       return String
       is abstract;
 
+   procedure Set_Current_Activity
+     (State  : in out State_Interface;
+      Phase  : Natural;
+      Step   : Natural)
+   is abstract;
+
    procedure Log
      (State   : State_Interface'Class;
       Message : String);
@@ -260,6 +290,16 @@ package Agrippa.State is
    function Senators_In_Rome
      (State   : State_Interface)
       return Senator_Id_Array
+      is abstract;
+
+   function Drawn_Cards
+     (State : State_Interface)
+      return Natural
+      is abstract;
+
+   function Remaining_Cards
+     (State : State_Interface)
+      return Natural
       is abstract;
 
    function Faction_Cards
@@ -425,6 +465,12 @@ package Agrippa.State is
       return Senator_State_Interface'Class
       is abstract;
 
+   function Get_Faction_State
+     (State   : State_Interface;
+      Faction : Faction_Id)
+      return Faction_State_Interface'Class
+      is abstract;
+
    function Highest_Ranking_Available_Officer
      (State : State_Interface)
       return Senator_Id
@@ -533,6 +579,11 @@ package Agrippa.State is
          State.Available_Fleets = State.Available_Fleets'Old - Count;
 
    function Total_Legion_Count
+     (State : State_Interface)
+      return Legion_Count
+      is abstract;
+
+   function Veteran_Legion_Count
      (State : State_Interface)
       return Legion_Count
       is abstract;

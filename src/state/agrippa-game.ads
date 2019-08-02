@@ -4,6 +4,7 @@ private with Ada.Finalization;
 
 with WL.Localisation;
 
+with Agrippa.Colors;
 with Agrippa.Events;
 with Agrippa.Scenarios;
 
@@ -37,8 +38,8 @@ package Agrippa.Game is
      (Game : Game_Type)
       return String;
 
-   procedure Set_Current_Activity
-     (Game  : in out Game_Type'Class;
+   overriding procedure Set_Current_Activity
+     (Game  : in out Game_Type;
       Phase : Natural;
       Step  : Natural);
 
@@ -273,8 +274,8 @@ package Agrippa.Game is
      (Game : Game_Type'Class)
       return Legion_Count;
 
-   function Veteran_Legion_Count
-     (Game : Game_Type'Class)
+   overriding function Veteran_Legion_Count
+     (Game : Game_Type)
       return Legion_Count;
 
    overriding function Available_Regular_Legions
@@ -327,6 +328,14 @@ package Agrippa.Game is
    function Forum_Deck
      (Game : Game_Type'Class)
       return Agrippa.Cards.Decks.Deck_Type'Class;
+
+   overriding function Drawn_Cards
+     (Game : Game_Type)
+      return Natural;
+
+   overriding function Remaining_Cards
+     (Game : Game_Type)
+      return Natural;
 
    procedure Add_Faction
      (Game   : in out Game_Type'Class;
@@ -416,6 +425,40 @@ private
 
    type Player_Array is
      array (Faction_Id) of Player_Record;
+
+   type Faction_State is
+     new Agrippa.State.Faction_State_Interface with
+      record
+         Faction   : Agrippa.Factions.Faction_Type;
+         Votes     : Vote_Count;
+         Influence : Faction_Influence_Range;
+         Color     : Agrippa.Colors.Agrippa_Color;
+      end record;
+
+   overriding function Name
+     (Faction : Faction_State)
+      return String
+   is (Faction.Faction.Name);
+
+   overriding function Treasury
+     (Faction : Faction_State)
+      return Talents
+   is (Faction.Faction.Treasury);
+
+   overriding function Influence
+     (Faction : Faction_State)
+      return Faction_Influence_Range
+   is (Faction.Influence);
+
+   overriding function Votes
+     (Faction : Faction_State)
+      return Vote_Count
+   is (Faction.Votes);
+
+   overriding function Color
+     (Faction : Faction_State)
+      return Agrippa.Colors.Agrippa_Color
+   is (Faction.Color);
 
    type Game_Type is limited
      new Ada.Finalization.Limited_Controlled
@@ -530,6 +573,11 @@ private
      (Game    : Game_Type;
       Senator : Senator_Id)
       return Agrippa.State.Senator_State_Interface'Class;
+
+   overriding function Get_Faction_State
+     (Game    : Game_Type;
+      Faction : Faction_Id)
+      return Agrippa.State.Faction_State_Interface'Class;
 
    overriding function Get_War_State
      (Game       : Game_Type;
@@ -760,5 +808,15 @@ private
              Game.Legion_State (Index),
           when Agrippa.State.Fleet  =>
              Game.Fleet_State (Index));
+
+   overriding function Drawn_Cards
+     (Game : Game_Type)
+      return Natural
+   is (Game.Forum_Deck.Drawn);
+
+   overriding function Remaining_Cards
+     (Game : Game_Type)
+      return Natural
+   is (Game.Forum_Deck.Remaining);
 
 end Agrippa.Game;
