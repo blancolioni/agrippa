@@ -176,13 +176,13 @@ package body Agrippa.Sessions is
                   "faction-name" & Id);
                Status.Name.Class_Name ("faction-name");
                Status.Coins.Create (Status.Header);
-               Status.Coins.Class_Name ("coins");
+               Status.Coins.Class_Name ("fas fa-coins");
                Status.Treasury.Create
                  (Status.Header,
                   Agrippa.Images.Image (Game.Faction_Treasury (Faction)),
                   "faction-treasury" & Id);
                Status.Vote_Icon.Create (Status.Header);
-               Status.Vote_Icon.Class_Name ("votes");
+               Status.Vote_Icon.Class_Name ("far fa-thumbs-up");
                Status.Votes.Create
                  (Status.Header,
                   Agrippa.Images.Image (Game.Faction_Votes (Faction)),
