@@ -7,8 +7,8 @@ with WL.Random;
 with Agrippa.Cards.Configure;
 with Agrippa.Scenarios.Configure;
 
-with Agrippa.UI.Gnoga_UI;
 with Agrippa.UI.Text;
+with Agrippa.UI.Web_UI;
 
 with Agrippa.Options;
 with Agrippa.Paths;
@@ -42,9 +42,9 @@ begin
       begin
          UI.Start; --   (Scenario => Agrippa.Scenarios.Get ("early-republic"));
       end;
-   elsif Agrippa.Options.Gnoga_UI then
+   elsif Agrippa.Options.Web_Server then
       declare
-         UI : Agrippa.UI.Gnoga_UI.Gnoga_UI_Type;
+         UI : Agrippa.UI.Web_UI.Web_UI_Type;
       begin
          UI.Start;
       end;

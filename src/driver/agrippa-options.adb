@@ -16,11 +16,11 @@ package body Agrippa.Options is
                ("random-seed", ' ', 0);
    end Random_Seed;
 
-   function Gnoga_UI return Boolean is
+   function Web_Server return Boolean is
    begin
       return WL.Command_Line.Find_Option
-               ("gnoga-ui", ' ');
-   end Gnoga_UI;
+               ("web-server", ' ');
+   end Web_Server;
 
    function Text_UI return Boolean is
    begin

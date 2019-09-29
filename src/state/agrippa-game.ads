@@ -172,6 +172,13 @@ package Agrippa.Game is
      with Post => Game.Has_Faction
        (Highest_Ranking_Available_Officer'Result);
 
+   procedure Create_Default_Game
+     (Game : in out Game_Type;
+      Scenario : Agrippa.Scenarios.Scenario_Type;
+      Language : WL.Localisation.Language_Type;
+      Notify   : not null access constant
+        Agrippa.State.Notifications.Change_Handler_Interface'Class);
+
    function Scenario
      (Game : Game_Type'Class)
       return Agrippa.Scenarios.Scenario_Type;

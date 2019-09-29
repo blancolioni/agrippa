@@ -17,7 +17,6 @@ with Agrippa.Cards.Concessions;
 with Agrippa.Cards.Wars;
 
 with Agrippa.State.Senators;
-with Agrippa.State.Notifications;
 
 with Agrippa.Factions;
 
@@ -93,6 +92,17 @@ package body Agrippa.UI.Text is
      (Game  : Agrippa.Game.Game_Type'Class;
       Id    : Agrippa.Phases.Sequence.Phase_Id;
       Phase : Agrippa.Phases.Phase_Interface'Class);
+
+   -----------------------
+   -- Get_Text_Notifier --
+   -----------------------
+
+   function Get_Text_Notifier
+     return Agrippa.State.Notifications.Change_Handler_Interface'Class
+   is
+   begin
+      return Notifier : Text_Notifier_Type;
+   end Get_Text_Notifier;
 
    -------------------------------
    -- On_Faction_Leader_Changed --

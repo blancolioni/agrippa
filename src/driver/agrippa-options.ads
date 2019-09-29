@@ -3,7 +3,7 @@ package Agrippa.Options is
 
    function Randomise return Boolean;
    function Random_Seed return Natural;
-   function Gnoga_UI return Boolean;
+   function Web_Server return Boolean;
    function Text_UI return Boolean;
 
 end Agrippa.Options;

@@ -1,4 +1,5 @@
 with Agrippa.Game;
+with Agrippa.State.Notifications;
 
 package Agrippa.UI.Text is
 
@@ -7,6 +8,9 @@ package Agrippa.UI.Text is
 
    overriding procedure Start
      (Text_UI  : in out Text_UI_Type);
+
+   function Get_Text_Notifier
+     return Agrippa.State.Notifications.Change_Handler_Interface'Class;
 
 private
 

@@ -8,10 +8,11 @@ source_dir = src/players
 source_dir = src/proposals
 source_dir = src/state
 source_dir = src/ui
+source_dir = src/ui/aws
 source_dir = src/ui/gnoga
 source_dir = src/ui/models
 source_dir = src/ui/text
-depend = { project = Gnoga external = yes }
+depend = { project = aws external = yes }
 depend = { project = Tropos version = any }
 depend = { project = Lith version = any }
 depend = { project = WLib version = any }

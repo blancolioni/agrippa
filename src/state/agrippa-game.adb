@@ -569,6 +569,23 @@ package body Agrippa.Game is
       end return;
    end Count_Legions;
 
+   procedure Create_Default_Game
+     (Game     : in out Game_Type;
+      Scenario : Agrippa.Scenarios.Scenario_Type;
+      Language : WL.Localisation.Language_Type;
+      Notify   : not null access constant
+        Agrippa.State.Notifications.Change_Handler_Interface'Class)
+   is
+   begin
+      Game.Add_Faction ("Gladius");
+      Game.Add_Faction ("Pila");
+      Game.Add_Faction ("Aquarius");
+      Game.Add_Faction ("Boni");
+      Game.Add_Faction ("Agnus Dei");
+      Game.Add_Faction ("Agricola");
+      Game.Start (Scenario, Language, Notify);
+   end Create_Default_Game;
+
    ------------------
    -- Create_Fleet --
    ------------------
