@@ -7,11 +7,16 @@ package body Agrippa.UI.Web_UI.Handlers is
 
    Get_Handlers : Get_Handler_Maps.Map;
 
-   --------------------
-   -- Handle_Request --
-   --------------------
+   package Post_Handler_Maps is
+     new WL.String_Maps (Handle_Post);
 
-   function Handle_Request
+   Post_Handlers : Post_Handler_Maps.Map;
+
+   ------------------------
+   -- Handle_Get_Request --
+   ------------------------
+
+   function Handle_Get_Request
      (Url     : String;
       Game    : Agrippa.Game.Game_Type)
       return Agrippa.Json.Json_Value'Class
@@ -22,7 +27,24 @@ package body Agrippa.UI.Web_UI.Handlers is
       else
          return Agrippa.Json.Null_Value;
       end if;
-   end Handle_Request;
+   end Handle_Get_Request;
+
+   -------------------------
+   -- Handle_Post_Request --
+   -------------------------
+
+   function Handle_Post_Request
+     (Url     : String;
+      Game    : in out Agrippa.Game.Game_Type)
+      return Agrippa.Json.Json_Value'Class
+   is
+   begin
+      if Post_Handlers.Contains (Url) then
+         return Post_Handlers.Element (Url) (Game);
+      else
+         return Agrippa.Json.Null_Value;
+      end if;
+   end Handle_Post_Request;
 
    --------------
    -- Register --
@@ -34,6 +56,18 @@ package body Agrippa.UI.Web_UI.Handlers is
    is
    begin
       Get_Handlers.Insert (Url, Handler);
+   end Register;
+
+   --------------
+   -- Register --
+   --------------
+
+   procedure Register
+     (Url     : String;
+      Handler : Handle_Post)
+   is
+   begin
+      Post_Handlers.Insert (Url, Handler);
    end Register;
 
 end Agrippa.UI.Web_UI.Handlers;

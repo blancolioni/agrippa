@@ -4,9 +4,7 @@ import Agrippa from './Agrippa.js'
 
 function App() {
   return (
-    <Agrippa>
-
-    </Agrippa>
+    <Agrippa/>
   );
 }
 

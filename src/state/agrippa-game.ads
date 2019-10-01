@@ -17,6 +17,8 @@ with Agrippa.Cards.Decks;
 
 with Agrippa.Messages;
 
+with Agrippa.Phases.Sequence;
+
 with Agrippa.State.Fleets;
 with Agrippa.State.Leaders;
 with Agrippa.State.Legions;
@@ -40,7 +42,7 @@ package Agrippa.Game is
 
    overriding procedure Set_Current_Activity
      (Game  : in out Game_Type;
-      Phase : Natural;
+      Phase : Phase_Id;
       Step  : Natural);
 
    overriding function Has_Winner
@@ -178,6 +180,9 @@ package Agrippa.Game is
       Language : WL.Localisation.Language_Type;
       Notify   : not null access constant
         Agrippa.State.Notifications.Change_Handler_Interface'Class);
+
+   procedure Next_Step
+     (Game : in out Game_Type);
 
    function Scenario
      (Game : Game_Type'Class)
@@ -344,6 +349,10 @@ package Agrippa.Game is
      (Game : Game_Type)
       return Natural;
 
+   function Current_Phase
+     (Game : Game_Type)
+      return Phase_Id;
+
    procedure Add_Faction
      (Game   : in out Game_Type'Class;
       Name   : String);
@@ -395,11 +404,6 @@ private
      new Ada.Containers.Vectors
        (War_Id, Agrippa.State.Wars.War_State_Type,
         Agrippa.State.Wars."=");
-
-   package Phase_Holders is
-     new Ada.Containers.Indefinite_Holders
-       (Agrippa.Phases.Phase_Interface'Class,
-        Agrippa.Phases."=");
 
    package Phase_State_Holders is
      new Ada.Containers.Indefinite_Holders
@@ -480,8 +484,6 @@ private
          Faction_Count    : Natural := 0;
          Winning_Faction  : Faction_Id;
          Current_Turn     : Turn_Number := 1;
-         Current_Phase    : Phase_Holders.Holder;
-         Phase_State      : Phase_State_Holders.Holder;
          Treasury         : Talents := 100;
          Unrest           : Unrest_Level := 0;
          Senate_Adjourned : Boolean := False;
@@ -495,8 +497,9 @@ private
          Events           : Event_Table;
          Status           : Status_Table;
          Forum_Deck       : Agrippa.Cards.Decks.Deck_Type;
-         Phase_Number     : Natural := 0;
+         Current_Phase    : Phase_Id := Agrippa.Phases.Sequence.First_Phase;
          Step_Number      : Natural := 0;
+         Phase_State      : Phase_State_Holders.Holder;
       end record;
 
    overriding procedure Initialize (Game : in out Game_Type);
@@ -825,5 +828,10 @@ private
      (Game : Game_Type)
       return Natural
    is (Game.Forum_Deck.Remaining);
+
+   function Current_Phase
+     (Game : Game_Type)
+      return Phase_Id
+   is (Game.Current_Phase);
 
 end Agrippa.Game;

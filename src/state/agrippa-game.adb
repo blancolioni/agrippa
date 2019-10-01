@@ -569,6 +569,10 @@ package body Agrippa.Game is
       end return;
    end Count_Legions;
 
+   -------------------------
+   -- Create_Default_Game --
+   -------------------------
+
    procedure Create_Default_Game
      (Game     : in out Game_Type;
       Scenario : Agrippa.Scenarios.Scenario_Type;
@@ -584,6 +588,7 @@ package body Agrippa.Game is
       Game.Add_Faction ("Agnus Dei");
       Game.Add_Faction ("Agricola");
       Game.Start (Scenario, Language, Notify);
+
    end Create_Default_Game;
 
    ------------------
@@ -678,8 +683,7 @@ package body Agrippa.Game is
       return Agrippa.Images.Image
         (Natural (Game.Current_Turn))
         & "."
-        & Agrippa.Images.Image
-        (Game.Phase_Number)
+        & Agrippa.Phases.Sequence.Show (Game.Current_Phase)
         & "."
         & Agrippa.Images.Image
         (Game.Step_Number);
@@ -2029,6 +2033,45 @@ package body Agrippa.Game is
       end loop;
    end Mortality_Roll;
 
+   ---------------
+   -- Next_Step --
+   ---------------
+
+   procedure Next_Step
+     (Game : in out Game_Type)
+   is
+      Phase : constant Agrippa.Phases.Phase_Interface'Class :=
+        Agrippa.Phases.Sequence.Phase (Game.Current_Phase);
+   begin
+
+      Ada.Text_IO.Put_Line
+        ("current phase: "
+         & Agrippa.Phases.Sequence.Show (Game.Current_Phase)
+         & ". "
+         & Game.Local_Text (Phase.Name));
+
+      Phase.Step (Game.Phase_State.Reference, Game);
+      Game.Step_Number := Game.Step_Number + 1;
+
+      if Game.Phase_State.Element.Is_Finished then
+         Ada.Text_IO.Put_Line ("going to next phase");
+         Game.Step_Number := 0;
+         if Agrippa.Phases.Sequence.Is_Last (Game.Current_Phase) then
+            Game.Current_Phase := Phase_Id'First;
+         else
+            Game.Current_Phase :=
+              Agrippa.Phases.Sequence.Next_Phase (Game.Current_Phase);
+         end if;
+         Ada.Text_IO.Put_Line
+           ("new phase: "
+            & Agrippa.Phases.Sequence.Phase
+              (Game.Current_Phase).Name);
+
+         Game.Phase_State.Replace_Element
+           (Agrippa.Phases.Sequence.Phase (Game.Current_Phase).Start (Game));
+      end if;
+   end Next_Step;
+
    ------------
    -- Notify --
    ------------
@@ -2702,11 +2745,11 @@ package body Agrippa.Game is
 
    overriding procedure Set_Current_Activity
      (Game  : in out Game_Type;
-      Phase : Natural;
+      Phase : Phase_Id;
       Step  : Natural)
    is
    begin
-      Game.Phase_Number := Phase;
+      Game.Current_Phase := Phase;
       Game.Step_Number := Step;
    end Set_Current_Activity;
 
@@ -2991,6 +3034,9 @@ package body Agrippa.Game is
 
       Game.Current_Turn := 0;
 
+      Game.Phase_State.Replace_Element
+        (Agrippa.Phases.Sequence.Phase (Phase_Id'First).Start (Game));
+
       Notify.Send_Notification ("Ready.");
 
    end Start;
@@ -3069,6 +3115,10 @@ package body Agrippa.Game is
    is
    begin
       Game.Current_Turn := Game.Current_Turn + 1;
+      Game.Current_Phase := Phase_Id'First;
+      Game.Step_Number := 0;
+      Game.Phase_State.Replace_Element
+        (Agrippa.Phases.Sequence.Phase (Game.Current_Phase).Start (Game));
       for Player of Game.Player_State loop
          Player.Handler.Start_Turn (Game);
       end loop;

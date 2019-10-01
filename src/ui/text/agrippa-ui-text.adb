@@ -90,7 +90,7 @@ package body Agrippa.UI.Text is
 
    procedure Put_Phase
      (Game  : Agrippa.Game.Game_Type'Class;
-      Id    : Agrippa.Phases.Sequence.Phase_Id;
+      Id    : Phase_Id;
       Phase : Agrippa.Phases.Phase_Interface'Class);
 
    -----------------------
@@ -286,7 +286,7 @@ package body Agrippa.UI.Text is
 
    procedure Put_Phase
      (Game  : Agrippa.Game.Game_Type'Class;
-      Id    : Agrippa.Phases.Sequence.Phase_Id;
+      Id    : Phase_Id;
       Phase : Agrippa.Phases.Phase_Interface'Class)
    is
       Name : constant String :=
@@ -963,7 +963,8 @@ package body Agrippa.UI.Text is
             Step_Number := 0;
             loop
                Step_Number := Step_Number + 1;
-               Game.Set_Current_Activity (Phase_Number, Step_Number);
+               Game.Set_Current_Activity
+                 (Phase_Id (Phase_Number), Step_Number);
                declare
                   use type Agrippa.Messages.Message_Content_Type;
                   Response : constant Agrippa.Messages.Message_Type :=
@@ -981,14 +982,15 @@ package body Agrippa.UI.Text is
          Text_UI.Start_Turn;
 
          declare
-            Id : Agrippa.Phases.Sequence.Phase_Id :=
+            Id : Phase_Id :=
                    Agrippa.Phases.Sequence.First_Phase;
             Phase_Number : Natural := 0;
          begin
 
             loop
                Phase_Number := Phase_Number + 1;
-               Game.Set_Current_Activity (Phase_Number, 0);
+               Game.Set_Current_Activity
+                 (Phase_Id (Phase_Number), 0);
 
                Put_Phase (Game, Id, Agrippa.Phases.Sequence.Phase (Id));
 
@@ -1012,7 +1014,8 @@ package body Agrippa.UI.Text is
                      end;
 
                      Step_Number := Step_Number + 1;
-                     Game.Set_Current_Activity (Phase_Number, Step_Number);
+                     Game.Set_Current_Activity
+                       (Phase_Id (Phase_Number), Step_Number);
                      Phase.Step (State, Game);
 
                   end loop;

@@ -48,11 +48,6 @@ private
    type Faction_Status_Array is
      array (Faction_Id) of Faction_Status_Record;
 
-   package Phase_State_Holders is
-     new Ada.Containers.Indefinite_Holders
-       (Agrippa.Phases.Phase_State_Type'Class,
-        Agrippa.Phases."=");
-
    type Change_Handler_Access is
      access all Agrippa.State.Notifications.Change_Handler_Interface'Class;
 
@@ -85,9 +80,6 @@ private
          Log           : Gnoga.Gui.Element.Common.DIV_Type;
          State         : access Agrippa.State.State_Interface'Class;
          Notifier      : Change_Handler_Access;
-         Phase_Number  : Agrippa.Phases.Sequence.Phase_Id;
-         Step_Number   : Natural;
-         Phase_State   : Phase_State_Holders.Holder;
       end record;
 
    procedure Information

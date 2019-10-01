@@ -243,7 +243,7 @@ package Agrippa.State is
 
    procedure Set_Current_Activity
      (State  : in out State_Interface;
-      Phase  : Natural;
+      Phase  : Phase_Id;
       Step   : Natural)
    is abstract;
 

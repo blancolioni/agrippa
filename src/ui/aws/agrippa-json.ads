@@ -6,6 +6,7 @@ package Agrippa.Json is
    type Json_Value is abstract tagged private;
 
    function Null_Value return Json_Value'Class;
+   function Boolean_Value (Bool : Boolean) return Json_Value'Class;
    function String_Value (Text : String) return Json_Value'Class;
    function Integer_Value (Int : Integer) return Json_Value'Class;
 
@@ -29,6 +30,16 @@ package Agrippa.Json is
      (Object : in out Json_Object'Class;
       Name   : String;
       Value  : String);
+
+   procedure Set_Property
+     (Object : in out Json_Object'Class;
+      Name   : String;
+      Value  : Integer);
+
+   procedure Set_Property
+     (Object : in out Json_Object'Class;
+      Name   : String;
+      Value  : Boolean);
 
    type Json_Array is new Json_Value with private;
 

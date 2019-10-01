@@ -30,14 +30,36 @@ package body Agrippa.Json is
      (Value : Integer_Json_Value)
       return String;
 
+   type Boolean_Json_Value is
+     new Json_Value with
+      record
+         Value : Boolean;
+      end record;
+
+   overriding function Serialize
+     (Value : Boolean_Json_Value)
+      return String;
+
    ------------
    -- Append --
    ------------
 
-   procedure Append (To : in out Json_Array'Class; Value : Json_Value'Class) is
+   procedure Append
+     (To : in out Json_Array'Class; Value : Json_Value'Class) is
    begin
       To.Vector.Append (Value);
    end Append;
+
+   -------------------
+   -- Boolean_Value --
+   -------------------
+
+   function Boolean_Value (Bool : Boolean) return Json_Value'Class is
+   begin
+      return Result : constant Boolean_Json_Value :=
+        Boolean_Json_Value'
+          (Value => Bool);
+   end Boolean_Value;
 
    -------------------
    -- Integer_Value --
@@ -110,6 +132,11 @@ package body Agrippa.Json is
       return String
    is (Ada.Strings.Fixed.Trim (Value.Value'Image, Ada.Strings.Left));
 
+   overriding function Serialize
+     (Value : Boolean_Json_Value)
+      return String
+   is (if Value.Value then "true" else "false");
+
    ------------------
    -- Set_Property --
    ------------------
@@ -138,6 +165,32 @@ package body Agrippa.Json is
    is
    begin
       Object.Set_Property (Name, String_Value (Value));
+   end Set_Property;
+
+   ------------------
+   -- Set_Property --
+   ------------------
+
+   procedure Set_Property
+     (Object : in out Json_Object'Class;
+      Name   : String;
+      Value  : Integer)
+   is
+   begin
+      Object.Set_Property (Name, Integer_Value (Value));
+   end Set_Property;
+
+   ------------------
+   -- Set_Property --
+   ------------------
+
+   procedure Set_Property
+     (Object : in out Json_Object'Class;
+      Name   : String;
+      Value  : Boolean)
+   is
+   begin
+      Object.Set_Property (Name, Boolean_Value (Value));
    end Set_Property;
 
    ------------------

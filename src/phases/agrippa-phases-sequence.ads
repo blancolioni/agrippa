@@ -1,7 +1,5 @@
 package Agrippa.Phases.Sequence is
 
-   type Phase_Id is private;
-
    function Show (Id : Phase_Id) return String;
 
    function First_Phase return Phase_Id;
@@ -12,8 +10,6 @@ package Agrippa.Phases.Sequence is
    function Phase (Id : Phase_Id) return Phase_Interface'Class;
 
 private
-
-   type Phase_Id is range 1 .. 7;
 
    function First_Phase return Phase_Id is (Phase_Id'First);
 
