@@ -43,6 +43,9 @@ package body Agrippa.UI.Web_UI.Requests is
    begin
       return Result : Agrippa.Json.Json_Object do
          Result.Set_Property
+           ("tag",
+              Agrippa.Phases.Sequence.Phase (Game.Current_Phase).Name);
+         Result.Set_Property
            ("localName",
             Game.Local_Text
               (Agrippa.Phases.Sequence.Phase (Game.Current_Phase).Name));

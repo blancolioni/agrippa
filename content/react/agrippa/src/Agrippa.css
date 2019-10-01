@@ -18,7 +18,11 @@
     color: white;
 }
 
-.info-phase-name {
+.agrippa-phase-view {
+  background: rgb(243, 243, 214);
+  height: 100%;
+}
+.agrippa-phase-name {
   font-size: 2em;
   margin-top: 0.67em;
   margin-bottom: 0.67em;
@@ -64,4 +68,12 @@
 
 .agrippa-card-family {
   font-size: x-large;
+}
+
+.navbar-dark {
+  color:white;
+}
+
+.gold {
+  color: gold;
 }

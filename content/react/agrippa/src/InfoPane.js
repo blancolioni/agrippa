@@ -5,38 +5,52 @@ function Phase(props) {
     return <div className="info-phase-name">{props.phaseName}</div>;
 }
 
+function NavItem(props) {
+    return (
+        <div className="navbar-nav">
+            <span className="nav-item nav-link active" href="#">
+                <i className={props.classes}></i>
+                {props.value}
+            </span>
+        </div>
+    );
+}
+
 function InfoPane(props) {
     return (
-        <div className="col-md-auto agrippa-info-pane">
-        <Phase phaseName={props.republic.currentPhase.localName}>
-        </Phase>
-        <div className="info-treasury">
-            Treasury {props.republic.treasury}t
-        </div>
-        <div className="info-unrest">
-            Unrest {props.republic.unrest}
-        </div>
-        <div className="info-legions">
-            Legions {props.republic.legions.total}
-        </div>
-        <div className="info-fleets">
-            Fleets {props.republic.fleets.total}
-        </div>
-        <div className="info-wars">
-            Active Wars
-        </div>
-        <div className="info-wars">
-            Inactive Wars
-        </div>
-        <div className="info-deck">
-            Deck
-        </div>
-        <div className="info-hrao">
-            HRAO <br/>
-            <SenatorCard senator={props.republic.hrao}></SenatorCard>
-        </div>
-    </div>
-
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+            <img src="./images/senator.png" width="30" height="30" alt=""></img>
+            <span>Agrippa</span>
+            <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <NavItem
+                   classes="fas fa-coins gold"
+                   value={props.republic.treasury}
+                   >
+                </NavItem>
+                <NavItem
+                   classes="fas fa-angry"
+                   value={props.republic.unrest}
+                   >
+                </NavItem>
+                <NavItem
+                   classes="fas fa-shoe-prints"
+                   value={props.republic.legions.total}
+                   >
+                </NavItem>
+                <NavItem
+                   classes="fas fa-ship"
+                   value={props.republic.fleets.total}
+                   >
+                </NavItem>
+            </div>
+                <button
+                    type="button"
+                    className="btn btn-success"
+                    onClick={() => props.onContinue()}
+                >
+                    Continue
+                </button>
+       </nav>
     )
 }
 

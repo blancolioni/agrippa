@@ -2,7 +2,8 @@ import React from 'react';
 import InfoPane from './InfoPane';
 
 import './Agrippa.css';
-import {SenatorRow,SenatorCard} from './Senate';
+import {SenatorRow} from './Senate';
+import {PhaseView} from './PhaseView';
 
 class FactionInfo extends React.Component {
 
@@ -60,6 +61,7 @@ class Board extends React.Component {
             isLoaded: false,
             factions: null,
         }
+        this.handleContinue = this.handleContinue.bind(this);
     }
 
     componentDidMount() {
@@ -98,28 +100,23 @@ class Board extends React.Component {
             return <div>Loading ...</div>;
         } else {
             return (
-             <div className="container-fluid">
-                 <div className="row">
-                    {factions.map(faction => (
-                        <FactionInfo faction={faction} key={faction.name} />
-                    ))}
-                    </div>
-                <div className="row">
-                    <InfoPane republic={republic} />
-                    <div className="col">
-                            <img src="./images/map2.png" className="img-fluid" />
-                     </div>
-                     <div className="col-md-auto">
-                         <button
-                            type="button"
-                            className="btn btn-success"
-                            onClick={() => this.handleContinue()}
-                         >
-                             Continue
-                         </button>
-                     </div>
+                <div>
+                    <InfoPane republic={republic} onContinue={this.handleContinue} />
+                    <div className="container-fluid">
+                    <div className="row">
+                        {factions.map(faction => (
+                            <FactionInfo faction={faction} key={faction.name} />
+                        ))}
+                        </div>
+                    <div className="row">
+                        <div className="col">
+                                <img src="./images/map2.png" className="img-fluid" />
+                        </div>
+                        <div className="col">
+                            <PhaseView republic={republic} />
+                        </div>
+                    </div>   
                 </div>
-                    
             </div>
             )
        }
