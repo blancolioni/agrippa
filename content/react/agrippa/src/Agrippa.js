@@ -2,40 +2,7 @@ import React from 'react';
 import InfoPane from './InfoPane';
 
 import './Agrippa.css';
-
-function SenatorRow(props) {
-    const senator = props.senator;
-    const className = senator.factionLeader ? "faction-leader" : "normal";
-    return (
-        <tr className={className}>
-        <td>                                    
-            {senator.id}
-        </td>
-        <td>
-            {senator.family}
-        </td>
-        <td>
-            {senator.military}
-        </td>
-        <td>
-            {senator.oratory}
-        </td>
-        <td>
-            {senator.loyalty}
-        </td>
-        <td>
-            {senator.influence}
-        </td>
-        <td>
-            {senator.popularity}
-        </td>
-        <td>
-            {senator.treasury}
-        </td>
-    </tr>
-
-    );
-}
+import {SenatorRow,SenatorCard} from './Senate';
 
 class FactionInfo extends React.Component {
 
@@ -48,13 +15,13 @@ class FactionInfo extends React.Component {
                             {this.props.faction.name}
                         </div>
                         <div className="col-md-auto align-self-end">
-                        <i class="fas fa-poll"></i> <span>{this.props.faction.votes}</span>
+                        <i className="fas fa-poll"></i> <span>{this.props.faction.votes}</span>
                         </div>
                         <div className="col-md-auto  align-self-end">
-                        <i class="fas fa-coins"></i> <span>{this.props.faction.treasury}</span>
+                        <i className="fas fa-coins"></i> <span>{this.props.faction.treasury}</span>
                         </div>
                         <div className="col-md-auto  align-self-end">
-                        <i class="fas fa-project-diagram"></i><span>{this.props.faction.influence}</span>
+                        <i className="fas fa-project-diagram"></i><span>{this.props.faction.influence}</span>
                         </div>
                     </div>
                 </div>
@@ -70,13 +37,15 @@ class FactionInfo extends React.Component {
                             <th>I</th>
                             <th>P</th>
                             <th>T</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {this.props.faction.senators.map(senator => (
                             <SenatorRow senator={senator}></SenatorRow>
                             )
-                        )}
+                        )
+                        }
                     </tbody>
                 </table>
             </div>
@@ -132,7 +101,7 @@ class Board extends React.Component {
              <div className="container-fluid">
                  <div className="row">
                     {factions.map(faction => (
-                        <FactionInfo faction={faction} />
+                        <FactionInfo faction={faction} key={faction.name} />
                     ))}
                     </div>
                 <div className="row">
@@ -143,7 +112,7 @@ class Board extends React.Component {
                      <div className="col-md-auto">
                          <button
                             type="button"
-                            class="btn btn-success"
+                            className="btn btn-success"
                             onClick={() => this.handleContinue()}
                          >
                              Continue

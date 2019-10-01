@@ -1,7 +1,8 @@
 import React from 'react';
+import {SenatorCard} from './Senate';
 
 function Phase(props) {
-    return <div class="info-phase-name">{props.phaseName}</div>;
+    return <div className="info-phase-name">{props.phaseName}</div>;
 }
 
 function InfoPane(props) {
@@ -31,7 +32,8 @@ function InfoPane(props) {
             Deck
         </div>
         <div className="info-hrao">
-            {props.republic.hrao}
+            HRAO <br/>
+            <SenatorCard senator={props.republic.hrao}></SenatorCard>
         </div>
     </div>
 

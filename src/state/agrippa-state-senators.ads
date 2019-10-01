@@ -103,8 +103,8 @@ package Agrippa.State.Senators is
      (Senator : Senator_State_Type'Class)
       return Popularity_Range;
 
-   function Knights
-     (Senator : Senator_State_Type'Class)
+   overriding function Knights
+     (Senator : Senator_State_Type)
       return Natural;
 
    procedure Add_Knight
@@ -359,8 +359,8 @@ private
       return Popularity_Range
    is (Senator.Popularity);
 
-   function Knights
-     (Senator : Senator_State_Type'Class)
+   overriding function Knights
+     (Senator : Senator_State_Type)
       return Natural
    is (Senator.Knights);
 

@@ -201,8 +201,7 @@ package body Agrippa.UI.Web_UI.Requests is
            ("fleets", Fleet_State (Game));
          Result.Set_Property
            ("hrao",
-            Game.Senator_Name_And_Faction
-              (Game.Highest_Ranking_Available_Officer));
+            Senator_State (Game, Game.Highest_Ranking_Available_Officer));
       end return;
    end Republic_State;
 
@@ -220,6 +219,9 @@ package body Agrippa.UI.Web_UI.Requests is
          Result.Set_Property ("id", Natural (Senator));
          Result.Set_Property ("family", Game.Senator_Name (Senator));
          Result.Set_Property
+           ("nameAndFaction",
+            Game.Senator_Name_And_Faction (Senator));
+         Result.Set_Property
            ("faction",
             (if Game.Has_Faction (Senator)
              then Natural (Game.Senator_Faction (Senator))
@@ -232,9 +234,29 @@ package body Agrippa.UI.Web_UI.Requests is
          Result.Set_Property ("loyalty", Natural (Game.Loyalty (Senator)));
          Result.Set_Property ("influence", Natural (Game.Influence (Senator)));
          Result.Set_Property
+           ("knights",
+            Game.Get_Senator_State (Senator).Knights);
+         Result.Set_Property
            ("popularity", Integer (Game.Popularity (Senator)));
          Result.Set_Property
            ("treasury", Natural (Game.Senator_Treasury (Senator)));
+         Result.Set_Property
+           ("priorConsul", Game.Is_Prior_Consul (Senator));
+         if Game.Has_Office (Senator) then
+            declare
+               Tag : constant String :=
+                 (case Game.Office (Senator) is
+                     when Dictator => "DI",
+                     when Rome_Consul => "RC",
+                     when Field_Consul => "FC",
+                     when Censor       => "CE",
+                     when Master_Of_Horse => "MH",
+                     when Pontifex_Maximus => "PM");
+            begin
+               Result.Set_Property
+                 ("office", Tag);
+            end;
+         end if;
       end return;
    end Senator_State;
 

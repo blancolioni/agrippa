@@ -122,6 +122,11 @@ package Agrippa.State is
       return Boolean
       is abstract;
 
+   function Knights
+     (Senator : Senator_State_Interface)
+      return Natural
+      is abstract;
+
    procedure Assign_Statesman
      (Senator    : in out Senator_State_Interface;
       Statesman  : Statesman_Id)
