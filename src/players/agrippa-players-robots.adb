@@ -40,7 +40,7 @@ package body Agrippa.Players.Robots is
       end record;
 
    function Create
-     (State   : Agrippa.State.State_Interface'Class;
+     (State   : Agrippa.State.State_Type;
       Faction : Faction_Id)
       return Faction_Record;
 
@@ -66,6 +66,7 @@ package body Agrippa.Players.Robots is
    type Robot_Player_Type is
      new Autoplayer_Interface with
       record
+         State         : Agrippa.State.State_Type;
          Robot_Faction : Robot_Faction_Type;
          Faction       : Faction_Id;
          Handler       : Player_Access;
@@ -89,12 +90,11 @@ package body Agrippa.Players.Robots is
 
    overriding procedure Initialize
      (Robot   : in out Robot_Player_Type;
-      State   : in out Agrippa.State.State_Interface'Class;
+      State   : Agrippa.State.State_Type;
       Faction : Faction_Id);
 
    overriding procedure Start_Turn
-     (Robot   : Robot_Player_Type;
-      State   : in out Agrippa.State.State_Interface'Class);
+     (Robot   : Robot_Player_Type);
 
    overriding function Send_Message
      (Robot   : in out Robot_Player_Type;
@@ -103,31 +103,26 @@ package body Agrippa.Players.Robots is
       return Agrippa.Messages.Message_Type;
 
    overriding function Senate_Phase_Desire
-     (Robot   : Robot_Player_Type;
-      State  : Agrippa.State.State_Interface'Class)
+     (Robot   : Robot_Player_Type)
       return Agrippa.Deals.Offer_List;
 
    overriding function What_Do_You_Want_For
      (Robot   : Robot_Player_Type;
-      State   : Agrippa.State.State_Interface'Class;
       Offer   : Agrippa.Deals.Offer_List)
       return Agrippa.Deals.Offer_List;
 
    overriding function What_Will_You_Give_For
      (Robot   : Robot_Player_Type;
-      State   : Agrippa.State.State_Interface'Class;
       Offer   : Agrippa.Deals.Offer_List)
       return Agrippa.Deals.Offer_List;
 
    overriding function Will_You_Agree_To
      (Robot   : in out Robot_Player_Type;
-      State   : Agrippa.State.State_Interface'Class;
       Deal    : Agrippa.Deals.Deal_Type)
       return Boolean;
 
    overriding function Vote
      (Player    : Robot_Player_Type;
-      State     : Agrippa.State.State_Interface'Class;
       Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type)
       return Faction_Vote_Type;
@@ -138,24 +133,20 @@ package body Agrippa.Players.Robots is
 
    function Desired_Candidate
      (Robot  : Robot_Player_Type'Class;
-      State  : Agrippa.State.State_Interface'Class;
       Office : Office_Type)
       return Nullable_Senator_Id;
 
    function Desired_Spoils
-     (Robot  : Robot_Player_Type'Class;
-      State  : Agrippa.State.State_Interface'Class)
+     (Robot  : Robot_Player_Type'Class)
       return Agrippa.Deals.Offer_List;
 
    function Create_Proposal
      (Robot   : in out Robot_Player_Type'Class;
-      State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Make_Proposal_Message)
       return Agrippa.Messages.Message_Type;
 
    function Make_Persuasion_Attempt
      (Robot     : Robot_Player_Type'Class;
-      State     : Agrippa.State.State_Interface'Class;
       Persuader : out Senator_Id;
       Target    : out Senator_Id;
       Spend     : out Talents)
@@ -163,45 +154,40 @@ package body Agrippa.Players.Robots is
 
    procedure Attract_Knights
      (Robot   : Robot_Player_Type'Class;
-      State   : Agrippa.State.State_Interface'Class;
       Senator : out Senator_Id;
       Spend   : out Talents);
 
    procedure Play_Card
      (Robot   : Robot_Player_Type'Class;
-      State   : Agrippa.State.State_Interface'Class;
       Senator : out Senator_Id;
       Card    : out Card_Id);
 
    function Create_Coalition
      (Robot    : Robot_Player_Type'Class;
-      State    : Agrippa.State.State_Interface'Class;
       Current  : Natural)
       return Coalition_Type;
 
    procedure Create_Proposal
      (Robot     : Robot_Player_Type'Class;
-      State     : Agrippa.State.State_Interface'Class;
       Category  : Agrippa.Proposals.Proposal_Category_Type;
       Coalition : Faction_Vectors.Vector;
       Container : in out Agrippa.Proposals.Proposal_Container_Type);
 
    function Proposal_Matches_Deal
-     (Faction  : Faction_Id;
-      State    : Agrippa.State.State_Interface'Class;
+     (Robot    : Robot_Player_Type'Class;
+      Faction  : Faction_Id;
       Deal     : Agrippa.Deals.Deal_Type;
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
       return Boolean;
 
    function Score_Proposals
-     (Faction  : Faction_Id;
-      State    : Agrippa.State.State_Interface'Class;
+     (Robot    : Robot_Player_Type'Class;
+      Faction  : Faction_Id;
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
       return Integer;
 
    function Attack_War
      (Robot     : Robot_Player_Type'Class;
-      State     : Agrippa.State.State_Interface'Class;
       War       : War_Id;
       Minimal   : Boolean;
       Overwhelm : Boolean;
@@ -211,7 +197,6 @@ package body Agrippa.Players.Robots is
 
    function Create_Election_Deal
      (Robot     : Robot_Player_Type'Class;
-      State     : Agrippa.State.State_Interface'Class;
       Coalition : Faction_Vectors.Vector)
       return Agrippa.Deals.Deal_Type;
 
@@ -221,7 +206,6 @@ package body Agrippa.Players.Robots is
 
    function Attack_War
      (Robot     : Robot_Player_Type'Class;
-      State     : Agrippa.State.State_Interface'Class;
       War       : War_Id;
       Minimal   : Boolean;
       Overwhelm : Boolean;
@@ -229,7 +213,8 @@ package body Agrippa.Players.Robots is
       Container : in out Agrippa.Proposals.Proposal_Container_Type)
       return Boolean
    is
-      pragma Unreferenced (Robot, Coalition);
+      pragma Unreferenced (Coalition);
+      State              : constant Agrippa.State.State_Type := Robot.State;
       War_State          : constant Agrippa.State.War_State_Interface'Class :=
                              State.Get_War_State (War);
       Fleet_Strength     : constant Fleet_Count := War_State.Fleet_Strength;
@@ -430,7 +415,6 @@ package body Agrippa.Players.Robots is
 
    procedure Attract_Knights
      (Robot   : Robot_Player_Type'Class;
-      State   : Agrippa.State.State_Interface'Class;
       Senator : out Senator_Id;
       Spend   : out Talents)
    is
@@ -443,8 +427,8 @@ package body Agrippa.Players.Robots is
    begin
       Spend :=
         Talents'Min (Max_Spend,
-                     State.Faction_Treasury (Robot.Faction));
-      Senator := State.Faction_Leader (Robot.Faction);
+                     Robot.State.Faction_Treasury (Robot.Faction));
+      Senator := Robot.State.Faction_Leader (Robot.Faction);
    end Attract_Knights;
 
    ------------
@@ -452,7 +436,7 @@ package body Agrippa.Players.Robots is
    ------------
 
    function Create
-     (State   : Agrippa.State.State_Interface'Class;
+     (State   : Agrippa.State.State_Type;
       Faction : Faction_Id)
       return Faction_Record
    is
@@ -485,14 +469,14 @@ package body Agrippa.Players.Robots is
 
    function Create_Coalition
      (Robot    : Robot_Player_Type'Class;
-      State    : Agrippa.State.State_Interface'Class;
       Current  : Natural)
       return Coalition_Type
    is
+      State : constant Agrippa.State.State_Type := Robot.State;
       Total_Votes    : Vote_Count := 0;
       Required_Votes : Vote_Count;
       This_Faction   : constant Faction_Record :=
-                         Create (State, Robot.Faction);
+                         Create (Robot.State, Robot.Faction);
       Other_Factions : Faction_Vectors.Vector;
 
       function Check_Coalition
@@ -530,9 +514,9 @@ package body Agrippa.Players.Robots is
    begin
 
       for Faction in Faction_Id loop
-         Total_Votes := Total_Votes + State.Faction_Votes (Faction);
+         Total_Votes := Total_Votes + Robot.State.Faction_Votes (Faction);
          if Faction /= Robot.Faction then
-            Other_Factions.Append (Create (State, Faction));
+            Other_Factions.Append (Create (Robot.State, Faction));
          end if;
       end loop;
       Required_Votes :=
@@ -613,12 +597,11 @@ package body Agrippa.Players.Robots is
 
    function Create_Election_Deal
      (Robot     : Robot_Player_Type'Class;
-      State     : Agrippa.State.State_Interface'Class;
       Coalition : Faction_Vectors.Vector)
       return Agrippa.Deals.Deal_Type
    is
-      pragma Unreferenced (Robot);
       use Agrippa.Deals;
+      State : constant Agrippa.State.State_Type := Robot.State;
       Deal      : Deal_Type;
       Allocated : array (Office_Type) of Boolean := (others => False);
       Success   : Boolean := False;
@@ -774,7 +757,7 @@ package body Agrippa.Players.Robots is
                               State.Log
                                 (State.Faction_Name (Rec.Faction)
                                  & ": already tried "
-                                 & Show (Report_Deal, State));
+                                 & Show (Report_Deal, State.all));
                            end;
                         end if;
 
@@ -906,12 +889,12 @@ package body Agrippa.Players.Robots is
 
    procedure Create_Proposal
      (Robot     : Robot_Player_Type'Class;
-      State     : Agrippa.State.State_Interface'Class;
       Category  : Agrippa.Proposals.Proposal_Category_Type;
       Coalition : Faction_Vectors.Vector;
       Container : in out Agrippa.Proposals.Proposal_Container_Type)
    is
       use Agrippa.Proposals;
+      State : constant Agrippa.State.State_Type := Robot.State;
    begin
 
       case Category is
@@ -957,7 +940,6 @@ package body Agrippa.Players.Robots is
                         if not State.Has_Commander (War) then
                            Attacked := Attack_War
                              (Robot     => Robot,
-                              State     => State,
                               War       => War,
                               Minimal   => Minimal,
                               Overwhelm => False,
@@ -971,7 +953,6 @@ package body Agrippa.Players.Robots is
                   for War of Inactive_Wars loop
                      exit when Attack_War
                        (Robot     => Robot,
-                        State     => State,
                         War       => War,
                         Minimal   => False,
                         Overwhelm => False,
@@ -1011,10 +992,10 @@ package body Agrippa.Players.Robots is
 
    function Create_Proposal
      (Robot   : in out Robot_Player_Type'Class;
-      State   : Agrippa.State.State_Interface'Class;
       Message : Agrippa.Messages.Make_Proposal_Message)
       return Agrippa.Messages.Message_Type
    is
+      State : constant Agrippa.State.State_Type := Robot.State;
       Coalition_Index : Natural := 1;
 
       function Make_Deal_Proposals
@@ -1069,7 +1050,7 @@ package body Agrippa.Players.Robots is
          declare
             use Agrippa.Messages;
             Coalition : Coalition_Type :=
-                          Robot.Create_Coalition (State, Coalition_Index);
+                          Robot.Create_Coalition (Coalition_Index);
             Proposals : Agrippa.Proposals.Proposal_Container_Type;
             Offers    : array (Faction_Id) of Agrippa.Deals.Offer_List;
             Deal      : Agrippa.Deals.Deal_Type;
@@ -1087,17 +1068,17 @@ package body Agrippa.Players.Robots is
             if Has_Proposal_Office (Message, Rome_Consul) then
                for Faction in Faction_Id loop
                   if Faction /= Robot.Faction then
-                     Robot.Handlers (Faction).Senate_Phase_Desire (State);
+                     Robot.Handlers (Faction).Senate_Phase_Desire;
                      Robot.Handlers (Faction).Get_Offer_Reply
                        (Offers (Faction));
                   else
-                     Offers (Faction) := Robot.Senate_Phase_Desire (State);
+                     Offers (Faction) := Robot.Senate_Phase_Desire;
                   end if;
 
                   State.Log
                     (State.Faction_Name (Faction)
                      & " wants "
-                     & Agrippa.Deals.Show (Offers (Faction), State));
+                     & Agrippa.Deals.Show (Offers (Faction), State.all));
                end loop;
 
                for Rec of Coalition.Vector loop
@@ -1109,12 +1090,12 @@ package body Agrippa.Players.Robots is
                end loop;
 
                Deal :=
-                 Create_Election_Deal (Robot, State, Coalition.Vector);
+                 Create_Election_Deal (Robot, Coalition.Vector);
 
                if not Agrippa.Deals.Is_Empty (Deal) then
                   State.Log
                     ("Deal: "
-                     & Agrippa.Deals.Show (Deal, State));
+                     & Agrippa.Deals.Show (Deal, State.all));
 
                   declare
                      Accepted : Boolean := True;
@@ -1124,8 +1105,8 @@ package body Agrippa.Players.Robots is
                            Agreed : Boolean;
                         begin
                            if Rec.Faction /= Robot.Faction then
-                              Robot.Handlers (Rec.Faction).Will_You_Agree_To
-                                (State, Deal);
+                              Robot.Handlers (Rec.Faction)
+                                .Will_You_Agree_To (Deal);
                               Robot.Handlers (Rec.Faction).Get_Agreement_Reply
                                 (Agreed);
                               if not Agreed then
@@ -1169,7 +1150,7 @@ package body Agrippa.Players.Robots is
                for Category in Agrippa.Proposals.Proposal_Category_Type loop
                   if Has_Proposal_Category (Message, Category) then
                      Robot.Create_Proposal
-                       (State, Category, Coalition.Vector, Proposals);
+                       (Category, Coalition.Vector, Proposals);
                   end if;
                end loop;
                return Make_Proposal (Message, Proposals);
@@ -1189,7 +1170,7 @@ package body Agrippa.Players.Robots is
    -------------------------
 
    function Create_Robot_Player
-     (State        : in out Agrippa.State.State_Interface'Class;
+     (State        : Agrippa.State.State_Type;
       Faction_Type : Robot_Faction_Type;
       Faction      : Faction_Id)
       return Autoplayer_Interface'Class
@@ -1198,6 +1179,7 @@ package body Agrippa.Players.Robots is
    begin
       Robot.Robot_Faction := Faction_Type;
       Robot.Faction := Faction;
+      Robot.State := State;
       Robot.Handler :=
         Agrippa.Players.Autohandler.Create_Autohandler
           (State, Faction);
@@ -1210,10 +1192,11 @@ package body Agrippa.Players.Robots is
 
    function Desired_Candidate
      (Robot  : Robot_Player_Type'Class;
-      State  : Agrippa.State.State_Interface'Class;
       Office : Office_Type)
       return Nullable_Senator_Id
    is
+      State : constant Agrippa.State.State_Type := Robot.State;
+
       function Score_Candidate
         (Senator : Senator_Id)
          return Natural;
@@ -1326,11 +1309,11 @@ package body Agrippa.Players.Robots is
    --------------------
 
    function Desired_Spoils
-     (Robot  : Robot_Player_Type'Class;
-      State  : Agrippa.State.State_Interface'Class)
+     (Robot  : Robot_Player_Type'Class)
       return Agrippa.Deals.Offer_List
    is
       use Agrippa.Deals;
+
       Result : Offer_List;
 
       procedure Add (Office : Office_Type);
@@ -1341,7 +1324,7 @@ package body Agrippa.Players.Robots is
 
       procedure Add (Office : Office_Type) is
          S : constant Nullable_Senator_Id :=
-               Robot.Desired_Candidate (State, Office);
+               Robot.Desired_Candidate (Office);
       begin
          if S /= No_Senator then
             Add (Result,
@@ -1391,11 +1374,11 @@ package body Agrippa.Players.Robots is
 
    overriding procedure Initialize
      (Robot   : in out Robot_Player_Type;
-      State   : in out Agrippa.State.State_Interface'Class;
+      State   : Agrippa.State.State_Type;
       Faction : Faction_Id)
    is
-      pragma Unreferenced (State);
    begin
+      Robot.State := State;
       Robot.Faction := Faction;
    end Initialize;
 
@@ -1405,12 +1388,13 @@ package body Agrippa.Players.Robots is
 
    function Make_Persuasion_Attempt
      (Robot     : Robot_Player_Type'Class;
-      State     : Agrippa.State.State_Interface'Class;
       Persuader : out Senator_Id;
       Target    : out Senator_Id;
       Spend     : out Talents)
       return Boolean
    is
+      State : constant Agrippa.State.State_Type := Robot.State;
+
       Senators      : constant Senator_Id_Array :=
                         State.Faction_Senators (Robot.Faction);
       Highest_Score : Natural := 0;
@@ -1485,10 +1469,10 @@ package body Agrippa.Players.Robots is
 
    procedure Play_Card
      (Robot   : Robot_Player_Type'Class;
-      State   : Agrippa.State.State_Interface'Class;
       Senator : out Senator_Id;
       Card    : out Card_Id)
    is
+      State : constant Agrippa.State.State_Type := Robot.State;
       Available : constant Card_Id_Array :=
                     State.Faction_Cards (Robot.Faction);
    begin
@@ -1559,8 +1543,8 @@ package body Agrippa.Players.Robots is
    ---------------------------
 
    function Proposal_Matches_Deal
-     (Faction  : Faction_Id;
-      State    : Agrippa.State.State_Interface'Class;
+     (Robot    : Robot_Player_Type'Class;
+      Faction  : Faction_Id;
       Deal     : Agrippa.Deals.Deal_Type;
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
       return Boolean
@@ -1592,7 +1576,7 @@ package body Agrippa.Players.Robots is
                if Agrippa.Deals.Contradicts
                  (Deal, Agrippa.Proposals.Office (P),
                   Agrippa.Proposals.Nominee (P),
-                  State.Senator_Faction
+                  Robot.State.Senator_Faction
                     (Agrippa.Proposals.Nominee (P)))
                then
                   return False;
@@ -1625,8 +1609,8 @@ package body Agrippa.Players.Robots is
    ---------------------
 
    function Score_Proposals
-     (Faction  : Faction_Id;
-      State    : Agrippa.State.State_Interface'Class;
+     (Robot    : Robot_Player_Type'Class;
+      Faction  : Faction_Id;
       Proposal : Agrippa.Proposals.Proposal_Container_Type)
       return Integer
    is
@@ -1659,7 +1643,7 @@ package body Agrippa.Players.Robots is
                   Office  : constant Office_Type :=
                               Agrippa.Proposals.Office (P);
                begin
-                  if State.Senator_Faction (Senator) = Faction then
+                  if Robot.State.Senator_Faction (Senator) = Faction then
                      return 2 * Office_Type'Pos (Office) + 1;
                   else
                      return 0;
@@ -1691,8 +1675,7 @@ package body Agrippa.Players.Robots is
    -------------------------
 
    overriding function Senate_Phase_Desire
-     (Robot   : Robot_Player_Type;
-      State   : Agrippa.State.State_Interface'Class)
+     (Robot   : Robot_Player_Type)
       return Agrippa.Deals.Offer_List
    is
       use Agrippa.Deals;
@@ -1716,7 +1699,7 @@ package body Agrippa.Players.Robots is
       end Add_Office_Desire;
 
    begin
-      Scan (Robot_Player_Type'Class (Robot).Desired_Spoils (State),
+      Scan (Robot_Player_Type'Class (Robot).Desired_Spoils,
             Add_Office_Desire'Access);
       return Desires;
    end Senate_Phase_Desire;
@@ -1740,7 +1723,7 @@ package body Agrippa.Players.Robots is
                Senator : Senator_Id;
                Spend   : Talents;
             begin
-               Robot.Attract_Knights (State, Senator, Spend);
+               Robot.Attract_Knights (Senator, Spend);
                return Attract_Knights (Message, Senator, Spend);
             end;
          when Faction_Transfers =>
@@ -1824,7 +1807,7 @@ package body Agrippa.Players.Robots is
                Bribe             : Talents;
             begin
                if Make_Persuasion_Attempt
-                 (Robot, State, Persuader, Target, Bribe)
+                 (Robot, Persuader, Target, Bribe)
                then
                   return Persuasion_Attempt
                     (Message, Persuader, Target, Bribe);
@@ -1835,7 +1818,7 @@ package body Agrippa.Players.Robots is
 
          when Make_Proposal =>
 
-            return Robot.Create_Proposal (State, Message);
+            return Robot.Create_Proposal (Message);
 
          when Player_Action =>
 
@@ -1846,7 +1829,7 @@ package body Agrippa.Players.Robots is
                   Card : Card_Id;
                   Senator : Senator_Id;
                begin
-                  Robot.Play_Card (State, Senator, Card);
+                  Robot.Play_Card (Senator, Card);
                   if Card /= No_Card then
                      return Play_Card_Action
                        (Message, Senator, Card);
@@ -1901,9 +1884,9 @@ package body Agrippa.Players.Robots is
    ----------------
 
    overriding procedure Start_Turn
-     (Robot   : Robot_Player_Type;
-      State   : in out Agrippa.State.State_Interface'Class)
+     (Robot   : Robot_Player_Type)
    is
+      State : constant Agrippa.State.State_Type := Robot.State;
       Sids       : constant Senator_Id_Array :=
                      State.Faction_Senators (Robot.Faction);
       Best       : Senator_Id;
@@ -1955,17 +1938,18 @@ package body Agrippa.Players.Robots is
 
    overriding function Vote
      (Player    : Robot_Player_Type;
-      State     : Agrippa.State.State_Interface'Class;
       Sponsor   : Senator_Id;
       Proposals : Agrippa.Proposals.Proposal_Container_Type)
       return Faction_Vote_Type
    is
+      State : constant Agrippa.State.State_Type := Player.State;
    begin
       return Votes : Faction_Vote_Type := (others => 0) do
          if State.Senator_Faction (Sponsor) = Player.Faction
            or else Proposal_Matches_Deal
-             (Player.Faction, State, Player.Current_Deal, Proposals)
-           or else Score_Proposals (Player.Faction, State, Proposals) > 0
+             (Player, Player.Faction, Player.Current_Deal, Proposals)
+           or else Score_Proposals
+             (Player, Player.Faction, Proposals) > 0
          then
             Votes (Aye) := State.Faction_Votes (Player.Faction);
          else
@@ -1980,12 +1964,9 @@ package body Agrippa.Players.Robots is
 
    overriding function What_Do_You_Want_For
      (Robot   : Robot_Player_Type;
-      State   : Agrippa.State.State_Interface'Class;
       Offer   : Agrippa.Deals.Offer_List)
       return Agrippa.Deals.Offer_List
    is
-      pragma Unreferenced (Robot, State);
-
       Response : Agrippa.Deals.Offer_List;
 
       procedure Evaluate_Request (Request : Agrippa.Deals.Offer_Type);
@@ -2012,11 +1993,10 @@ package body Agrippa.Players.Robots is
 
    overriding function What_Will_You_Give_For
      (Robot   : Robot_Player_Type;
-      State   : Agrippa.State.State_Interface'Class;
       Offer   : Agrippa.Deals.Offer_List)
       return Agrippa.Deals.Offer_List
    is
-      pragma Unreferenced (Robot, State, Offer);
+      pragma Unreferenced (Robot, Offer);
       Result : Agrippa.Deals.Offer_List;
    begin
       Agrippa.Deals.Clear (Result);
@@ -2029,13 +2009,13 @@ package body Agrippa.Players.Robots is
 
    overriding function Will_You_Agree_To
      (Robot   : in out Robot_Player_Type;
-      State   : Agrippa.State.State_Interface'Class;
       Deal    : Agrippa.Deals.Deal_Type)
       return Boolean
    is
       Score : Integer := 0;
+      State : constant Agrippa.State.State_Type := Robot.State;
       Spoils : constant Agrippa.Deals.Offer_List :=
-                 Robot_Player_Type'Class (Robot).Desired_Spoils (State);
+                 Robot_Player_Type'Class (Robot).Desired_Spoils;
       procedure Check_Terms
         (Faction : Faction_Id;
          Terms   : Agrippa.Deals.Offer_List);

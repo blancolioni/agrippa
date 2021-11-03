@@ -19,10 +19,8 @@ with Agrippa.Sessions.Messages;
 
 package body Agrippa.Sessions is
 
-   type Game_Access is access all Agrippa.Game.Game_Type'Class;
-
    procedure New_Game
-     (Game : Game_Access;
+     (Game : Agrippa.Game.Game_Access;
       Scenario : Agrippa.Scenarios.Scenario_Type;
       Notifier : not null access constant
         Agrippa.State.Notifications.Change_Handler_Interface'Class);
@@ -65,7 +63,7 @@ package body Agrippa.Sessions is
    --------------
 
    procedure New_Game
-     (Game     : Game_Access;
+     (Game     : Agrippa.Game.Game_Access;
       Scenario : Agrippa.Scenarios.Scenario_Type;
       Notifier : not null access constant
         Agrippa.State.Notifications.Change_Handler_Interface'Class)
@@ -82,7 +80,7 @@ package body Agrippa.Sessions is
          Language => WL.Localisation.To_Language ("en"),
          Notify   => Notifier);
       Agrippa.Players.Robots.Configure.Configure_Robots
-        (Game.all, (1, 2, 3, 4, 5, 6));
+        (Game, (1, 2, 3, 4, 5, 6));
    end New_Game;
 
    -----------------
@@ -95,7 +93,8 @@ package body Agrippa.Sessions is
    is
       Scenario : constant Agrippa.Scenarios.Scenario_Type :=
                    Agrippa.Scenarios.Get ("early-republic");
-      Game     : constant Game_Access := new Agrippa.Game.Game_Type;
+      Game     : constant Agrippa.Game.Game_Access :=
+                   new Agrippa.Game.Game_Type;
    begin
       return Session : constant Agrippa_Session := new Root_Agrippa_Session do
          Session.Id := WL.Guids.New_Guid;

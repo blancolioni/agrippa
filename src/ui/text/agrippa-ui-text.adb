@@ -74,23 +74,24 @@ package body Agrippa.UI.Text is
       Field_Value   : String;
       Field_Comment : String := "");
 
-   procedure Put_Field (State        : Agrippa.State.State_Interface'Class;
+   procedure Put_Field
+     (State         : Agrippa.State.State_Interface'Class;
       Field_Name   : String;
       Field_Value  : Integer;
-                        Field_Suffix : String := "");
+      Field_Suffix : String := "");
 
    procedure Put_Faction_Name (Faction : Agrippa.Factions.Faction_Type'Class);
 
    procedure Put_Faction
-     (Game    : Agrippa.Game.Game_Type'Class;
+     (Game    : Agrippa.Game.Game_Access;
       Faction : Agrippa.Factions.Faction_Type'Class);
 
    procedure Put_Senators
-     (Game    : Agrippa.Game.Game_Type'Class;
+     (Game    : Agrippa.Game.Game_Access;
       Ids     : Senator_Id_Array);
 
    procedure Put_Phase
-     (Game  : Agrippa.Game.Game_Type'Class;
+     (Game  : Agrippa.Game.Game_Access;
       Id    : Agrippa.Phases.Sequence.Phase_Id;
       Phase : Agrippa.Phases.Phase_Interface'Class);
 
@@ -179,7 +180,7 @@ package body Agrippa.UI.Text is
    -----------------
 
    procedure Put_Faction
-     (Game    : Agrippa.Game.Game_Type'Class;
+     (Game    : Agrippa.Game.Game_Access;
       Faction : Agrippa.Factions.Faction_Type'Class)
    is
       use Ada.Text_IO;
@@ -249,10 +250,10 @@ package body Agrippa.UI.Text is
    ---------------
 
    procedure Put_Field
-     (State        : Agrippa.State.State_Interface'Class;
+     (State         : Agrippa.State.State_Interface'Class;
       Field_Name   : String;
       Field_Value  : Integer;
-      Field_Suffix : String := "")
+      Field_Suffix  : String := "")
    is
    begin
       Put_Field
@@ -275,7 +276,7 @@ package body Agrippa.UI.Text is
    ---------------
 
    procedure Put_Phase
-     (Game  : Agrippa.Game.Game_Type'Class;
+     (Game  : Agrippa.Game.Game_Access;
       Id    : Agrippa.Phases.Sequence.Phase_Id;
       Phase : Agrippa.Phases.Phase_Interface'Class)
    is
@@ -296,7 +297,7 @@ package body Agrippa.UI.Text is
    ------------------
 
    procedure Put_Senators
-     (Game : Agrippa.Game.Game_Type'Class;
+     (Game : Agrippa.Game.Game_Access;
       Ids : Senator_Id_Array)
    is
       use Ada.Text_IO;
@@ -931,8 +932,9 @@ package body Agrippa.UI.Text is
    is
       Scenario : constant Agrippa.Scenarios.Scenario_Type :=
                    Agrippa.Scenarios.Get ("early-republic");
-      Game     : Agrippa.Game.Game_Type renames Text_UI.Game;
+      Game     : Agrippa.Game.Game_Access renames Text_UI.Game;
    begin
+      Game := new Agrippa.Game.Game_Type;
       Game.Add_Faction ("Gladius");
       Game.Add_Faction ("Pila");
       Game.Add_Faction ("Aquarius");
@@ -986,14 +988,15 @@ package body Agrippa.UI.Text is
                   Phase : constant Agrippa.Phases.Phase_Interface'Class :=
                             Agrippa.Phases.Sequence.Phase (Id);
                   State : Agrippa.Phases.Phase_State_Type'Class :=
-                            Phase.Start (Game);
+                            Phase.Start (Game.all);
                   Step_Number : Natural := 0;
                begin
 
                   while not State.Is_Finished loop
                      declare
                         Step_Name : constant String :=
-                                      Phase.Current_Step_Name (State, Game);
+                                      Phase.Current_Step_Name
+                                        (State, Game.all);
                      begin
                         if Step_Name /= "" then
                            Ada.Text_IO.New_Line;
@@ -1003,7 +1006,7 @@ package body Agrippa.UI.Text is
 
                      Step_Number := Step_Number + 1;
                      Game.Set_Current_Activity (Phase_Number, Step_Number);
-                     Phase.Step (State, Game);
+                     Phase.Step (State, Game.all);
 
                   end loop;
                end;
@@ -1047,11 +1050,11 @@ package body Agrippa.UI.Text is
    procedure Start_Turn
      (UI : in out Text_UI_Type'Class)
    is
-      Game : Agrippa.Game.Game_Type renames UI.Game;
+      Game : Agrippa.Game.Game_Access renames UI.Game;
    begin
       Game.Start_Turn;
-      Put_Field (Game, "Scenario", Agrippa.Scenarios.Show (Game.Scenario));
-      Put_Field (Game, "Turn", Positive (Game.Current_Turn));
+      Put_Field (Game.all, "Scenario", Agrippa.Scenarios.Show (Game.Scenario));
+      Put_Field (Game.all, "Turn", Positive (Game.Current_Turn));
       if Game.Current_Turn = 1 then
          UI.State_Of_The_Republic;
       end if;
@@ -1065,17 +1068,17 @@ package body Agrippa.UI.Text is
      (UI : in out Text_UI_Type'Class)
    is
       use Agrippa.Images;
-      Game : Agrippa.Game.Game_Type renames UI.Game;
+      Game : Agrippa.Game.Game_Access renames UI.Game;
    begin
       Put_Heading ("State of the Republic");
-      Put_Field (Game, "treasury-heading",
+      Put_Field (Game.all, "treasury-heading",
                  Natural (Game.Current_Treasury), "t");
-      Put_Field (Game, "unrest-level", Natural (Game.Current_Unrest));
-      Put_Field (Game, "legions",
+      Put_Field (Game.all, "unrest-level", Natural (Game.Current_Unrest));
+      Put_Field (Game.all, "legions",
                  Image (Game.Total_Legion_Count)
                  & ": " & Image (Game.Regular_Legion_Count)
                  & "reg");
-      Put_Field (Game, "fleets",
+      Put_Field (Game.all, "fleets",
                  Image (Game.Total_Fleet_Count));
 
       declare
@@ -1105,7 +1108,7 @@ package body Agrippa.UI.Text is
          begin
             if Match'Length = 0 then
                Put_Field
-                 (Game, Field_Tag, ".");
+                 (Game.all, Field_Tag, ".");
             else
                for I in Match'Range loop
                   declare
@@ -1117,7 +1120,7 @@ package body Agrippa.UI.Text is
                                      then Field_Tag
                                      else "");
                   begin
-                     Put_Field (Game, Field_Name,
+                     Put_Field (Game.all, Field_Name,
                                 Game.Local_Text (War.Tag)
                                 & " "
                                 & Image (War.Land_Strength)
@@ -1135,7 +1138,7 @@ package body Agrippa.UI.Text is
          Show_Wars ("inactive-wars", Is_Inactive'Access);
       end;
 
-      Put_Field (Game, "cards-in-deck",
+      Put_Field (Game.all, "cards-in-deck",
                  Image (Game.Forum_Deck.Remaining)
                  & "/"
                  & Image (Game.Forum_Deck.Remaining
@@ -1144,7 +1147,7 @@ package body Agrippa.UI.Text is
       declare
          HRAO : constant Senator_Id := Game.Highest_Ranking_Available_Officer;
       begin
-         Put_Field (Game, "hrao",
+         Put_Field (Game.all, "hrao",
                     Game.Local_Text
                       ("senator-of-faction",
                        Game.Senator_Name (HRAO),

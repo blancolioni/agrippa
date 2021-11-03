@@ -6,7 +6,7 @@ package Agrippa.Players.Robots is
 private
 
    function Create_Robot_Player
-     (State        : in out Agrippa.State.State_Interface'Class;
+     (State        : Agrippa.State.State_Type;
       Faction_Type : Robot_Faction_Type;
       Faction      : Faction_Id)
       return Autoplayer_Interface'Class;

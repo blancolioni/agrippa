@@ -236,6 +236,8 @@ package Agrippa.State is
      and Show_Senator_Interface
      and WL.Localisation.Localisation_Interface;
 
+   type State_Type is access all State_Interface'Class;
+
    function Current_Activity
      (State : State_Interface)
       return String

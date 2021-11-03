@@ -13,6 +13,7 @@ package body Agrippa.Players.Autohandler is
    ----------------------
 
    task body Autohandler_Task is
+      State            : Agrippa.State.State_Type;
       My_Faction       : Faction_Id;
       My_Player        : Autoplayer_Holders.Holder;
       Agreement        : Boolean;
@@ -22,10 +23,10 @@ package body Agrippa.Players.Autohandler is
       pragma Unreferenced (My_Faction);
    begin
       accept Initialize
-        (State : in out Agrippa.State.State_Interface'Class;
-         Faction : in Faction_Id)
+        (State_Access : Agrippa.State.State_Type;
+         Faction      : Faction_Id)
       do
-         pragma Unreferenced (State);
+         State := State_Access;
          My_Faction := Faction;
       end Initialize;
 
@@ -35,73 +36,62 @@ package body Agrippa.Players.Autohandler is
 
       loop
          select
-            accept Start_Turn
-              (State : in out Agrippa.State.State_Interface'Class)
-            do
-               My_Player.Element.Start_Turn (State);
+            accept Start_Turn do
+               My_Player.Element.Start_Turn;
             end Start_Turn;
          or
             accept Send_Message
-              (State : in Agrippa.State.State_Interface'Class;
-               Message : in Agrippa.Messages.Message_Type)
+              (Message : in Agrippa.Messages.Message_Type)
             do
-               Msg := My_Player.Reference.Send_Message (State, Message);
+               Msg := My_Player.Reference.Send_Message (State.all, Message);
             end Send_Message;
             accept Get_Reply (Reply : out Agrippa.Messages.Message_Type) do
                Reply := Msg;
             end Get_Reply;
          or
             accept Will_You_Agree_To
-              (State : in Agrippa.State.State_Interface'Class;
-               Deal : in Agrippa.Deals.Deal_Type)
+              (Deal : in Agrippa.Deals.Deal_Type)
             do
                Agreement :=
-                 My_Player.Reference.Will_You_Agree_To (State, Deal);
+                 My_Player.Reference.Will_You_Agree_To (Deal);
             end Will_You_Agree_To;
             accept Get_Agreement_Reply (Agree : out Boolean) do
                Agree := Agreement;
             end Get_Agreement_Reply;
          or
-            accept Senate_Phase_Desire
-              (State : in Agrippa.State.State_Interface'Class)
-            do
-               Counter := My_Player.Element.Senate_Phase_Desire (State);
+            accept Senate_Phase_Desire do
+               Counter := My_Player.Element.Senate_Phase_Desire;
             end Senate_Phase_Desire;
             accept Get_Offer_Reply (Offer : out Agrippa.Deals.Offer_List) do
                Offer := Counter;
             end Get_Offer_Reply;
          or
             accept What_Do_You_Want_For
-              (State : in Agrippa.State.State_Interface'Class;
-               Offer : in Agrippa.Deals.Offer_List)
+              (Offer : in Agrippa.Deals.Offer_List)
             do
                Counter :=
-                 My_Player.Element.What_Do_You_Want_For
-                   (State, Offer);
+                 My_Player.Element.What_Do_You_Want_For (Offer);
             end What_Do_You_Want_For;
             accept Get_Offer_Reply (Offer : out Agrippa.Deals.Offer_List) do
                Offer := Counter;
             end Get_Offer_Reply;
          or
             accept What_Will_You_Give_For
-              (State : in Agrippa.State.State_Interface'Class;
-               Offer : in Agrippa.Deals.Offer_List)
+              (Offer : in Agrippa.Deals.Offer_List)
             do
                Counter :=
-                 My_Player.Element.What_Will_You_Give_For
-                   (State, Offer);
+                 My_Player.Element.What_Will_You_Give_For (Offer);
             end What_Will_You_Give_For;
             accept Get_Offer_Reply (Offer : out Agrippa.Deals.Offer_List) do
                Offer := Counter;
             end Get_Offer_Reply;
          or
             accept Vote_Proposal
-              (State    : Agrippa.State.State_Interface'Class;
-               Sponsor  : Senator_Id;
+              (Sponsor  : Senator_Id;
                Proposal : in Agrippa.Proposals.Proposal_Container_Type)
             do
                Current_Votes :=
-                 My_Player.Element.Vote (State, Sponsor, Proposal);
+                 My_Player.Element.Vote (Sponsor, Proposal);
             end Vote_Proposal;
             accept Get_Votes (Votes : out Faction_Vote_Type) do
                Votes := Current_Votes;
@@ -120,7 +110,7 @@ package body Agrippa.Players.Autohandler is
    ------------------------
 
    function Create_Autohandler
-     (State   : in out Agrippa.State.State_Interface'Class;
+     (State   : Agrippa.State.State_Type;
       Faction : Faction_Id)
       return Player_Access
    is

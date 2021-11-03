@@ -30,6 +30,8 @@ package Agrippa.Game is
    type Game_Type is
    limited new Agrippa.State.State_Interface with private;
 
+   type Game_Access is access all Game_Type'Class;
+
    overriding function End_Of_Game
      (Game : Game_Type)
       return Boolean;

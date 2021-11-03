@@ -1745,7 +1745,7 @@ package body Agrippa.Game is
                            Game.Player_State (Faction.Id).Handler;
                Votes   : Faction_Vote_Type;
             begin
-               Handler.Vote_Proposal (Game, Sponsor, Proposals);
+               Handler.Vote_Proposal (Sponsor, Proposals);
                Handler.Get_Votes (Votes);
                Ada.Text_IO.Put
                  (Faction.Name & ": ");
@@ -2274,7 +2274,7 @@ package body Agrippa.Game is
          Player : constant Agrippa.Players.Player_Access :=
                     Game.Player_State (Get_Faction (M)).Handler;
       begin
-         Player.Send_Message (Game, M);
+         Player.Send_Message (M);
          return Response : Message_Type do
             Player.Get_Reply (Response);
          end return;
@@ -3053,7 +3053,7 @@ package body Agrippa.Game is
    begin
       Game.Current_Turn := Game.Current_Turn + 1;
       for Player of Game.Player_State loop
-         Player.Handler.Start_Turn (Game);
+         Player.Handler.Start_Turn;
       end loop;
    end Start_Turn;
 

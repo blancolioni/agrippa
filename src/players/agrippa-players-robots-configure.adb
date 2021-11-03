@@ -7,7 +7,7 @@ package body Agrippa.Players.Robots.Configure is
    ----------------------
 
    procedure Configure_Robots
-     (Game      : in out Agrippa.Game.Game_Type'Class;
+     (Game      : Agrippa.Game.Game_Access;
       Available : Faction_Id_Array)
    is
       Remaining : array (Faction_Id) of Boolean :=
@@ -114,7 +114,9 @@ package body Agrippa.Players.Robots.Configure is
          Faction : constant Faction_Id :=
                      Game.Highest_Score (Score);
          Player  : constant Autoplayer_Interface'Class :=
-                     Create_Robot_Player (Game, Robot_Faction, Faction);
+                     Create_Robot_Player
+                       (Agrippa.State.State_Type (Game),
+                        Robot_Faction, Faction);
       begin
          Game.Set_Player (Faction, Player.Get_Player_Handler);
          Game.Set_Autoplayer (Faction, Player);
@@ -139,7 +141,9 @@ package body Agrippa.Players.Robots.Configure is
                Robot : constant Robot_Faction_Type :=
                          Robot_Faction_Type'Val (Index);
                Player  : constant Autoplayer_Interface'Class :=
-                           Create_Robot_Player (Game, Robot, Id);
+                           Create_Robot_Player
+                             (Agrippa.State.State_Type (Game),
+                              Robot, Id);
             begin
                Game.Set_Player (Id, Player.Get_Player_Handler);
                Game.Set_Autoplayer (Id, Player);
