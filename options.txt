@@ -1,3 +1,0 @@
-randomise=no
-random-seed=0
-gnoga-ui = yes

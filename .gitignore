@@ -1,6 +1,7 @@
 build/*
 agrippa.gpr
 src/driver/agrippa-paths.ads
-bin/agrippa-driver.exe
+bin
 img/map.png
 img/map2.png
+test-results
