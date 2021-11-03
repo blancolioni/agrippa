@@ -33,7 +33,8 @@ package body Agrippa.Models.Tables is
             Row_Model => Model_Type (Row_Model)));
       for I in 1 .. Table.Column_Count loop
          Table.Rows (Table.Rows.Last_Index)
-           .Cells.Append ((Boolean_Cell, False));
+           .Cells.Append
+             (Cell_Record'(Boolean_Cell, False));
       end loop;
       return Table.Rows.Last_Index;
    end Add_Row;

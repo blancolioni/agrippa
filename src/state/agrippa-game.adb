@@ -17,8 +17,6 @@ with Agrippa.Cards.Senators;
 with Agrippa.Cards.Statesmen;
 with Agrippa.Cards.Wars;
 
-with Agrippa.Cards.Vectors;
-
 package body Agrippa.Game is
 
    Faction_Colors : constant array (Faction_Id)

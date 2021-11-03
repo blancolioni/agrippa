@@ -1,5 +1,4 @@
 with Agrippa.State;
-with Agrippa.Factions;
 
 package Agrippa.Models.Factions is
 

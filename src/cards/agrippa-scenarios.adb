@@ -39,7 +39,7 @@ package body Agrippa.Scenarios is
       Other    : String)
    is
    begin
-      Scenario_Map (Scenario).Includes.Insert (Other);
+      Scenario_Map (Scenario).Includes.Include (Other);
    end Include_Scenario;
 
    --------------
